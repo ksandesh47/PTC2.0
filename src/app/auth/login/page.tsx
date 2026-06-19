@@ -6,9 +6,23 @@ import { loginSchema, type LoginInput } from "@/lib/validators";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 
 export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-[calc(100vh-3.5rem)] items-center justify-center px-4">
+          <p className="text-sm text-[--color-text-muted]">Loading login...</p>
+        </div>
+      }
+    >
+      <LoginPageContent />
+    </Suspense>
+  );
+}
+
+function LoginPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const nextPath = searchParams.get("next") ?? "/";
