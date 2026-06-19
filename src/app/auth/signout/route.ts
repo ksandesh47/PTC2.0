@@ -1,9 +1,16 @@
 import { createClient } from "@/lib/supabase/server";
-import { redirect } from "next/navigation";
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function POST(_req: NextRequest) {
+async function handleSignOut(req: NextRequest) {
   const supabase = await createClient();
   await supabase.auth.signOut();
-  redirect("/");
+  return NextResponse.redirect(new URL("/", req.url), { status: 303 });
+}
+
+export async function POST(req: NextRequest) {
+  return handleSignOut(req);
+}
+
+export async function GET(req: NextRequest) {
+  return handleSignOut(req);
 }

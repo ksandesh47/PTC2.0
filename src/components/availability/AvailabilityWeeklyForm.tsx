@@ -15,6 +15,7 @@ type SlotInput = {
 type Props = {
   playerId: string;
   slots: SlotInput[];
+  formAction?: string;
 };
 
 type WeekGroup = {
@@ -55,7 +56,11 @@ function weekTitle(dateIso: string): string {
   return `WEEK OF ${fmtMonthDay.format(start).toUpperCase()} - ${fmtMonthDay.format(end).toUpperCase()}`;
 }
 
-export default function AvailabilityWeeklyForm({ playerId, slots }: Props) {
+export default function AvailabilityWeeklyForm({
+  playerId,
+  slots,
+  formAction = "/api/availability",
+}: Readonly<Props>) {
   const [statusBySlot, setStatusBySlot] = useState<Record<string, AvailabilityStatus>>(() => {
     const initial: Record<string, AvailabilityStatus> = {};
     for (const s of slots) initial[s.id] = s.status;
@@ -101,17 +106,17 @@ export default function AvailabilityWeeklyForm({ playerId, slots }: Props) {
   }
 
   return (
-    <form action="/api/availability" method="POST" className="space-y-6">
+    <form action={formAction} method="POST" className="space-y-6">
       <input type="hidden" name="playerId" value={playerId} />
 
-      <div className="sticky top-14 z-10 flex items-center justify-between rounded-lg border border-[--color-border] bg-[--color-surface] px-4 py-3">
+      <div className="sticky top-14 z-10 flex items-center justify-between rounded-xl border border-[--color-border] bg-[--color-surface]/95 px-4 py-3 shadow-sm backdrop-blur-sm">
         <p className="text-sm font-semibold text-[--color-text-muted]">Tap slots to toggle your availability</p>
         <p className="text-sm font-semibold text-[--color-clay-600]">{selectedCount} selected</p>
       </div>
 
       <div className="space-y-6">
         {groupedWeeks.map((week) => (
-          <section key={week.key} className="space-y-3">
+          <section key={week.key} className="space-y-3 rounded-xl border border-[--color-border] bg-[--color-surface] p-3 shadow-sm">
             <div className="flex items-center justify-between">
               <h2 className="text-sm font-bold uppercase tracking-widest text-[--color-clay-600]">
                 {week.title}
@@ -134,7 +139,7 @@ export default function AvailabilityWeeklyForm({ playerId, slots }: Props) {
               </div>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2 animate-stagger">
               {week.slots.map((slot) => {
                 const isSelected = statusBySlot[slot.id] === "available";
                 const isWeekend = slot.label.includes("8:30 AM") || slot.label.includes("11:00 AM");
@@ -147,10 +152,10 @@ export default function AvailabilityWeeklyForm({ playerId, slots }: Props) {
                     type="button"
                     onClick={() => toggleSlot(slot.id)}
                     className={[
-                      "flex w-full items-center justify-between rounded-lg border px-3 py-3 text-left transition-colors",
+                      "flex w-full items-center justify-between rounded-lg border px-3 py-3 text-left transition-all",
                       isSelected
                         ? "border-[--color-clay-800] bg-[--color-clay-900] text-[--color-accent]"
-                        : "border-[--color-border] bg-[--color-surface] text-[--color-text]",
+                        : "border-[--color-border] bg-[--color-surface] text-[--color-text] hover:border-[--color-clay-300]",
                     ].join(" ")}
                   >
                     <div className="flex items-center gap-3">
