@@ -3,6 +3,31 @@ import { matches, players, seasons, auditEvents } from "@/db/schema";
 import { eq, desc, count } from "drizzle-orm";
 import Link from "next/link";
 import { formatDate } from "@/lib/utils";
+import { revalidatePath } from "next/cache";
+
+async function updateAvailabilityWindow(formData: FormData) {
+  "use server";
+
+  const rawSeasonId = formData.get("seasonId");
+  const rawStartDate = formData.get("startDate");
+  const rawEndDate = formData.get("endDate");
+
+  const seasonId = typeof rawSeasonId === "string" ? rawSeasonId.trim() : "";
+  const startDate = typeof rawStartDate === "string" ? rawStartDate.trim() : "";
+  const endDate = typeof rawEndDate === "string" ? rawEndDate.trim() : "";
+
+  if (!seasonId || !startDate || !endDate) return;
+  if (startDate > endDate) return;
+
+  await db
+    .update(seasons)
+    .set({ startDate, endDate, updatedAt: new Date() })
+    .where(eq(seasons.id, seasonId));
+
+  revalidatePath("/admin");
+  revalidatePath("/admin/availability");
+  revalidatePath("/player/availability");
+}
 
 export default async function AdminDashboardPage() {
   const [activeSeason, totalPlayers, recentAudit] = await Promise.all([
@@ -84,6 +109,12 @@ export default async function AdminDashboardPage() {
             Manage Players
           </Link>
           <Link
+            href="/admin/availability"
+            className="rounded-md border border-[--color-border] px-4 py-2 text-sm font-semibold hover:bg-[--color-clay-50] transition-colors"
+          >
+            View Availability
+          </Link>
+          <Link
             href="/admin/seasons"
             className="rounded-md border border-[--color-border] px-4 py-2 text-sm font-semibold hover:bg-[--color-clay-50] transition-colors"
           >
@@ -91,6 +122,43 @@ export default async function AdminDashboardPage() {
           </Link>
         </div>
       </div>
+
+      {/* Availability window control */}
+      {activeSeason && (
+        <div className="rounded-lg border border-[--color-border] bg-[--color-surface] p-4 space-y-3">
+          <h2 className="font-display text-2xl tracking-wider">AVAILABILITY WINDOW</h2>
+          <p className="text-sm text-[--color-text-muted]">
+            Admin controls which dates players can submit availability for.
+          </p>
+          <form action={updateAvailabilityWindow} className="flex flex-wrap items-end gap-3">
+            <input type="hidden" name="seasonId" value={activeSeason.id} />
+            <label className="space-y-1">
+              <span className="text-xs font-semibold uppercase tracking-widest text-[--color-text-muted]">From</span>
+              <input
+                name="startDate"
+                type="date"
+                defaultValue={String(activeSeason.startDate)}
+                className="rounded-md border border-[--color-border] bg-white px-3 py-2 text-sm"
+              />
+            </label>
+            <label className="space-y-1">
+              <span className="text-xs font-semibold uppercase tracking-widest text-[--color-text-muted]">To</span>
+              <input
+                name="endDate"
+                type="date"
+                defaultValue={String(activeSeason.endDate)}
+                className="rounded-md border border-[--color-border] bg-white px-3 py-2 text-sm"
+              />
+            </label>
+            <button
+              type="submit"
+              className="rounded-md bg-[--color-accent] px-4 py-2 text-sm font-semibold text-white hover:bg-[--color-accent-hover] transition-colors"
+            >
+              Update Window
+            </button>
+          </form>
+        </div>
+      )}
 
       {/* Recent audit log */}
       <div>

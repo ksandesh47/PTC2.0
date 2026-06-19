@@ -22,7 +22,7 @@ export async function SiteHeader() {
           href="/"
           className="font-display text-2xl tracking-widest text-[--color-accent] leading-none"
         >
-          PALOMINO TC
+          PTC
         </Link>
 
         {/* Primary nav */}

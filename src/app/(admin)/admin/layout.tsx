@@ -11,11 +11,12 @@ const adminNav = [
   { href: "/admin/matches", label: "Match Builder" },
   { href: "/admin/scores", label: "Score Entry" },
   { href: "/admin/players", label: "Players" },
+  { href: "/admin/availability", label: "Availability" },
   { href: "/admin/seasons", label: "Seasons" },
   { href: "/admin/audit", label: "Audit Log" },
 ];
 
-export default async function AdminLayout({ children }: { children: ReactNode }) {
+export default async function AdminLayout({ children }: Readonly<{ children: ReactNode }>) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/auth/login?next=/admin");
@@ -24,7 +25,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
     where: eq(users.id, user.id),
   });
 
-  if (!profile || profile.role !== "admin") {
+  if (profile?.role !== "admin") {
     redirect("/");
   }
 
