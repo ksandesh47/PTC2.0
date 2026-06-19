@@ -146,6 +146,8 @@ export default async function SchedulePage({ searchParams }: Readonly<PageProps>
     ? Math.max(minWeek, Math.min(maxWeek, requestedWeek))
     : minWeek;
   const activeWeekEntry = weeks.find(([week]) => week === selectedWeek) ?? weeks[0];
+  const canGoPrev = selectedWeek > minWeek;
+  const canGoNext = selectedWeek < maxWeek;
 
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 space-y-8">
@@ -161,12 +163,18 @@ export default async function SchedulePage({ searchParams }: Readonly<PageProps>
       {activeWeekEntry && (
         <div className="rounded-xl border border-[--color-border] bg-[--color-surface] px-4 py-3">
           <div className="flex items-center justify-between gap-3">
-            <Link
-              href={`/schedule?week=${Math.max(minWeek, selectedWeek - 1)}`}
-              className="rounded-md border border-[--color-border] px-3 py-1.5 text-sm font-semibold hover:bg-[--color-clay-50]"
-            >
-              ← Prev
-            </Link>
+            {canGoPrev ? (
+              <Link
+                href={`/schedule?week=${selectedWeek - 1}`}
+                className="rounded-md border border-[--color-border] px-3 py-1.5 text-sm font-semibold hover:bg-[--color-clay-50]"
+              >
+                ← Prev
+              </Link>
+            ) : (
+              <span className="rounded-md border border-[--color-border] px-3 py-1.5 text-sm font-semibold text-[--color-text-muted] opacity-60">
+                ← Prev
+              </span>
+            )}
 
             <div className="text-center">
               <p className="font-display text-xl tracking-wider">WEEK {selectedWeek}</p>
@@ -177,12 +185,18 @@ export default async function SchedulePage({ searchParams }: Readonly<PageProps>
               </p>
             </div>
 
-            <Link
-              href={`/schedule?week=${Math.min(maxWeek, selectedWeek + 1)}`}
-              className="rounded-md border border-[--color-border] px-3 py-1.5 text-sm font-semibold hover:bg-[--color-clay-50]"
-            >
-              Next →
-            </Link>
+            {canGoNext ? (
+              <Link
+                href={`/schedule?week=${selectedWeek + 1}`}
+                className="rounded-md border border-[--color-border] px-3 py-1.5 text-sm font-semibold hover:bg-[--color-clay-50]"
+              >
+                Next →
+              </Link>
+            ) : (
+              <span className="rounded-md border border-[--color-border] px-3 py-1.5 text-sm font-semibold text-[--color-text-muted] opacity-60">
+                Next →
+              </span>
+            )}
           </div>
         </div>
       )}
