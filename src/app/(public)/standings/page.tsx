@@ -1,40 +1,11 @@
-import { db } from "@/db";
-import { standingsSnapshots, players, seasons } from "@/db/schema";
-import { eq, desc } from "drizzle-orm";
 import { formatDate } from "@/lib/utils";
+import { getStandingsLabel } from "@/lib/league/rules";
+import { getActiveSeasonProjection } from "@/lib/league/season-projection";
 
 export const revalidate = 60; // ISR — revalidate every 60 s
 
-async function getActiveSeasonStandings() {
-  const activeSeason = await db.query.seasons.findFirst({
-    where: eq(seasons.isActive, true),
-  });
-  if (!activeSeason) return { season: null, rows: [] };
-
-  const rows = await db
-    .select({
-      rank: standingsSnapshots.rank,
-      firstName: players.firstName,
-      lastName: players.lastName,
-      matchesPlayed: standingsSnapshots.matchesPlayed,
-      matchesWon: standingsSnapshots.matchesWon,
-      setsWon: standingsSnapshots.setsWon,
-      setsLost: standingsSnapshots.setsLost,
-      gamesWon: standingsSnapshots.gamesWon,
-      gamesLost: standingsSnapshots.gamesLost,
-      points: standingsSnapshots.points,
-      computedAt: standingsSnapshots.computedAt,
-    })
-    .from(standingsSnapshots)
-    .innerJoin(players, eq(players.id, standingsSnapshots.playerId))
-    .where(eq(standingsSnapshots.seasonId, activeSeason.id))
-    .orderBy(desc(standingsSnapshots.points), desc(standingsSnapshots.setsWon));
-
-  return { season: activeSeason, rows };
-}
-
 export default async function StandingsPage() {
-  const { season, rows } = await getActiveSeasonStandings();
+  const { season, standings } = await getActiveSeasonProjection();
 
   if (!season) {
     return (
@@ -51,9 +22,40 @@ export default async function StandingsPage() {
           STANDINGS
         </h1>
         <p className="text-sm text-[--color-text-muted] mt-1">
-          {season.name} &mdash; updated{" "}
-          {rows[0] ? formatDate(rows[0].computedAt) : "—"}
+          {season.name} &mdash; {getStandingsLabel()} league model &middot; updated{" "}
+          {formatDate(new Date())}
         </p>
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-3">
+        {standings.slice(0, 3).map((row, index) => (
+          <article
+            key={row.playerName}
+            className="rounded-xl border border-[--color-border] bg-[--color-surface] p-5 shadow-sm"
+          >
+            <p className="text-xs uppercase tracking-widest text-[--color-text-muted]">
+              {index === 0 ? "Leader" : `Rank ${row.rank}`}
+            </p>
+            <h2 className="mt-2 font-display text-3xl tracking-wider text-[--color-text]">
+              {row.playerName}
+            </h2>
+            <div className="mt-4 flex items-end justify-between">
+              <div>
+                <p className="text-xs uppercase tracking-widest text-[--color-text-muted]">
+                  {getStandingsLabel()}
+                </p>
+                <p className="font-display text-4xl tracking-wider text-[--color-clay-600]">
+                  {row.standingsTotal}
+                </p>
+              </div>
+              <div className="text-right text-sm text-[--color-text-muted]">
+                <p>Avg {row.averageScore.toFixed(1)}</p>
+                <p>{row.matchesPlayed} matches</p>
+                <p>SW-SL {row.setsWon}-{row.setsLost}</p>
+              </div>
+            </div>
+          </article>
+        ))}
       </div>
 
       <div className="overflow-x-auto rounded-lg border border-[--color-border]">
@@ -62,31 +64,30 @@ export default async function StandingsPage() {
             <tr>
               <th scope="col" className="px-4 py-3 text-right w-10">#</th>
               <th scope="col" className="px-4 py-3 text-left">Player</th>
+              <th scope="col" className="px-4 py-3 text-right">{getStandingsLabel()}</th>
+              <th scope="col" className="px-4 py-3 text-right">Avg</th>
               <th scope="col" className="px-4 py-3 text-right">MP</th>
-              <th scope="col" className="px-4 py-3 text-right">MW</th>
               <th scope="col" className="px-4 py-3 text-right hidden sm:table-cell">SW</th>
               <th scope="col" className="px-4 py-3 text-right hidden sm:table-cell">SL</th>
               <th scope="col" className="px-4 py-3 text-right hidden md:table-cell">GW</th>
               <th scope="col" className="px-4 py-3 text-right hidden md:table-cell">GL</th>
-              <th scope="col" className="px-4 py-3 text-right font-bold">Pts</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-[--color-border] bg-[--color-surface]">
-            {rows.map((row, i) => (
+            {standings.map((row) => (
               <tr
-                key={`${row.firstName}-${row.lastName}`}
+                key={row.playerName}
                 className="hover:bg-[--color-clay-50] transition-colors"
               >
                 <td className="px-4 py-3 text-right text-[--color-text-muted] font-mono">
-                  {row.rank ?? i + 1}
+                  {row.rank}
                 </td>
                 <td className="px-4 py-3 font-semibold">
-                  {row.firstName} {row.lastName}
+                  {row.playerName}
                 </td>
+                <td className="px-4 py-3 text-right font-bold text-[--color-clay-600]">{row.standingsTotal}</td>
+                <td className="px-4 py-3 text-right">{row.averageScore.toFixed(1)}</td>
                 <td className="px-4 py-3 text-right">{row.matchesPlayed}</td>
-                <td className="px-4 py-3 text-right text-[--color-success]">
-                  {row.matchesWon}
-                </td>
                 <td className="px-4 py-3 text-right hidden sm:table-cell">
                   {row.setsWon}
                 </td>
@@ -99,12 +100,9 @@ export default async function StandingsPage() {
                 <td className="px-4 py-3 text-right hidden md:table-cell">
                   {row.gamesLost}
                 </td>
-                <td className="px-4 py-3 text-right font-bold text-[--color-clay-600]">
-                  {row.points}
-                </td>
               </tr>
             ))}
-            {rows.length === 0 && (
+            {standings.length === 0 && (
               <tr>
                 <td
                   colSpan={9}
@@ -119,7 +117,7 @@ export default async function StandingsPage() {
       </div>
 
       <p className="text-xs text-[--color-text-muted]">
-        MP = Matches Played · MW = Matches Won · SW/SL = Sets · GW/GL = Games · Pts = Points
+        League rules stay separate from storage here: {getStandingsLabel()} is derived from projected per-match scorecards built on top of recorded rotating-set results.
       </p>
     </div>
   );

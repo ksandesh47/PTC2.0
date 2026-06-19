@@ -16,7 +16,7 @@ const sourceSans = Source_Sans_3({
 });
 
 export const metadata: Metadata = {
-  title: "PTC 2.0 – Tennis League",
+  title: "Palomino Tennis Club – Tennis League",
   description: "Schedule, standings, and availability for your tennis league.",
 };
 

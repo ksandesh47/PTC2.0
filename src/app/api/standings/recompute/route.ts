@@ -3,13 +3,11 @@ import { createClient } from "@/lib/supabase/server";
 import { db } from "@/db";
 import {
   standingsSnapshots,
-  matchSets,
-  matchPairings,
   matches,
-  seasonPlayers,
   users,
 } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
+import { palominoLeagueRules } from "@/lib/league/rules";
 
 async function requireAdmin(userId: string) {
   const profile = await db.query.users.findFirst({ where: eq(users.id, userId) });
@@ -108,7 +106,9 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  // Sort and assign ranks
+  // Sort and assign ranks. The current snapshot uses cumulative points as a
+  // fallback until per-match player scorecards are added; the league rules stay
+  // outside the DB shape so we can later swap in best-N match scoring.
   const sorted = [...statsMap.entries()].sort(([, a], [, b]) => {
     const pointsA = a.matchesWon * 3;
     const pointsB = b.matchesWon * 3;
@@ -140,5 +140,10 @@ export async function POST(req: NextRequest) {
     )
   );
 
-  return NextResponse.json({ ok: true, playersUpdated: sorted.length });
+  return NextResponse.json({
+    ok: true,
+    playersUpdated: sorted.length,
+    scoringModel: palominoLeagueRules.standings.model,
+    fallback: palominoLeagueRules.standings.fallbackLabel,
+  });
 }

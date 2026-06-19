@@ -6,10 +6,10 @@ export default function HomePage() {
       {/* Hero */}
       <section className="text-center space-y-4">
         <h1 className="font-display text-6xl sm:text-8xl text-[--color-clay-500] tracking-widest">
-          PLATFORM TENNIS CLUB
+          PALOMINO TENNIS CLUB
         </h1>
         <p className="text-lg text-[--color-text-muted] max-w-xl mx-auto">
-          Your league. Every score, every week, every ranking — live and auditable.
+          Weekly rotating doubles, best-eight standings, live results, and availability built around Palomino's actual league logic.
         </p>
         <div className="flex justify-center gap-4 pt-2">
           <Link
@@ -35,8 +35,8 @@ export default function HomePage() {
             { href: "/standings", title: "Live Standings", desc: "Current rankings for the active season." },
             { href: "/schedule", title: "Season Schedule", desc: "Week-by-week match schedule and courts." },
             { href: "/results", title: "Match Results", desc: "Full archive of completed matches." },
+            { href: "/stats", title: "League Stats", desc: "Best-eight totals, averages, sets, and games." },
             { href: "/player/availability", title: "My Availability", desc: "Declare when you can play.", auth: true },
-            { href: "/player/profile", title: "My Profile", desc: "Stats, history, and attendance.", auth: true },
             { href: "/admin", title: "Admin Dashboard", desc: "Score entry, assignments, audit log.", admin: true },
           ].map((card) => (
             <Link

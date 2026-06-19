@@ -5,6 +5,7 @@ const navLinks = [
   { href: "/schedule", label: "Schedule" },
   { href: "/standings", label: "Standings" },
   { href: "/results", label: "Results" },
+  { href: "/stats", label: "Stats" },
 ];
 
 export async function SiteHeader() {
@@ -21,7 +22,7 @@ export async function SiteHeader() {
           href="/"
           className="font-display text-2xl tracking-widest text-[--color-accent] leading-none"
         >
-          PTC
+          PALOMINO TC
         </Link>
 
         {/* Primary nav */}
