@@ -41,6 +41,13 @@ function displayName(firstName: string, lastName: string) {
   return [firstName, lastName].filter(Boolean).join(" ").trim();
 }
 
+function dayWindow(startDate: string, endDate: string) {
+  const start = new Date(`${startDate}T00:00:00`).getTime();
+  const end = new Date(`${endDate}T00:00:00`).getTime();
+  const diff = Math.round((end - start) / (24 * 60 * 60 * 1000)) + 1;
+  return Math.max(diff, 0);
+}
+
 function buildStats(roster: RosterPlayer[], pairRows: PairRow[]) {
   const statMap = new Map<string, { played: number; scheduled: number }>();
   for (const p of roster) statMap.set(p.id, { played: 0, scheduled: 0 });
@@ -125,9 +132,9 @@ export default async function AvailabilityPage({ searchParams }: Readonly<PagePr
         <div className="rounded-2xl border border-[--color-border] bg-gradient-to-br from-[--color-clay-100] via-[--color-cream] to-white px-6 py-7 shadow-sm">
           <div className="text-center space-y-2">
             <div className="text-3xl">🎾</div>
-            <h1 className="font-display text-5xl tracking-widest text-[--color-clay-700]">PTC</h1>
+            <h1 className="font-display text-5xl tracking-widest text-[--color-clay-700]">PALOMINO TENNIS CLUB</h1>
             <p className="text-sm text-[--color-text-muted]">
-              Select your name to submit availability for the active season window.
+              Select your name to submit your availability for the next {dayWindow(activeSeason.startDate, activeSeason.endDate)} days.
             </p>
             <p className="text-xs font-semibold uppercase tracking-widest text-[--color-forest-700]">
               {formatDate(activeSeason.startDate)} - {formatDate(activeSeason.endDate)}
