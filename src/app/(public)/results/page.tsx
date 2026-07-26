@@ -1,6 +1,7 @@
 import { formatDate } from "@/lib/utils";
 import { getLatestVersionSets } from "@/lib/league/display";
 import { getActiveSeasonProjection } from "@/lib/league/season-projection";
+import type { PlayerMatchScorecard } from "@/lib/league/scorecards";
 
 export const revalidate = 60;
 
@@ -22,7 +23,7 @@ export default async function ResultsPage() {
   let season: Awaited<ReturnType<typeof getActiveSeasonProjection>>["season"] = null;
   let completedMatches: Awaited<ReturnType<typeof getActiveSeasonProjection>>["completedMatches"] = [];
   let playerMap: Awaited<ReturnType<typeof getActiveSeasonProjection>>["playerMap"] = new Map();
-  let scorecardsByMatch: Awaited<ReturnType<typeof getActiveSeasonProjection>>["scorecardsByMatch"] = new Map();
+  let scorecardsByMatch: Map<string, PlayerMatchScorecard[]> = new Map();
   try {
     ({ season, completedMatches, playerMap, scorecardsByMatch } = await getActiveSeasonProjection());
   } catch {
@@ -55,7 +56,7 @@ export default async function ResultsPage() {
       <div className="space-y-6 animate-stagger">
         {completedMatches.map((match) => {
           const matchScorecards = new Map(
-            (scorecardsByMatch.get(match.id) ?? []).map((scorecard) => [
+            (scorecardsByMatch.get(match.id) ?? []).map((scorecard: PlayerMatchScorecard) => [
               scorecard.playerId,
               scorecard.score,
             ])

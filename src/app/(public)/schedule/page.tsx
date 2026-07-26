@@ -98,8 +98,9 @@ function getWeekDateRange(weekMatches: ScheduleMatch[]): { range: string; isThis
   
   // Get all dates from matches in this week
   const dates = weekMatches
-    .map(m => m.slot?.slotDate)
-    .filter(d => d !== null && d !== undefined) as Date[];
+    .map((m) => m.slot?.slotDate)
+    .filter((d): d is string => d !== null && d !== undefined)
+    .map((d) => new Date(d));
   
   if (dates.length === 0) return { range: "Date pending", isThisWeek: false };
   
