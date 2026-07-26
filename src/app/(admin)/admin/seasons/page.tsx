@@ -2,6 +2,7 @@ import { db } from "@/db";
 import { seasons } from "@/db/schema";
 import { desc } from "drizzle-orm";
 import { formatDate } from "@/lib/utils";
+import { SeasonEditForm } from "@/components/admin/SeasonEditForm";
 
 export default async function AdminSeasonsPage() {
   const list = await db.query.seasons.findMany({
@@ -19,7 +20,14 @@ export default async function AdminSeasonsPage() {
               <p className="font-semibold">{s.name}</p>
               <p className="text-xs text-[--color-text-muted]">{formatDate(s.startDate)} - {formatDate(s.endDate)}</p>
             </div>
-            <span className="text-xs font-semibold uppercase tracking-wider text-[--color-clay-600]">{s.isActive ? "Active" : "Inactive"}</span>
+            <div className="flex items-center gap-3">
+              <span className="text-xs font-semibold uppercase tracking-wider text-[--color-clay-600]">{s.isActive ? "Active" : "Inactive"}</span>
+              <SeasonEditForm
+                seasonId={s.id}
+                startDate={s.startDate}
+                endDate={s.endDate}
+              />
+            </div>
           </div>
         ))}
       </div>

@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { matches, players, seasons, auditEvents, availabilitySlots } from "@/db/schema";
-import { and, eq, desc, count, gte, lte } from "drizzle-orm";
+import { and, eq, desc, count, gte, lte, sql } from "drizzle-orm";
 import Link from "next/link";
 import { formatDate } from "@/lib/utils";
 import { revalidatePath } from "next/cache";
@@ -127,14 +127,25 @@ async function updateAvailabilityWindow(formData: FormData) {
   revalidatePath("/player/availability");
 }
 
+async function checkDbHealth(): Promise<{ ok: boolean; latencyMs: number }> {
+  const t0 = Date.now();
+  try {
+    await db.select({ ping: sql<number>`1` }).from(seasons).limit(1);
+    return { ok: true, latencyMs: Date.now() - t0 };
+  } catch {
+    return { ok: false, latencyMs: -1 };
+  }
+}
+
 export default async function AdminDashboardPage() {
-  const [activeSeason, totalPlayers, recentAudit] = await Promise.all([
+  const [activeSeason, totalPlayers, recentAudit, dbHealth] = await Promise.all([
     db.query.seasons.findFirst({ where: eq(seasons.isActive, true) }),
     db.select({ count: count() }).from(players).where(eq(players.isActive, true)),
     db.query.auditEvents.findMany({
       orderBy: [desc(auditEvents.createdAt)],
       limit: 10,
     }),
+    checkDbHealth(),
   ]);
 
   const matchStats = activeSeason
@@ -182,6 +193,24 @@ export default async function AdminDashboardPage() {
             </p>
           </div>
         ))}
+      </div>
+
+      {/* DB health banner */}
+      <div className={`flex items-center justify-between rounded-lg border px-4 py-3 text-sm ${
+        dbHealth.ok
+          ? "border-[--color-forest-200] bg-[--color-forest-50] text-[--color-forest-700]"
+          : "border-red-200 bg-red-50 text-red-700"
+      }`}>
+        <div className="flex items-center gap-2">
+          <span className={`inline-block h-2 w-2 rounded-full ${dbHealth.ok ? "bg-[--color-forest-500]" : "bg-red-500"}`} />
+          <span className="font-semibold">
+            Database {dbHealth.ok ? "connected" : "unavailable"}
+          </span>
+          {dbHealth.ok && (
+            <span className="text-xs opacity-70">{dbHealth.latencyMs} ms</span>
+          )}
+        </div>
+        <span className="text-xs opacity-70">Weekly keepalive: Mon 10:00 UTC via cron</span>
       </div>
 
       {/* Quick actions */}

@@ -3,8 +3,23 @@ import { getActiveSeasonProjection } from "@/lib/league/season-projection";
 
 export const revalidate = 60;
 
+function DataUnavailable() {
+  return (
+    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 text-center space-y-4">
+      <h1 className="font-display text-5xl tracking-widest text-[--color-clay-500]">STATS</h1>
+      <p className="text-[--color-text-muted]">Data is temporarily unavailable. Please try again shortly.</p>
+    </div>
+  );
+}
+
 export default async function StatsPage() {
-  const { season, standings } = await getActiveSeasonProjection();
+  let season: Awaited<ReturnType<typeof getActiveSeasonProjection>>["season"] = null;
+  let standings: Awaited<ReturnType<typeof getActiveSeasonProjection>>["standings"] = [];
+  try {
+    ({ season, standings } = await getActiveSeasonProjection());
+  } catch {
+    return <DataUnavailable />;
+  }
 
   if (!season) {
     return (

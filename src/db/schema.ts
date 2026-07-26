@@ -362,6 +362,22 @@ export const matchPairingsRelations = relations(
       fields: [matchPairings.matchId],
       references: [matches.id],
     }),
+    team1Player1: one(players, {
+      fields: [matchPairings.team1Player1Id],
+      references: [players.id],
+    }),
+    team1Player2: one(players, {
+      fields: [matchPairings.team1Player2Id],
+      references: [players.id],
+    }),
+    team2Player1: one(players, {
+      fields: [matchPairings.team2Player1Id],
+      references: [players.id],
+    }),
+    team2Player2: one(players, {
+      fields: [matchPairings.team2Player2Id],
+      references: [players.id],
+    }),
     sets: many(matchSets),
   })
 );

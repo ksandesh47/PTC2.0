@@ -9,9 +9,25 @@ function playerName(playerMap: Map<string, string>, id: string | null | undefine
   return playerMap.get(id) ?? "Unknown player";
 }
 
+function DataUnavailable() {
+  return (
+    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 text-center space-y-4">
+      <h1 className="font-display text-5xl tracking-widest text-[--color-clay-500]">RESULTS</h1>
+      <p className="text-[--color-text-muted]">Data is temporarily unavailable. Please try again shortly.</p>
+    </div>
+  );
+}
+
 export default async function ResultsPage() {
-  const { season, completedMatches, playerMap, scorecardsByMatch } =
-    await getActiveSeasonProjection();
+  let season: Awaited<ReturnType<typeof getActiveSeasonProjection>>["season"] = null;
+  let completedMatches: Awaited<ReturnType<typeof getActiveSeasonProjection>>["completedMatches"] = [];
+  let playerMap: Awaited<ReturnType<typeof getActiveSeasonProjection>>["playerMap"] = new Map();
+  let scorecardsByMatch: Awaited<ReturnType<typeof getActiveSeasonProjection>>["scorecardsByMatch"] = new Map();
+  try {
+    ({ season, completedMatches, playerMap, scorecardsByMatch } = await getActiveSeasonProjection());
+  } catch {
+    return <DataUnavailable />;
+  }
 
   if (!season) {
     return (

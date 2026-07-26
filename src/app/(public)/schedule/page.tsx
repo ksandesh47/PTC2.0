@@ -93,6 +93,55 @@ function lineupIds(match: ScheduleMatch): string[] {
   return Array.from(ids);
 }
 
+function getWeekDateRange(weekMatches: ScheduleMatch[]): { range: string; isThisWeek: boolean } {
+  if (weekMatches.length === 0) return { range: "Date pending", isThisWeek: false };
+  
+  // Get all dates from matches in this week
+  const dates = weekMatches
+    .map(m => m.slot?.slotDate)
+    .filter(d => d !== null && d !== undefined) as Date[];
+  
+  if (dates.length === 0) return { range: "Date pending", isThisWeek: false };
+  
+  // Find first and last dates in the week
+  const sortedDates = [...dates].sort((a, b) => a.getTime() - b.getTime());
+  const firstDate = new Date(sortedDates[0]);
+  const lastDate = new Date(sortedDates[sortedDates.length - 1]);
+  
+  // Find Monday of the week (go back to nearest Monday)
+  const monday = new Date(firstDate);
+  const dayOfWeek = monday.getDay(); // 0 = Sunday, 1 = Monday
+  const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+  monday.setDate(monday.getDate() - daysToMonday);
+  
+  // Find Sunday of the week (go forward to nearest Sunday)
+  const sunday = new Date(lastDate);
+  const daysToSunday = 7 - (sunday.getDay() || 7) % 7;
+  sunday.setDate(sunday.getDate() + daysToSunday);
+  
+  const monthFormatter = new Intl.DateTimeFormat('en-US', { month: 'short' });
+  const dayFormatter = new Intl.DateTimeFormat('en-US', { day: 'numeric' });
+  
+  const mondayMonth = monthFormatter.format(monday);
+  const mondayDay = dayFormatter.format(monday);
+  const sundayMonth = monthFormatter.format(sunday);
+  const sundayDay = dayFormatter.format(sunday);
+  
+  // Format: "Jul 20 – Jul 26" or "Jul 20 – Aug 2"
+  const range = mondayMonth === sundayMonth 
+    ? `${mondayMonth} ${mondayDay} – ${sundayDay}`
+    : `${mondayMonth} ${mondayDay} – ${sundayMonth} ${sundayDay}`;
+  
+  // Check if this week is the current week (contains today)
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  monday.setHours(0, 0, 0, 0);
+  sunday.setHours(0, 0, 0, 0);
+  const isThisWeek = today >= monday && today <= sunday;
+  
+  return { range, isThisWeek };
+}
+
 function completedSetRows(match: ScheduleMatch, playerMap: Map<string, string>) {
   const rows: Array<{
     key: string;
@@ -127,7 +176,18 @@ function completedSetRows(match: ScheduleMatch, playerMap: Map<string, string>) 
 }
 
 export default async function SchedulePage({ searchParams }: Readonly<PageProps>) {
-  const { season, weeks, playerMap } = await getSchedule();
+  let scheduleData: Awaited<ReturnType<typeof getSchedule>>;
+  try {
+    scheduleData = await getSchedule();
+  } catch {
+    return (
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 text-center space-y-4">
+        <h1 className="font-display text-5xl tracking-widest text-[--color-clay-500]">SCHEDULE</h1>
+        <p className="text-[--color-text-muted]">Data is temporarily unavailable. Please try again shortly.</p>
+      </div>
+    );
+  }
+  const { season, weeks, playerMap } = scheduleData;
   const params = (await searchParams) ?? {};
   const requestedWeek = Number.parseInt(asSingle(params.week) ?? "", 10);
 
@@ -177,12 +237,17 @@ export default async function SchedulePage({ searchParams }: Readonly<PageProps>
             )}
 
             <div className="text-center">
-              <p className="font-display text-xl tracking-wider">WEEK {selectedWeek}</p>
-              <p className="text-xs text-[--color-text-muted]">
-                {activeWeekEntry[1][0]?.slot?.slotDate
-                  ? formatDate(activeWeekEntry[1][0].slot.slotDate)
-                  : "Date pending"}
-              </p>
+              {(() => {
+                const { range, isThisWeek } = activeWeekEntry[1].length > 0 
+                  ? getWeekDateRange(activeWeekEntry[1]) 
+                  : { range: "Date pending", isThisWeek: false };
+                return (
+                  <>
+                    <p className="font-display text-xl tracking-wider">{range}</p>
+                    {isThisWeek && <p className="text-xs text-[--color-text-muted] uppercase tracking-wide">This Week</p>}
+                  </>
+                );
+              })()}
             </div>
 
             {canGoNext ? (
@@ -206,23 +271,22 @@ export default async function SchedulePage({ searchParams }: Readonly<PageProps>
       )}
 
       <div className="space-y-6 animate-stagger">
-        {(activeWeekEntry ? [activeWeekEntry] : []).map(([week, weekMatches]) => (
-          <section key={week}>
-            <h2 className="font-display text-2xl tracking-wider text-[--color-text] mb-3">
-              WEEK {week}
-              {weekMatches[0]?.slot?.slotDate && (
-                <span className="ml-3 text-base font-body font-normal text-[--color-text-muted]">
-                  {formatDate(weekMatches[0].slot.slotDate)}
-                </span>
-              )}
-            </h2>
-            <div className="grid gap-4 lg:grid-cols-2">
-              {weekMatches.map((m) => (
-                <ScheduleMatchCard key={m.id} match={m} playerMap={playerMap} />
-              ))}
-            </div>
-          </section>
-        ))}
+        {(activeWeekEntry ? [activeWeekEntry] : []).map(([week, weekMatches]) => {
+          const { range, isThisWeek } = getWeekDateRange(weekMatches);
+          return (
+            <section key={week}>
+              <h2 className="font-display text-2xl tracking-wider text-[--color-text] mb-3">
+                {range}
+                {isThisWeek && <span className="ml-3 text-base font-body font-normal text-[--color-text-muted] uppercase tracking-wide">This Week</span>}
+              </h2>
+              <div className="grid gap-4 lg:grid-cols-2">
+                {weekMatches.map((m) => (
+                  <ScheduleMatchCard key={m.id} match={m} playerMap={playerMap} />
+                ))}
+              </div>
+            </section>
+          );
+        })}
       </div>
     </div>
   );

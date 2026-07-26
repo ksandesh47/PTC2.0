@@ -152,7 +152,7 @@ slots(label, slot_date, week_number) AS (
   SELECT
     trim(to_char(d, 'Dy Mon FMDD')) || ' - 5:30 PM' AS label,
     d AS slot_date,
-    (1 + ((d - DATE '2026-05-01') / 7))::smallint AS week_number
+    (1 + (EXTRACT(DAY FROM (d - DATE '2026-05-01')) / 7))::smallint AS week_number
   FROM generate_series(DATE '2026-05-01', DATE '2026-09-01', INTERVAL '1 day') AS g(d)
   WHERE EXTRACT(ISODOW FROM d) BETWEEN 1 AND 5
 
@@ -161,7 +161,7 @@ slots(label, slot_date, week_number) AS (
   SELECT
     trim(to_char(d, 'Dy Mon FMDD')) || ' - 8:30 AM' AS label,
     d AS slot_date,
-    (1 + ((d - DATE '2026-05-01') / 7))::smallint AS week_number
+    (1 + (EXTRACT(DAY FROM (d - DATE '2026-05-01')) / 7))::smallint AS week_number
   FROM generate_series(DATE '2026-05-01', DATE '2026-09-01', INTERVAL '1 day') AS g(d)
   WHERE EXTRACT(ISODOW FROM d) IN (6, 7)
 
@@ -170,7 +170,7 @@ slots(label, slot_date, week_number) AS (
   SELECT
     trim(to_char(d, 'Dy Mon FMDD')) || ' - 11:00 AM' AS label,
     d AS slot_date,
-    (1 + ((d - DATE '2026-05-01') / 7))::smallint AS week_number
+    (1 + (EXTRACT(DAY FROM (d - DATE '2026-05-01')) / 7))::smallint AS week_number
   FROM generate_series(DATE '2026-05-01', DATE '2026-09-01', INTERVAL '1 day') AS g(d)
   WHERE EXTRACT(ISODOW FROM d) IN (6, 7)
 )
@@ -1006,24 +1006,6 @@ resolved AS (
     ON sl.season_id = s.id
    AND sl.slot_date = i.slot_date
    AND (
-        (i.slot_idx = 0 AND EXTRACT(ISODOW FROM sl.slot_date) BETWEEN 1 AND 5 AND sl.label LIKE '%5:30 PM%')
-     OR (i.slot_idx = 0 AND EXTRACT(ISODOW FROM sl.slot_date) IN (6, 7) AND sl.label LIKE '%8:30 AM%')
-     OR (i.slot_idx = 1 AND EXTRACT(ISODOW FROM sl.slot_date) IN (6, 7) AND sl.label LIKE '%11:00 AM%')
-   )
-)
-resolved AS (
-  SELECT
-    sl.id AS slot_id,
-    p.id AS player_id,
-    CASE WHEN i.is_available THEN 'available'::public.availability_status ELSE 'unavailable'::public.availability_status END AS status,
-    i.submitted_at
-  FROM imported_availability i
-  JOIN public.seasons s ON s.is_active = true
-  JOIN public.players p ON p.first_name = i.player_name
-  JOIN public.availability_slots sl
-    ON sl.season_id = s.id
-   AND sl.slot_date = i.slot_date
-   AND (
         (i.slot_idx = 0 AND sl.label LIKE '%5:30 PM%' AND EXTRACT(ISODOW FROM sl.slot_date) BETWEEN 1 AND 5)
      OR (i.slot_idx = 0 AND sl.label LIKE '%8:30 AM%')
      OR (i.slot_idx = 1 AND sl.label LIKE '%11:00 AM%')
@@ -1099,101 +1081,277 @@ INSERT INTO public.match_pairings (
 SELECT r.match_id, r.p1_id, r.p2_id, r.p3_id, r.p4_id
 FROM resolved r;
 
--- 13) Completed match scorecards with real 1.0 set scores
-WITH completed_sets(slot_label, set_number, t1p1, t1p2, t2p1, t2p2, g1, g2) AS (
-  VALUES
-    -- Mon Jun 15 completed match
-    ('Mon Jun 15 - 5:30 PM', 1, 'Connors', 'Marc',   'Mike L', 'Rob',    6, 2),
-    ('Mon Jun 15 - 5:30 PM', 2, 'Connors', 'Mike L', 'Marc',   'Rob',    6, 4),
-    ('Mon Jun 15 - 5:30 PM', 3, 'Connors', 'Rob',    'Marc',   'Mike L', 1, 6),
-
-    -- Sun Jun 14 completed match
-    ('Sun Jun 14 - 8:30 AM', 1, 'Brownie', 'Doug',   'Todd',   'Vijay',  1, 6),
-    ('Sun Jun 14 - 8:30 AM', 2, 'Brownie', 'Todd',   'Doug',   'Vijay',  6, 4),
-    ('Sun Jun 14 - 8:30 AM', 3, 'Brownie', 'Vijay',  'Doug',   'Todd',   0, 6),
-
-    -- Sat Jun 13 completed match
-    ('Sat Jun 13 - 8:30 AM', 1, 'Henry',   'Jeremy', 'Todd',   'Vijay',  2, 6),
-    ('Sat Jun 13 - 8:30 AM', 2, 'Henry',   'Todd',   'Jeremy', 'Vijay',  6, 0),
-    ('Sat Jun 13 - 8:30 AM', 3, 'Henry',   'Vijay',  'Jeremy', 'Todd',   6, 7)
+-- 13) Import 52 completed matches from production (May 4 - Jul 25, 2026)
+-- Step 1: Insert all match records
+INSERT INTO public.matches (season_id, slot_id, week_number, court, status)
+WITH active_season AS (
+  SELECT id FROM public.seasons WHERE is_active = true LIMIT 1
 ),
-resolved AS (
+match_data(match_num, match_date, match_time, p1, p2, p3, p4, s1_t1_g, s1_t2_g, s2_t1_g, s2_t2_g, s3_t1_g, s3_t2_g) AS (
+  VALUES
+    (52, DATE '2026-07-25', TIME '11:00:00', 'Todd', 'Ahad', 'Henry', 'Kevin', 4, 6, 6, 3, 6, 3),
+    (51, DATE '2026-07-24', TIME '17:30:00', 'Brownie', 'Cruz', 'Sandesh', 'Todd', 4, 6, 0, 6, 6, 4),
+    (50, DATE '2026-07-23', TIME '17:30:00', 'Denny', 'Greg', 'Jeremy', 'RI Jeff', 4, 6, 2, 6, 1, 6),
+    (49, DATE '2026-07-22', TIME '17:30:00', 'Mike L', 'Vijay', 'Eric', 'Raj', 2, 6, 2, 6, 6, 7),
+    (48, DATE '2026-07-20', TIME '17:30:00', 'Connors', 'Cruz', 'Raj', 'Jon', 1, 6, 3, 6, 4, 6),
+    (47, DATE '2026-07-18', TIME '08:30:00', 'Henry', 'Kevin', 'Cruz', 'Raj', 5, 7, 6, 3, 6, 0),
+    (46, DATE '2026-07-17', TIME '17:30:00', 'Henry', 'Raj', 'Sandesh', 'Kevin', 7, 5, 2, 6, 6, 4),
+    (45, DATE '2026-07-16', TIME '17:30:00', 'Brian', 'Denny', 'Vijay', 'Jeremy', 6, 4, 2, 6, 6, 1),
+    (44, DATE '2026-07-15', TIME '17:30:00', 'Brownie', 'Doug', 'Marc', 'Raj', 2, 6, 1, 6, 6, 4),
+    (43, DATE '2026-07-14', TIME '17:30:00', 'Ahad', 'Brian', 'Vijay', 'Jeremy', 6, 7, 4, 6, 7, 6),
+    (42, DATE '2026-07-13', TIME '17:30:00', 'Connors', 'Marc', 'Mike L', 'Rob', 6, 4, 6, 4, 6, 3),
+    (41, DATE '2026-07-11', TIME '08:30:00', 'Henry', 'Raj', 'Brownie', 'Kevin', 6, 4, 3, 6, 6, 1),
+    (40, DATE '2026-07-10', TIME '17:30:00', 'Raj', 'Sandesh', 'Todd', 'Vijay', 1, 6, 1, 6, 0, 6),
+    (39, DATE '2026-07-09', TIME '17:30:00', 'Denny', 'Greg', 'Jeremy', 'Marc', 6, 3, 1, 6, 0, 6),
+    (38, DATE '2026-07-08', TIME '17:30:00', 'Brian', 'Marc', 'Raj', 'Vijay', 6, 4, 6, 2, 6, 2),
+    (37, DATE '2026-07-06', TIME '17:30:00', 'Connors', 'Henry', 'Jon', 'Mike L', 6, 0, 0, 6, 3, 6),
+    (36, DATE '2026-07-03', TIME '17:30:00', 'Doug', 'Greg', 'Sandesh', 'Todd', 2, 6, 1, 6, 3, 6),
+    (35, DATE '2026-07-01', TIME '17:30:00', 'Brian', 'Greg', 'Marc', 'Raj', 7, 6, 4, 6, 2, 6),
+    (34, DATE '2026-06-30', TIME '17:30:00', 'Brian', 'Eric', 'Ahad', 'Raj', 6, 3, 6, 2, 4, 6),
+    (33, DATE '2026-06-29', TIME '17:30:00', 'Connors', 'Greg', 'Kevin', 'Raj', 3, 6, 0, 6, 4, 6),
+    (32, DATE '2026-06-28', TIME '08:30:00', 'Cruz', 'Doug', 'Raj', 'Mike L', 3, 6, 6, 2, 6, 1),
+    (31, DATE '2026-06-27', TIME '11:00:00', 'Eric', 'Jeremy', 'Ravi', 'Rob', 6, 1, 6, 1, 6, 2),
+    (30, DATE '2026-06-25', TIME '17:30:00', 'Brownie', 'Denny', 'Kevin', 'RI Jeff', 0, 6, 4, 6, 7, 5),
+    (29, DATE '2026-06-24', TIME '17:30:00', 'Marc', 'Ravi', 'Vijay', 'Mike L', 0, 6, 6, 1, 1, 6),
+    (28, DATE '2026-06-23', TIME '17:30:00', 'Todd', 'Ahad', 'Cruz', 'Jeremy', 6, 1, 6, 1, 6, 0),
+    (27, DATE '2026-06-20', TIME '11:00:00', 'Eric', 'Rob', 'Vijay', 'Mike L', 6, 1, 6, 1, 6, 3),
+    (26, DATE '2026-06-19', TIME '17:30:00', 'Brownie', 'Greg', 'Henry', 'Denny', 5, 7, 6, 4, 0, 6),
+    (25, DATE '2026-06-17', TIME '17:30:00', 'Brian', 'Marc', 'Raj', 'Mike L', 6, 4, 2, 6, 6, 4),
+    (24, DATE '2026-06-16', TIME '17:30:00', 'Ahad', 'Brownie', 'Cruz', 'Kevin', 4, 6, 2, 6, 6, 1),
+    (23, DATE '2026-06-15', TIME '17:30:00', 'Connors', 'Marc', 'Mike L', 'Rob', 6, 2, 6, 4, 1, 6),
+    (22, DATE '2026-06-14', TIME '08:30:00', 'Brownie', 'Doug', 'Todd', 'Vijay', 1, 6, 6, 4, 0, 6),
+    (21, DATE '2026-06-13', TIME '08:30:00', 'Henry', 'Jeremy', 'Todd', 'Vijay', 2, 6, 6, 0, 6, 7),
+    (20, DATE '2026-06-12', TIME '17:30:00', 'Vijay', 'Sandesh', 'Denny', 'Raj', 3, 6, 6, 1, 2, 6),
+    (19, DATE '2026-06-11', TIME '17:30:00', 'Brian', 'Doug', 'Jeremy', 'Kevin', 6, 7, 4, 6, 6, 7),
+    (18, DATE '2026-06-09', TIME '17:30:00', 'Brian', 'Jeremy', 'Ahad', 'Brownie', 7, 5, 6, 2, 6, 1),
+    (17, DATE '2026-06-08', TIME '17:30:00', 'Doug', 'Kevin', 'Eric', 'Connors', 6, 1, 6, 4, 1, 6),
+    (16, DATE '2026-06-05', TIME '17:30:00', 'Ahad', 'Eric', 'Greg', 'Sandesh', 1, 6, 2, 6, 6, 4),
+    (15, DATE '2026-05-27', TIME '17:30:00', 'Brian', 'Eric', 'Rob', 'Todd', 6, 4, 0, 6, 6, 2),
+    (14, DATE '2026-05-26', TIME '17:30:00', 'Ahad', 'Brian', 'Cruz', 'Jeremy', 6, 2, 6, 4, 6, 3),
+    (13, DATE '2026-05-25', TIME '17:30:00', 'Cruz', 'Eric', 'Jon', 'Rob', 6, 4, 3, 6, 6, 7),
+    (12, DATE '2026-05-23', TIME '08:30:00', 'Brownie', 'Henry', 'Jeremy', 'Sandesh', 1, 6, 1, 6, 4, 6),
+    (11, DATE '2026-05-22', TIME '17:30:00', 'Eric', 'Greg', 'Kevin', 'Sandesh', 3, 6, 4, 6, 3, 6),
+    (10, DATE '2026-05-21', TIME '17:30:00', 'Brownie', 'Denny', 'Henry', 'Jeremy', 1, 6, 6, 0, 2, 6),
+    (9, DATE '2026-05-20', TIME '17:30:00', 'Brian', 'Eric', 'Greg', 'Kevin', 3, 6, 6, 1, 6, 3),
+    (8, DATE '2026-05-18', TIME '17:30:00', 'Connors', 'Doug', 'Jon', 'Sandesh', 3, 6, 1, 6, 6, 3),
+    (7, DATE '2026-05-17', TIME '08:30:00', 'Brownie', 'Cruz', 'Doug', 'Rob', 6, 3, 6, 3, 3, 6),
+    (6, DATE '2026-05-16', TIME '08:30:00', 'Doug', 'Eric', 'Henry', 'Mike L', 6, 3, 6, 3, 2, 6),
+    (5, DATE '2026-05-15', TIME '17:30:00', 'Greg', 'Kevin', 'Todd', 'Sandesh', 2, 6, 4, 6, 7, 5),
+    (4, DATE '2026-05-12', TIME '17:30:00', 'Ahad', 'Brian', 'Eric', 'Todd', 0, 6, 0, 6, 6, 3),
+    (3, DATE '2026-05-08', TIME '17:30:00', 'Eric', 'RI Jeff', 'Sandesh', 'Todd', 1, 6, 6, 7, 5, 7),
+    (2, DATE '2026-05-05', TIME '17:30:00', 'Brownie', 'Denny', 'Doug', 'RI Jeff', 2, 6, 6, 1, 6, 4),
+    (1, DATE '2026-05-04', TIME '17:30:00', 'Connors', 'Cruz', 'Eric', 'Denny', 2, 6, 6, 4, 0, 6)
+),
+with_slots AS (
   SELECT
-    m.id AS match_id,
-    c.set_number,
+    m.match_num,
+    m.match_date,
+    m.match_time,
+    m.p1, m.p2, m.p3, m.p4,
+    m.s1_t1_g, m.s1_t2_g, m.s2_t1_g, m.s2_t2_g, m.s3_t1_g, m.s3_t2_g,
+    (SELECT id FROM public.availability_slots 
+     WHERE season_id = (SELECT id FROM active_season) 
+     AND slot_date = m.match_date 
+     LIMIT 1) AS slot_id
+  FROM match_data m
+)
+SELECT
+  (SELECT id FROM active_season),
+  slot_id,
+  EXTRACT(WEEK FROM match_date)::smallint - 17 + 1,
+  'Court A',
+  'completed'::public.match_status
+FROM with_slots;
+
+-- 13b) Insert match pairings for all 52 completed matches
+WITH match_data(match_num, match_date, match_time, p1, p2, p3, p4, s1_t1_g, s1_t2_g, s2_t1_g, s2_t2_g, s3_t1_g, s3_t2_g) AS (
+  VALUES
+    (52, DATE '2026-07-25', TIME '11:00:00', 'Todd', 'Ahad', 'Henry', 'Kevin', 4, 6, 6, 3, 6, 3),
+    (51, DATE '2026-07-24', TIME '17:30:00', 'Brownie', 'Cruz', 'Sandesh', 'Todd', 4, 6, 0, 6, 6, 4),
+    (50, DATE '2026-07-23', TIME '17:30:00', 'Denny', 'Greg', 'Jeremy', 'RI Jeff', 4, 6, 2, 6, 1, 6),
+    (49, DATE '2026-07-22', TIME '17:30:00', 'Mike L', 'Vijay', 'Eric', 'Raj', 2, 6, 2, 6, 6, 7),
+    (48, DATE '2026-07-20', TIME '17:30:00', 'Connors', 'Cruz', 'Raj', 'Jon', 1, 6, 3, 6, 4, 6),
+    (47, DATE '2026-07-18', TIME '08:30:00', 'Henry', 'Kevin', 'Cruz', 'Raj', 5, 7, 6, 3, 6, 0),
+    (46, DATE '2026-07-17', TIME '17:30:00', 'Henry', 'Raj', 'Sandesh', 'Kevin', 7, 5, 2, 6, 6, 4),
+    (45, DATE '2026-07-16', TIME '17:30:00', 'Brian', 'Denny', 'Vijay', 'Jeremy', 6, 4, 2, 6, 6, 1),
+    (44, DATE '2026-07-15', TIME '17:30:00', 'Brownie', 'Doug', 'Marc', 'Raj', 2, 6, 1, 6, 6, 4),
+    (43, DATE '2026-07-14', TIME '17:30:00', 'Ahad', 'Brian', 'Vijay', 'Jeremy', 6, 7, 4, 6, 7, 6),
+    (42, DATE '2026-07-13', TIME '17:30:00', 'Connors', 'Marc', 'Mike L', 'Rob', 6, 4, 6, 4, 6, 3),
+    (41, DATE '2026-07-11', TIME '08:30:00', 'Henry', 'Raj', 'Brownie', 'Kevin', 6, 4, 3, 6, 6, 1),
+    (40, DATE '2026-07-10', TIME '17:30:00', 'Raj', 'Sandesh', 'Todd', 'Vijay', 1, 6, 1, 6, 0, 6),
+    (39, DATE '2026-07-09', TIME '17:30:00', 'Denny', 'Greg', 'Jeremy', 'Marc', 6, 3, 1, 6, 0, 6),
+    (38, DATE '2026-07-08', TIME '17:30:00', 'Brian', 'Marc', 'Raj', 'Vijay', 6, 4, 6, 2, 6, 2),
+    (37, DATE '2026-07-06', TIME '17:30:00', 'Connors', 'Henry', 'Jon', 'Mike L', 6, 0, 0, 6, 3, 6),
+    (36, DATE '2026-07-03', TIME '17:30:00', 'Doug', 'Greg', 'Sandesh', 'Todd', 2, 6, 1, 6, 3, 6),
+    (35, DATE '2026-07-01', TIME '17:30:00', 'Brian', 'Greg', 'Marc', 'Raj', 7, 6, 4, 6, 2, 6),
+    (34, DATE '2026-06-30', TIME '17:30:00', 'Brian', 'Eric', 'Ahad', 'Raj', 6, 3, 6, 2, 4, 6),
+    (33, DATE '2026-06-29', TIME '17:30:00', 'Connors', 'Greg', 'Kevin', 'Raj', 3, 6, 0, 6, 4, 6),
+    (32, DATE '2026-06-28', TIME '08:30:00', 'Cruz', 'Doug', 'Raj', 'Mike L', 3, 6, 6, 2, 6, 1),
+    (31, DATE '2026-06-27', TIME '11:00:00', 'Eric', 'Jeremy', 'Ravi', 'Rob', 6, 1, 6, 1, 6, 2),
+    (30, DATE '2026-06-25', TIME '17:30:00', 'Brownie', 'Denny', 'Kevin', 'RI Jeff', 0, 6, 4, 6, 7, 5),
+    (29, DATE '2026-06-24', TIME '17:30:00', 'Marc', 'Ravi', 'Vijay', 'Mike L', 0, 6, 6, 1, 1, 6),
+    (28, DATE '2026-06-23', TIME '17:30:00', 'Todd', 'Ahad', 'Cruz', 'Jeremy', 6, 1, 6, 1, 6, 0),
+    (27, DATE '2026-06-20', TIME '11:00:00', 'Eric', 'Rob', 'Vijay', 'Mike L', 6, 1, 6, 1, 6, 3),
+    (26, DATE '2026-06-19', TIME '17:30:00', 'Brownie', 'Greg', 'Henry', 'Denny', 5, 7, 6, 4, 0, 6),
+    (25, DATE '2026-06-17', TIME '17:30:00', 'Brian', 'Marc', 'Raj', 'Mike L', 6, 4, 2, 6, 6, 4),
+    (24, DATE '2026-06-16', TIME '17:30:00', 'Ahad', 'Brownie', 'Cruz', 'Kevin', 4, 6, 2, 6, 6, 1),
+    (23, DATE '2026-06-15', TIME '17:30:00', 'Connors', 'Marc', 'Mike L', 'Rob', 6, 2, 6, 4, 1, 6),
+    (22, DATE '2026-06-14', TIME '08:30:00', 'Brownie', 'Doug', 'Todd', 'Vijay', 1, 6, 6, 4, 0, 6),
+    (21, DATE '2026-06-13', TIME '08:30:00', 'Henry', 'Jeremy', 'Todd', 'Vijay', 2, 6, 6, 0, 6, 7),
+    (20, DATE '2026-06-12', TIME '17:30:00', 'Vijay', 'Sandesh', 'Denny', 'Raj', 3, 6, 6, 1, 2, 6),
+    (19, DATE '2026-06-11', TIME '17:30:00', 'Brian', 'Doug', 'Jeremy', 'Kevin', 6, 7, 4, 6, 6, 7),
+    (18, DATE '2026-06-09', TIME '17:30:00', 'Brian', 'Jeremy', 'Ahad', 'Brownie', 7, 5, 6, 2, 6, 1),
+    (17, DATE '2026-06-08', TIME '17:30:00', 'Doug', 'Kevin', 'Eric', 'Connors', 6, 1, 6, 4, 1, 6),
+    (16, DATE '2026-06-05', TIME '17:30:00', 'Ahad', 'Eric', 'Greg', 'Sandesh', 1, 6, 2, 6, 6, 4),
+    (15, DATE '2026-05-27', TIME '17:30:00', 'Brian', 'Eric', 'Rob', 'Todd', 6, 4, 0, 6, 6, 2),
+    (14, DATE '2026-05-26', TIME '17:30:00', 'Ahad', 'Brian', 'Cruz', 'Jeremy', 6, 2, 6, 4, 6, 3),
+    (13, DATE '2026-05-25', TIME '17:30:00', 'Cruz', 'Eric', 'Jon', 'Rob', 6, 4, 3, 6, 6, 7),
+    (12, DATE '2026-05-23', TIME '08:30:00', 'Brownie', 'Henry', 'Jeremy', 'Sandesh', 1, 6, 1, 6, 4, 6),
+    (11, DATE '2026-05-22', TIME '17:30:00', 'Eric', 'Greg', 'Kevin', 'Sandesh', 3, 6, 4, 6, 3, 6),
+    (10, DATE '2026-05-21', TIME '17:30:00', 'Brownie', 'Denny', 'Henry', 'Jeremy', 1, 6, 6, 0, 2, 6),
+    (9, DATE '2026-05-20', TIME '17:30:00', 'Brian', 'Eric', 'Greg', 'Kevin', 3, 6, 6, 1, 6, 3),
+    (8, DATE '2026-05-18', TIME '17:30:00', 'Connors', 'Doug', 'Jon', 'Sandesh', 3, 6, 1, 6, 6, 3),
+    (7, DATE '2026-05-17', TIME '08:30:00', 'Brownie', 'Cruz', 'Doug', 'Rob', 6, 3, 6, 3, 3, 6),
+    (6, DATE '2026-05-16', TIME '08:30:00', 'Doug', 'Eric', 'Henry', 'Mike L', 6, 3, 6, 3, 2, 6),
+    (5, DATE '2026-05-15', TIME '17:30:00', 'Greg', 'Kevin', 'Todd', 'Sandesh', 2, 6, 4, 6, 7, 5),
+    (4, DATE '2026-05-12', TIME '17:30:00', 'Ahad', 'Brian', 'Eric', 'Todd', 0, 6, 0, 6, 6, 3),
+    (3, DATE '2026-05-08', TIME '17:30:00', 'Eric', 'RI Jeff', 'Sandesh', 'Todd', 1, 6, 6, 7, 5, 7),
+    (2, DATE '2026-05-05', TIME '17:30:00', 'Brownie', 'Denny', 'Doug', 'RI Jeff', 2, 6, 6, 1, 6, 4),
+    (1, DATE '2026-05-04', TIME '17:30:00', 'Connors', 'Cruz', 'Eric', 'Denny', 2, 6, 6, 4, 0, 6)
+),
+resolved_matches AS (
+  SELECT
+    ROW_NUMBER() OVER (ORDER BY m.match_num DESC) AS match_order,
     p1.id AS p1_id,
     p2.id AS p2_id,
     p3.id AS p3_id,
     p4.id AS p4_id,
-    c.g1,
-    c.g2
-  FROM completed_sets c
-  JOIN public.seasons s ON s.is_active = true
-  JOIN public.availability_slots sl ON sl.season_id = s.id AND sl.label = c.slot_label
-  JOIN public.matches m ON m.season_id = s.id AND m.slot_id = sl.id AND m.status = 'completed'
-  JOIN public.players p1 ON p1.first_name = c.t1p1
-  JOIN public.players p2 ON p2.first_name = c.t1p2
-  JOIN public.players p3 ON p3.first_name = c.t2p1
-  JOIN public.players p4 ON p4.first_name = c.t2p2
+    m.s1_t1_g, m.s1_t2_g,
+    m.s2_t1_g, m.s2_t2_g,
+    m.s3_t1_g, m.s3_t2_g
+  FROM match_data m
+  JOIN public.players p1 ON p1.first_name = m.p1
+  JOIN public.players p2 ON p2.first_name = m.p2
+  JOIN public.players p3 ON p3.first_name = m.p3
+  JOIN public.players p4 ON p4.first_name = m.p4
 ),
-pair_insert AS (
-  INSERT INTO public.match_pairings (
-    match_id,
-    team1_player1_id,
-    team1_player2_id,
-    team2_player1_id,
-    team2_player2_id
-  )
-  SELECT DISTINCT r.match_id, r.p1_id, r.p2_id, r.p3_id, r.p4_id
-  FROM resolved r
-  RETURNING id, match_id, team1_player1_id, team1_player2_id, team2_player1_id, team2_player2_id
+match_ids AS (
+  SELECT ROW_NUMBER() OVER (ORDER BY id DESC) AS match_order, id
+  FROM public.matches
+  WHERE status = 'completed'
+  ORDER BY id DESC
+  LIMIT 52
 ),
-pair_lookup AS (
-  SELECT id, match_id, team1_player1_id, team1_player2_id, team2_player1_id, team2_player2_id
-  FROM pair_insert
-  UNION ALL
-  SELECT ex.id, ex.match_id, ex.team1_player1_id, ex.team1_player2_id, ex.team2_player1_id, ex.team2_player2_id
-  FROM public.match_pairings ex
-  JOIN (SELECT DISTINCT match_id, p1_id, p2_id, p3_id, p4_id FROM resolved) r
-    ON ex.match_id = r.match_id
-   AND ex.team1_player1_id = r.p1_id
-   AND ex.team1_player2_id = r.p2_id
-   AND ex.team2_player1_id = r.p3_id
-   AND ex.team2_player2_id = r.p4_id
+combined AS (
+  SELECT rm.*, mi.id AS match_id
+  FROM resolved_matches rm
+  JOIN match_ids mi ON rm.match_order = mi.match_order
+)
+INSERT INTO public.match_pairings (match_id, team1_player1_id, team1_player2_id, team2_player1_id, team2_player2_id)
+SELECT match_id, p1_id, p2_id, p3_id, p4_id
+FROM combined;
+
+-- 13c) Insert match sets for all 52 completed matches
+WITH match_data(match_num, match_date, match_time, p1, p2, p3, p4, s1_t1_g, s1_t2_g, s2_t1_g, s2_t2_g, s3_t1_g, s3_t2_g) AS (
+  VALUES
+    (52, DATE '2026-07-25', TIME '11:00:00', 'Todd', 'Ahad', 'Henry', 'Kevin', 4, 6, 6, 3, 6, 3),
+    (51, DATE '2026-07-24', TIME '17:30:00', 'Brownie', 'Cruz', 'Sandesh', 'Todd', 4, 6, 0, 6, 6, 4),
+    (50, DATE '2026-07-23', TIME '17:30:00', 'Denny', 'Greg', 'Jeremy', 'RI Jeff', 4, 6, 2, 6, 1, 6),
+    (49, DATE '2026-07-22', TIME '17:30:00', 'Mike L', 'Vijay', 'Eric', 'Raj', 2, 6, 2, 6, 6, 7),
+    (48, DATE '2026-07-20', TIME '17:30:00', 'Connors', 'Cruz', 'Raj', 'Jon', 1, 6, 3, 6, 4, 6),
+    (47, DATE '2026-07-18', TIME '08:30:00', 'Henry', 'Kevin', 'Cruz', 'Raj', 5, 7, 6, 3, 6, 0),
+    (46, DATE '2026-07-17', TIME '17:30:00', 'Henry', 'Raj', 'Sandesh', 'Kevin', 7, 5, 2, 6, 6, 4),
+    (45, DATE '2026-07-16', TIME '17:30:00', 'Brian', 'Denny', 'Vijay', 'Jeremy', 6, 4, 2, 6, 6, 1),
+    (44, DATE '2026-07-15', TIME '17:30:00', 'Brownie', 'Doug', 'Marc', 'Raj', 2, 6, 1, 6, 6, 4),
+    (43, DATE '2026-07-14', TIME '17:30:00', 'Ahad', 'Brian', 'Vijay', 'Jeremy', 6, 7, 4, 6, 7, 6),
+    (42, DATE '2026-07-13', TIME '17:30:00', 'Connors', 'Marc', 'Mike L', 'Rob', 6, 4, 6, 4, 6, 3),
+    (41, DATE '2026-07-11', TIME '08:30:00', 'Henry', 'Raj', 'Brownie', 'Kevin', 6, 4, 3, 6, 6, 1),
+    (40, DATE '2026-07-10', TIME '17:30:00', 'Raj', 'Sandesh', 'Todd', 'Vijay', 1, 6, 1, 6, 0, 6),
+    (39, DATE '2026-07-09', TIME '17:30:00', 'Denny', 'Greg', 'Jeremy', 'Marc', 6, 3, 1, 6, 0, 6),
+    (38, DATE '2026-07-08', TIME '17:30:00', 'Brian', 'Marc', 'Raj', 'Vijay', 6, 4, 6, 2, 6, 2),
+    (37, DATE '2026-07-06', TIME '17:30:00', 'Connors', 'Henry', 'Jon', 'Mike L', 6, 0, 0, 6, 3, 6),
+    (36, DATE '2026-07-03', TIME '17:30:00', 'Doug', 'Greg', 'Sandesh', 'Todd', 2, 6, 1, 6, 3, 6),
+    (35, DATE '2026-07-01', TIME '17:30:00', 'Brian', 'Greg', 'Marc', 'Raj', 7, 6, 4, 6, 2, 6),
+    (34, DATE '2026-06-30', TIME '17:30:00', 'Brian', 'Eric', 'Ahad', 'Raj', 6, 3, 6, 2, 4, 6),
+    (33, DATE '2026-06-29', TIME '17:30:00', 'Connors', 'Greg', 'Kevin', 'Raj', 3, 6, 0, 6, 4, 6),
+    (32, DATE '2026-06-28', TIME '08:30:00', 'Cruz', 'Doug', 'Raj', 'Mike L', 3, 6, 6, 2, 6, 1),
+    (31, DATE '2026-06-27', TIME '11:00:00', 'Eric', 'Jeremy', 'Ravi', 'Rob', 6, 1, 6, 1, 6, 2),
+    (30, DATE '2026-06-25', TIME '17:30:00', 'Brownie', 'Denny', 'Kevin', 'RI Jeff', 0, 6, 4, 6, 7, 5),
+    (29, DATE '2026-06-24', TIME '17:30:00', 'Marc', 'Ravi', 'Vijay', 'Mike L', 0, 6, 6, 1, 1, 6),
+    (28, DATE '2026-06-23', TIME '17:30:00', 'Todd', 'Ahad', 'Cruz', 'Jeremy', 6, 1, 6, 1, 6, 0),
+    (27, DATE '2026-06-20', TIME '11:00:00', 'Eric', 'Rob', 'Vijay', 'Mike L', 6, 1, 6, 1, 6, 3),
+    (26, DATE '2026-06-19', TIME '17:30:00', 'Brownie', 'Greg', 'Henry', 'Denny', 5, 7, 6, 4, 0, 6),
+    (25, DATE '2026-06-17', TIME '17:30:00', 'Brian', 'Marc', 'Raj', 'Mike L', 6, 4, 2, 6, 6, 4),
+    (24, DATE '2026-06-16', TIME '17:30:00', 'Ahad', 'Brownie', 'Cruz', 'Kevin', 4, 6, 2, 6, 6, 1),
+    (23, DATE '2026-06-15', TIME '17:30:00', 'Connors', 'Marc', 'Mike L', 'Rob', 6, 2, 6, 4, 1, 6),
+    (22, DATE '2026-06-14', TIME '08:30:00', 'Brownie', 'Doug', 'Todd', 'Vijay', 1, 6, 6, 4, 0, 6),
+    (21, DATE '2026-06-13', TIME '08:30:00', 'Henry', 'Jeremy', 'Todd', 'Vijay', 2, 6, 6, 0, 6, 7),
+    (20, DATE '2026-06-12', TIME '17:30:00', 'Vijay', 'Sandesh', 'Denny', 'Raj', 3, 6, 6, 1, 2, 6),
+    (19, DATE '2026-06-11', TIME '17:30:00', 'Brian', 'Doug', 'Jeremy', 'Kevin', 6, 7, 4, 6, 6, 7),
+    (18, DATE '2026-06-09', TIME '17:30:00', 'Brian', 'Jeremy', 'Ahad', 'Brownie', 7, 5, 6, 2, 6, 1),
+    (17, DATE '2026-06-08', TIME '17:30:00', 'Doug', 'Kevin', 'Eric', 'Connors', 6, 1, 6, 4, 1, 6),
+    (16, DATE '2026-06-05', TIME '17:30:00', 'Ahad', 'Eric', 'Greg', 'Sandesh', 1, 6, 2, 6, 6, 4),
+    (15, DATE '2026-05-27', TIME '17:30:00', 'Brian', 'Eric', 'Rob', 'Todd', 6, 4, 0, 6, 6, 2),
+    (14, DATE '2026-05-26', TIME '17:30:00', 'Ahad', 'Brian', 'Cruz', 'Jeremy', 6, 2, 6, 4, 6, 3),
+    (13, DATE '2026-05-25', TIME '17:30:00', 'Cruz', 'Eric', 'Jon', 'Rob', 6, 4, 3, 6, 6, 7),
+    (12, DATE '2026-05-23', TIME '08:30:00', 'Brownie', 'Henry', 'Jeremy', 'Sandesh', 1, 6, 1, 6, 4, 6),
+    (11, DATE '2026-05-22', TIME '17:30:00', 'Eric', 'Greg', 'Kevin', 'Sandesh', 3, 6, 4, 6, 3, 6),
+    (10, DATE '2026-05-21', TIME '17:30:00', 'Brownie', 'Denny', 'Henry', 'Jeremy', 1, 6, 6, 0, 2, 6),
+    (9, DATE '2026-05-20', TIME '17:30:00', 'Brian', 'Eric', 'Greg', 'Kevin', 3, 6, 6, 1, 6, 3),
+    (8, DATE '2026-05-18', TIME '17:30:00', 'Connors', 'Doug', 'Jon', 'Sandesh', 3, 6, 1, 6, 6, 3),
+    (7, DATE '2026-05-17', TIME '08:30:00', 'Brownie', 'Cruz', 'Doug', 'Rob', 6, 3, 6, 3, 3, 6),
+    (6, DATE '2026-05-16', TIME '08:30:00', 'Doug', 'Eric', 'Henry', 'Mike L', 6, 3, 6, 3, 2, 6),
+    (5, DATE '2026-05-15', TIME '17:30:00', 'Greg', 'Kevin', 'Todd', 'Sandesh', 2, 6, 4, 6, 7, 5),
+    (4, DATE '2026-05-12', TIME '17:30:00', 'Ahad', 'Brian', 'Eric', 'Todd', 0, 6, 0, 6, 6, 3),
+    (3, DATE '2026-05-08', TIME '17:30:00', 'Eric', 'RI Jeff', 'Sandesh', 'Todd', 1, 6, 6, 7, 5, 7),
+    (2, DATE '2026-05-05', TIME '17:30:00', 'Brownie', 'Denny', 'Doug', 'RI Jeff', 2, 6, 6, 1, 6, 4),
+    (1, DATE '2026-05-04', TIME '17:30:00', 'Connors', 'Cruz', 'Eric', 'Denny', 2, 6, 6, 4, 0, 6)
 ),
-set_rows AS (
+resolved_matches AS (
   SELECT
-    l.id AS pairing_id,
-    r.match_id,
-    r.set_number,
-    r.g1,
-    r.g2
-  FROM resolved r
-  JOIN pair_lookup l
-    ON l.match_id = r.match_id
-   AND l.team1_player1_id = r.p1_id
-   AND l.team1_player2_id = r.p2_id
-   AND l.team2_player1_id = r.p3_id
-   AND l.team2_player2_id = r.p4_id
+    ROW_NUMBER() OVER (ORDER BY m.match_num DESC) AS match_order,
+    p1.id AS p1_id,
+    p2.id AS p2_id,
+    p3.id AS p3_id,
+    p4.id AS p4_id,
+    m.s1_t1_g, m.s1_t2_g,
+    m.s2_t1_g, m.s2_t2_g,
+    m.s3_t1_g, m.s3_t2_g
+  FROM match_data m
+  JOIN public.players p1 ON p1.first_name = m.p1
+  JOIN public.players p2 ON p2.first_name = m.p2
+  JOIN public.players p3 ON p3.first_name = m.p3
+  JOIN public.players p4 ON p4.first_name = m.p4
+),
+match_ids AS (
+  SELECT ROW_NUMBER() OVER (ORDER BY id DESC) AS match_order, id
+  FROM public.matches
+  WHERE status = 'completed'
+  ORDER BY id DESC
+  LIMIT 52
+),
+combined AS (
+  SELECT rm.*, mi.id AS match_id
+  FROM resolved_matches rm
+  JOIN match_ids mi ON rm.match_order = mi.match_order
+),
+pairings_data AS (
+  SELECT mp.id, mp.match_id
+  FROM public.match_pairings mp
+  WHERE mp.match_id IN (SELECT id FROM public.matches WHERE status = 'completed' ORDER BY id DESC LIMIT 52)
 )
-INSERT INTO public.match_sets (
-  match_id,
-  pairing_id,
-  set_number,
-  team1_games,
-  team2_games,
-  version,
-  recorded_by
-)
-SELECT
-  s.match_id,
-  s.pairing_id,
-  s.set_number::smallint,
-  s.g1::smallint,
-  s.g2::smallint,
-  1,
-  '00000000-0000-0000-0000-000000000001'::uuid
-FROM set_rows s;
+INSERT INTO public.match_sets (match_id, pairing_id, set_number, team1_games, team2_games, version, recorded_by)
+SELECT c.match_id, pd.id, 1::smallint, c.s1_t1_g::smallint, c.s1_t2_g::smallint, 1, '00000000-0000-0000-0000-000000000001'::uuid
+FROM combined c
+JOIN pairings_data pd ON c.match_id = pd.match_id
+UNION ALL
+SELECT c.match_id, pd.id, 2::smallint, c.s2_t1_g::smallint, c.s2_t2_g::smallint, 1, '00000000-0000-0000-0000-000000000001'::uuid
+FROM combined c
+JOIN pairings_data pd ON c.match_id = pd.match_id
+UNION ALL
+SELECT c.match_id, pd.id, 3::smallint, c.s3_t1_g::smallint, c.s3_t2_g::smallint, 1, '00000000-0000-0000-0000-000000000001'::uuid
+FROM combined c
+JOIN pairings_data pd ON c.match_id = pd.match_id;
 
 -- 14) Ensure standings snapshot rows exist for all active players
 WITH active_season AS (

@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { db } from "@/db";
-import { matchSets, matchPairings, matches, standingsSnapshots, auditEvents, users } from "@/db/schema";
+import { matchSets, matchPairings, auditEvents, users } from "@/db/schema";
 import { matchSetsSchema, scoreCorrectionSchema } from "@/lib/validators";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 async function requireAdmin(userId: string) {
   const profile = await db.query.users.findFirst({ where: eq(users.id, userId) });
@@ -32,8 +32,41 @@ export async function POST(
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 422 });
   }
 
-  const { pairingId, sets } = parsed.data;
+  const { pairingId: incomingPairingId, pairing, sets } = parsed.data;
   const correctionReason = isCorrection ? (parsed.data as unknown as { correctionReason: string }).correctionReason : undefined;
+
+  let pairingId = incomingPairingId;
+  if (!pairingId && pairing) {
+    const existingPairing = await db.query.matchPairings.findFirst({
+      where: and(
+        eq(matchPairings.matchId, matchId),
+        eq(matchPairings.team1Player1Id, pairing.team1Player1Id),
+        eq(matchPairings.team1Player2Id, pairing.team1Player2Id),
+        eq(matchPairings.team2Player1Id, pairing.team2Player1Id),
+        eq(matchPairings.team2Player2Id, pairing.team2Player2Id)
+      ),
+    });
+
+    if (existingPairing) {
+      pairingId = existingPairing.id;
+    } else {
+      const inserted = await db
+        .insert(matchPairings)
+        .values({
+          matchId,
+          team1Player1Id: pairing.team1Player1Id,
+          team1Player2Id: pairing.team1Player2Id,
+          team2Player1Id: pairing.team2Player1Id,
+          team2Player2Id: pairing.team2Player2Id,
+        })
+        .returning({ id: matchPairings.id });
+      pairingId = inserted[0]?.id;
+    }
+  }
+
+  if (!pairingId) {
+    return NextResponse.json({ error: "Pairing could not be resolved" }, { status: 422 });
+  }
 
   // Append-only: get current max version for this pairing
   const existing = await db.query.matchSets.findMany({
@@ -68,8 +101,6 @@ export async function POST(
     resourceId: matchId,
     diff: { sets, version: nextVersion },
   });
-
-  // TODO: trigger standings recompute (can be async via API or DB trigger)
 
   return NextResponse.json({ ok: true, version: nextVersion });
 }

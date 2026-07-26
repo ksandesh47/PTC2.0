@@ -82,9 +82,19 @@ export default async function AvailabilityPage({ searchParams }: Readonly<PagePr
 
   const statusMessage = error ? errorMessageByKey[error] : undefined;
 
-  const activeSeason = await db.query.seasons.findFirst({
-    where: eq(seasons.isActive, true),
-  });
+  let activeSeason: Awaited<ReturnType<typeof db.query.seasons.findFirst>> = undefined;
+  try {
+    activeSeason = await db.query.seasons.findFirst({
+      where: eq(seasons.isActive, true),
+    });
+  } catch {
+    return (
+      <div className="mx-auto max-w-3xl px-4 sm:px-6 py-16 text-center space-y-4">
+        <h1 className="font-display text-4xl tracking-widest text-[--color-clay-500]">AVAILABILITY</h1>
+        <p className="text-[--color-text-muted]">Data is temporarily unavailable. Please try again shortly.</p>
+      </div>
+    );
+  }
 
   if (!activeSeason) {
     return (
@@ -94,27 +104,40 @@ export default async function AvailabilityPage({ searchParams }: Readonly<PagePr
     );
   }
 
-  const [roster, pairRows] = await Promise.all([
-    db
-      .select({ id: players.id, firstName: players.firstName, lastName: players.lastName })
-      .from(seasonPlayers)
-      .innerJoin(players, eq(players.id, seasonPlayers.playerId))
-      .where(and(eq(seasonPlayers.seasonId, activeSeason.id), eq(players.isActive, true)))
-      .orderBy(asc(players.firstName), asc(players.lastName)),
-    db
-      .select({
-        status: matches.status,
-        p1: matchPairings.team1Player1Id,
-        p2: matchPairings.team1Player2Id,
-        p3: matchPairings.team2Player1Id,
-        p4: matchPairings.team2Player2Id,
-      })
-      .from(matchPairings)
-      .innerJoin(matches, eq(matches.id, matchPairings.matchId))
-      .where(eq(matches.seasonId, activeSeason.id)),
-  ]);
+  let roster: RosterPlayer[] = [];
+  let pairRows: PairRow[] = [];
+  try {
+    const results = await Promise.all([
+      db
+        .select({ id: players.id, firstName: players.firstName, lastName: players.lastName })
+        .from(seasonPlayers)
+        .innerJoin(players, eq(players.id, seasonPlayers.playerId))
+        .where(and(eq(seasonPlayers.seasonId, activeSeason.id), eq(players.isActive, true)))
+        .orderBy(asc(players.firstName), asc(players.lastName)),
+      db
+        .select({
+          status: matches.status,
+          p1: matchPairings.team1Player1Id,
+          p2: matchPairings.team1Player2Id,
+          p3: matchPairings.team2Player1Id,
+          p4: matchPairings.team2Player2Id,
+        })
+        .from(matchPairings)
+        .innerJoin(matches, eq(matches.id, matchPairings.matchId))
+        .where(eq(matches.seasonId, activeSeason.id)),
+    ]);
+    roster = results[0];
+    pairRows = results[1] as PairRow[];
+  } catch {
+    return (
+      <div className="mx-auto max-w-3xl px-4 sm:px-6 py-16 text-center space-y-4">
+        <h1 className="font-display text-4xl tracking-widest text-[--color-clay-500]">AVAILABILITY</h1>
+        <p className="text-[--color-text-muted]">Data is temporarily unavailable. Please try again shortly.</p>
+      </div>
+    );
+  }
 
-  const statMap = buildStats(roster, pairRows as PairRow[]);
+  const statMap = buildStats(roster, pairRows);
 
   const selectedPlayer = roster.find((p) => p.id === selectedPlayerId);
   if (!selectedPlayer) {

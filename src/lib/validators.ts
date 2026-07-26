@@ -89,8 +89,18 @@ export const setScoreSchema = z
   );
 
 export const matchSetsSchema = z.object({
-  pairingId: z.string().uuid(),
+  pairingId: z.string().uuid().optional(),
+  pairing: z
+    .object({
+      team1Player1Id: z.string().uuid(),
+      team1Player2Id: z.string().uuid(),
+      team2Player1Id: z.string().uuid(),
+      team2Player2Id: z.string().uuid(),
+    })
+    .optional(),
   sets: z.array(setScoreSchema).min(1).max(5),
+}).refine((payload) => !!payload.pairingId || !!payload.pairing, {
+  message: "pairingId or pairing is required",
 });
 
 export const scoreCorrectionSchema = matchSetsSchema.extend({
