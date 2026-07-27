@@ -1,8 +1,8 @@
-import { createClient } from "@/lib/supabase/server";
-import { redirect } from "next/navigation";
-import { db } from "@/db";
-import { users } from "@/db/schema";
-import { eq } from "drizzle-orm";
+// import { createClient } from "@/lib/supabase/server";
+// import { redirect } from "next/navigation";
+// import { db } from "@/db";
+// import { users } from "@/db/schema";
+// import { eq } from "drizzle-orm";
 import { ReactNode } from "react";
 import Link from "next/link";
 
@@ -17,20 +17,20 @@ const adminNav = [
 ];
 
 export default async function AdminLayout({ children }: Readonly<{ children: ReactNode }>) {
-  // Enforce admin auth only in production; local development bypasses.
-  if (process.env.NODE_ENV === "production") {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) redirect("/auth/login?next=/admin");
-
-    const profile = await db.query.users.findFirst({
-      where: eq(users.id, user.id),
-    });
-
-    if (profile?.role !== "admin" && profile?.role !== "captain") {
-      redirect("/");
-    }
-  }
+  // Auth disabled for now - allow access without sign-in
+  // if (process.env.NODE_ENV === "production") {
+  //   const supabase = await createClient();
+  //   const { data: { user } } = await supabase.auth.getUser();
+  //   if (!user) redirect("/auth/login?next=/admin");
+  //
+  //   const profile = await db.query.users.findFirst({
+  //     where: eq(users.id, user.id),
+  //   });
+  //
+  //   if (profile?.role !== "admin" && profile?.role !== "captain") {
+  //     redirect("/");
+  //   }
+  // }
 
   return (
     <div className="flex min-h-[calc(100vh-3.5rem)]">
