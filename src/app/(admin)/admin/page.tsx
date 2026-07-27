@@ -90,11 +90,11 @@ export default async function AdminDashboardPage() {
   return (
     <div className="p-6 lg:p-8 space-y-8 max-w-5xl">
       <div>
-        <h1 className="font-display text-4xl tracking-widest text-[--color-clay-500]">
+        <h1 className="font-display text-4xl tracking-widest text-(--color-clay-500)">
           DASHBOARD
         </h1>
         {activeSeason && (
-          <p className="text-sm text-[--color-text-muted] mt-1">
+          <p className="text-sm text-(--color-text-muted) mt-1">
             Active season: <strong>{activeSeason.name}</strong> &middot;{" "}
             {formatDate(activeSeason.startDate)} – {formatDate(activeSeason.endDate)}
           </p>
@@ -111,12 +111,12 @@ export default async function AdminDashboardPage() {
         ].map((stat) => (
           <div
             key={stat.label}
-            className="rounded-lg border border-[--color-border] bg-[--color-surface] p-4"
+            className="rounded-lg border border-(--color-border) border-l-4 border-l-(--color-forest-400) bg-(--color-surface) p-4"
           >
-            <p className="text-xs uppercase tracking-widest text-[--color-text-muted]">
+            <p className="text-xs uppercase tracking-widest text-(--color-text-muted)">
               {stat.label}
             </p>
-            <p className="mt-1 font-display text-3xl tracking-wider text-[--color-clay-600]">
+            <p className="mt-1 font-display text-3xl tracking-wider text-(--color-clay-600)">
               {stat.value}
             </p>
           </div>
@@ -126,11 +126,11 @@ export default async function AdminDashboardPage() {
       {/* DB health banner */}
       <div className={`flex items-center justify-between rounded-lg border px-4 py-3 text-sm ${
         dbHealth.ok
-          ? "border-[--color-forest-200] bg-[--color-forest-50] text-[--color-forest-700]"
+          ? "border-(--color-forest-200) bg-(--color-forest-50) text-(--color-forest-700)"
           : "border-red-200 bg-red-50 text-red-700"
       }`}>
         <div className="flex items-center gap-2">
-          <span className={`inline-block h-2 w-2 rounded-full ${dbHealth.ok ? "bg-[--color-forest-500]" : "bg-red-500"}`} />
+          <span className={`inline-block h-2 w-2 rounded-full ${dbHealth.ok ? "bg-(--color-forest-500)" : "bg-red-500"}`} />
           <span className="font-semibold">
             Database {dbHealth.ok ? "connected" : "unavailable"}
           </span>
@@ -149,7 +149,7 @@ export default async function AdminDashboardPage() {
         return (
           <div className={`rounded-lg border px-4 py-3 text-sm ${
             issueCount === 0
-              ? "border-[--color-forest-200] bg-[--color-forest-50] text-[--color-forest-700]"
+              ? "border-(--color-forest-200) bg-(--color-forest-50) text-(--color-forest-700)"
               : "border-yellow-200 bg-yellow-50 text-yellow-800"
           }`}>
             <p className="font-semibold">{heading}</p>
@@ -187,31 +187,31 @@ export default async function AdminDashboardPage() {
         <div className="flex flex-wrap gap-3">
           <Link
             href="/admin/matches"
-            className="rounded-md bg-[--color-accent] px-4 py-2 text-sm font-semibold text-white hover:bg-[--color-accent-hover] transition-colors"
+            className="rounded-md bg-(--color-accent) px-4 py-2 text-sm font-semibold text-white hover:bg-(--color-accent-hover) transition-colors"
           >
             Build Matches
           </Link>
           <Link
             href="/admin/scores"
-            className="rounded-md border border-[--color-border] px-4 py-2 text-sm font-semibold hover:bg-[--color-clay-50] transition-colors"
+            className="rounded-md border border-(--color-border) px-4 py-2 text-sm font-semibold hover:bg-(--color-clay-50) transition-colors"
           >
             Enter Scores
           </Link>
           <Link
             href="/admin/players"
-            className="rounded-md border border-[--color-border] px-4 py-2 text-sm font-semibold hover:bg-[--color-clay-50] transition-colors"
+            className="rounded-md border border-(--color-border) px-4 py-2 text-sm font-semibold hover:bg-(--color-clay-50) transition-colors"
           >
             Manage Players
           </Link>
           <Link
             href="/admin/availability"
-            className="rounded-md border border-[--color-border] px-4 py-2 text-sm font-semibold hover:bg-[--color-clay-50] transition-colors"
+            className="rounded-md border border-(--color-border) px-4 py-2 text-sm font-semibold hover:bg-(--color-clay-50) transition-colors"
           >
             View Availability
           </Link>
           <Link
             href="/admin/seasons"
-            className="rounded-md border border-[--color-border] px-4 py-2 text-sm font-semibold hover:bg-[--color-clay-50] transition-colors"
+            className="rounded-md border border-(--color-border) px-4 py-2 text-sm font-semibold hover:bg-(--color-clay-50) transition-colors"
           >
             Manage Seasons
           </Link>
@@ -231,25 +231,25 @@ export default async function AdminDashboardPage() {
       <div>
         <div className="flex items-center justify-between mb-3">
           <h2 className="font-display text-2xl tracking-wider">RECENT ACTIVITY</h2>
-          <Link href="/admin/audit" className="text-sm text-[--color-clay-600] hover:underline">
+          <Link href="/admin/audit" className="text-sm text-(--color-clay-600) hover:underline">
             View all →
           </Link>
         </div>
-        <div className="rounded-lg border border-[--color-border] bg-[--color-surface] divide-y divide-[--color-border]">
+        <div className="rounded-lg border border-(--color-border) bg-(--color-surface) divide-y divide-(--color-border)">
           {recentAudit.length === 0 && (
-            <p className="px-4 py-6 text-sm text-[--color-text-muted]">No activity yet.</p>
+            <p className="px-4 py-6 text-sm text-(--color-text-muted)">No activity yet.</p>
           )}
           {recentAudit.map((event) => (
             <div key={event.id} className="flex items-center justify-between px-4 py-3">
               <div>
-                <span className="text-xs font-semibold uppercase tracking-wider text-[--color-clay-600]">
+                <span className="text-xs font-semibold uppercase tracking-wider text-(--color-clay-600)">
                   {event.action}
                 </span>{" "}
-                <span className="text-sm text-[--color-text-muted]">
+                <span className="text-sm text-(--color-text-muted)">
                   {event.resourceType} {event.resourceId?.slice(0, 8)}…
                 </span>
               </div>
-              <span className="text-xs text-[--color-text-muted]">
+              <span className="text-xs text-(--color-text-muted)">
                 {formatDate(event.createdAt)}
               </span>
             </div>
@@ -261,15 +261,15 @@ export default async function AdminDashboardPage() {
   } catch {
     return (
       <div className="p-6 lg:p-8 max-w-5xl space-y-3">
-        <h1 className="font-display text-4xl tracking-widest text-[--color-clay-500]">DASHBOARD</h1>
-        <p className="text-sm text-[--color-text-muted]">
+        <h1 className="font-display text-4xl tracking-widest text-(--color-clay-500)">DASHBOARD</h1>
+        <p className="text-sm text-(--color-text-muted)">
           Data is temporarily unavailable. Please refresh or try again in a moment.
         </p>
         <div className="flex flex-wrap gap-3 text-sm">
-          <Link href="/admin/scores" className="rounded-md border border-[--color-border] px-3 py-1.5 font-semibold hover:bg-[--color-clay-50]">
+          <Link href="/admin/scores" className="rounded-md border border-(--color-border) px-3 py-1.5 font-semibold hover:bg-(--color-clay-50)">
             Open Score Entry
           </Link>
-          <Link href="/schedule" className="rounded-md border border-[--color-border] px-3 py-1.5 font-semibold hover:bg-[--color-clay-50]">
+          <Link href="/schedule" className="rounded-md border border-(--color-border) px-3 py-1.5 font-semibold hover:bg-(--color-clay-50)">
             Open Public Schedule
           </Link>
         </div>

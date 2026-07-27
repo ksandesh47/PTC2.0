@@ -69,7 +69,7 @@ export function SeasonEditForm({
     return (
       <button
         onClick={() => setIsOpen(true)}
-        className="text-xs rounded-md border border-[--color-border] px-2 py-1 hover:bg-[--color-clay-50] text-[--color-clay-600] font-semibold"
+        className="text-xs rounded-md border border-(--color-border) px-2 py-1 hover:bg-(--color-clay-50) text-(--color-clay-600) font-semibold"
       >
         Edit Dates
       </button>
@@ -77,25 +77,25 @@ export function SeasonEditForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="text-xs space-y-2 p-3 rounded-lg bg-[--color-clay-50] border border-[--color-clay-200]">
+    <form onSubmit={handleSubmit} className="text-xs space-y-2 p-3 rounded-lg bg-(--color-clay-50) border border-(--color-clay-200)">
       <div className="space-y-1">
-        <label htmlFor="season-start-date" className="block font-semibold text-[--color-text-muted]">Start Date</label>
+        <label htmlFor="season-start-date" className="block font-semibold text-(--color-text-muted)">Start Date</label>
         <input
           id="season-start-date"
           type="date"
           value={newStartDate}
           onChange={(e) => setNewStartDate(e.target.value)}
-          className="w-full rounded px-2 py-1 border border-[--color-border] text-sm"
+          className="w-full rounded px-2 py-1 border border-(--color-border) text-sm"
         />
       </div>
       <div className="space-y-1">
-        <label htmlFor="season-end-date" className="block font-semibold text-[--color-text-muted]">End Date</label>
+        <label htmlFor="season-end-date" className="block font-semibold text-(--color-text-muted)">End Date</label>
         <input
           id="season-end-date"
           type="date"
           value={newEndDate}
           onChange={(e) => setNewEndDate(e.target.value)}
-          className="w-full rounded px-2 py-1 border border-[--color-border] text-sm"
+          className="w-full rounded px-2 py-1 border border-(--color-border) text-sm"
         />
       </div>
       {error && <p className="text-red-600">{error}</p>}
@@ -110,7 +110,7 @@ export function SeasonEditForm({
         <button
           type="button"
           onClick={() => setIsOpen(false)}
-          className="flex-1 rounded-md border border-[--color-border] px-2 py-1 font-semibold hover:bg-[--color-surface]"
+          className="flex-1 rounded-md border border-(--color-border) px-2 py-1 font-semibold hover:bg-(--color-surface)"
         >
           Cancel
         </button>

@@ -116,7 +116,7 @@ export function EditScoreForm({
         {setCards.map((setCard, idx) => (
           <div
             key={`${setCard.team1Player1Id}-${setCard.team1Player2Id}-${setCard.team2Player1Id}-${setCard.team2Player2Id}`}
-            className="rounded-md border border-[--color-border] bg-[--color-clay-50] p-2 space-y-2 text-sm"
+            className="rounded-md border border-(--color-border) bg-(--color-clay-50) p-2 space-y-2 text-sm"
             draggable
             onDragStart={() => setDraggingIndex(idx)}
             onDragOver={(e) => e.preventDefault()}
@@ -126,9 +126,9 @@ export function EditScoreForm({
             }}
             onDragEnd={() => setDraggingIndex(null)}
           >
-            <div className="flex items-center justify-between font-semibold text-xs uppercase tracking-wider text-[--color-text-muted]">
+            <div className="flex items-center justify-between font-semibold text-xs uppercase tracking-wider text-(--color-text-muted)">
               <span>Set {setCard.setNumber}</span>
-              <span className="rounded border border-dashed border-[--color-border] px-2 py-0.5 normal-case">Drag</span>
+              <span className="rounded border border-dashed border-(--color-border) px-2 py-0.5 normal-case">Drag</span>
             </div>
             {(() => {
               const t1 = setCard.team1Games;
@@ -137,20 +137,20 @@ export function EditScoreForm({
               const p1 = t1 > t2 ? 2 * t1 - t2 : t1;
               const p2 = t2 > t1 ? 2 * t2 - t1 : t2;
               return (
-                <p className="text-[10px] uppercase tracking-wider text-[--color-text-muted]">
-                  Spreadsheet points: <span className="font-mono font-semibold text-[--color-clay-600]">{p1} - {p2}</span>
+                <p className="text-[10px] uppercase tracking-wider text-(--color-text-muted)">
+                  Spreadsheet points: <span className="font-mono font-semibold text-(--color-clay-600)">{p1} - {p2}</span>
                 </p>
               );
             })()}
             <div className="grid grid-cols-[1fr_auto_auto_1fr] gap-2 items-center">
-              <label className="text-xs text-[--color-text-muted]">{setCard.team1Label}</label>
+              <label className="text-xs text-(--color-text-muted)">{setCard.team1Label}</label>
               <input
                 type="number"
                 min="0"
                 max="7"
                 value={setCard.team1Games}
                 onChange={(e) => handleSetChange(idx, 'team1Games', Number.parseInt(e.target.value, 10) || 0)}
-                className="w-12 px-2 py-1 border border-[--color-border] rounded"
+                className="w-12 px-2 py-1 border border-(--color-border) rounded"
                 disabled={loading}
               />
               <input
@@ -159,23 +159,23 @@ export function EditScoreForm({
                 max="7"
                 value={setCard.team2Games}
                 onChange={(e) => handleSetChange(idx, 'team2Games', Number.parseInt(e.target.value, 10) || 0)}
-                className="w-12 px-2 py-1 border border-[--color-border] rounded text-right"
+                className="w-12 px-2 py-1 border border-(--color-border) rounded text-right"
                 disabled={loading}
               />
-              <label className="text-xs text-[--color-text-muted] text-right">{setCard.team2Label}</label>
+              <label className="text-xs text-(--color-text-muted) text-right">{setCard.team2Label}</label>
             </div>
           </div>
         ))}
 
         {setCards.length === 0 && (
-          <p className="text-sm text-[--color-text-muted]">No set cards are available for this match.</p>
+          <p className="text-sm text-(--color-text-muted)">No set cards are available for this match.</p>
         )}
       </div>
 
       <button
         type="submit"
         disabled={loading || setCards.length === 0}
-        className="text-sm font-semibold px-3 py-1.5 bg-[--color-clay-600] text-white rounded hover:bg-[--color-clay-700] disabled:opacity-50"
+        className="text-sm font-semibold px-3 py-1.5 bg-(--color-clay-600) text-white rounded hover:bg-(--color-clay-700) disabled:opacity-50"
       >
         {loading ? 'Saving...' : 'Save Changes'}
       </button>

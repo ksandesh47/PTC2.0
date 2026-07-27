@@ -13,18 +13,18 @@ export default async function AdminSeasonsPage() {
   return (
     <div className="p-6 lg:p-8 max-w-5xl space-y-4">
       <div className="flex items-center justify-between gap-3">
-        <h1 className="font-display text-4xl tracking-widest text-[--color-clay-500]">SEASONS</h1>
-        <p className="text-sm text-[--color-text-muted]">{list.length} total</p>
+        <h1 className="font-display text-4xl tracking-widest text-(--color-clay-500)">SEASONS</h1>
+        <p className="text-sm text-(--color-text-muted)">{list.length} total</p>
       </div>
 
       <CreateSeasonForm />
 
-      <div className="rounded-lg border border-[--color-border] bg-[--color-surface] divide-y divide-[--color-border]">
+      <div className="rounded-lg border border-(--color-border) bg-(--color-surface) divide-y divide-(--color-border)">
         {list.map((s) => (
           <div key={s.id} className="px-4 py-3 flex flex-wrap items-center justify-between gap-3">
             <div>
               <p className="font-semibold">{s.name}</p>
-              <p className="text-xs text-[--color-text-muted]">
+              <p className="text-xs text-(--color-text-muted)">
                 {formatDate(s.startDate)} – {formatDate(s.endDate)}
               </p>
             </div>
@@ -35,7 +35,7 @@ export default async function AdminSeasonsPage() {
           </div>
         ))}
         {list.length === 0 && (
-          <div className="px-4 py-6 text-center text-sm text-[--color-text-muted]">
+          <div className="px-4 py-6 text-center text-sm text-(--color-text-muted)">
             No seasons yet. Create the first one above.
           </div>
         )}

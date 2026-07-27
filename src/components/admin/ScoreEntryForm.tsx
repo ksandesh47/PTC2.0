@@ -99,11 +99,11 @@ export function ScoreEntryForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 rounded-lg border border-[--color-border] bg-[--color-surface] p-4">
+    <form onSubmit={handleSubmit} className="space-y-4 rounded-lg border border-(--color-border) bg-(--color-surface) p-4">
       {setCards.map((setCard, idx) => (
         <div
           key={`${setCard.team1Player1Id}-${setCard.team1Player2Id}-${setCard.team2Player1Id}-${setCard.team2Player2Id}`}
-          className="space-y-2 rounded-lg border border-[--color-border] bg-[--color-clay-50] p-3"
+          className="space-y-2 rounded-lg border border-(--color-border) bg-(--color-clay-50) p-3"
           draggable
           onDragStart={() => setDraggingIndex(idx)}
           onDragOver={(e) => e.preventDefault()}
@@ -113,9 +113,9 @@ export function ScoreEntryForm({
           }}
           onDragEnd={() => setDraggingIndex(null)}
         >
-          <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-wider text-[--color-text-muted]">
+          <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-wider text-(--color-text-muted)">
             <span>Set {setCard.setNumber}</span>
-            <span className="rounded border border-dashed border-[--color-border] px-2 py-0.5 normal-case">Drag</span>
+            <span className="rounded border border-dashed border-(--color-border) px-2 py-0.5 normal-case">Drag</span>
           </div>
           <div className="grid grid-cols-[1fr_auto_auto_1fr] gap-2 items-center">
             <div className="text-sm font-semibold">{setCard.team1Label}</div>
@@ -125,7 +125,7 @@ export function ScoreEntryForm({
               max="7"
               value={setCard.team1Games}
               onChange={(e) => handleSetChange(idx, 'team1Games', Number.parseInt(e.target.value, 10) || 0)}
-              className="w-14 rounded px-2 py-1.5 text-sm font-semibold border border-[--color-border] bg-white"
+              className="w-14 rounded px-2 py-1.5 text-sm font-semibold border border-(--color-border) bg-white"
             />
             <input
               type="number"
@@ -133,7 +133,7 @@ export function ScoreEntryForm({
               max="7"
               value={setCard.team2Games}
               onChange={(e) => handleSetChange(idx, 'team2Games', Number.parseInt(e.target.value, 10) || 0)}
-              className="w-14 rounded px-2 py-1.5 text-sm font-semibold border border-[--color-border] bg-white text-right"
+              className="w-14 rounded px-2 py-1.5 text-sm font-semibold border border-(--color-border) bg-white text-right"
             />
             <div className="text-right text-sm font-semibold">{setCard.team2Label}</div>
           </div>
@@ -141,7 +141,7 @@ export function ScoreEntryForm({
       ))}
 
       {setCards.length === 0 && (
-        <p className="text-sm text-[--color-text-muted]">No set cards are available for this match.</p>
+        <p className="text-sm text-(--color-text-muted)">No set cards are available for this match.</p>
       )}
 
       {error && <p className="text-xs text-red-600">{error}</p>}
@@ -150,7 +150,7 @@ export function ScoreEntryForm({
       <button
         type="submit"
         disabled={loading || setCards.length === 0}
-        className="w-full rounded-md bg-[--color-clay-600] px-3 py-2 text-sm font-semibold text-white hover:bg-[--color-clay-700] disabled:opacity-60"
+        className="w-full rounded-md bg-(--color-clay-600) px-3 py-2 text-sm font-semibold text-white hover:bg-(--color-clay-700) disabled:opacity-60"
       >
         {loading ? 'Submitting...' : 'Submit Scores'}
       </button>

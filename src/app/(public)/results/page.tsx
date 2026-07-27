@@ -13,8 +13,8 @@ function playerName(displayNameMap: Map<string, string>, id: string | null | und
 function DataUnavailable() {
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 text-center space-y-4">
-      <h1 className="font-display text-5xl tracking-widest text-[--color-clay-500]">RESULTS</h1>
-      <p className="text-[--color-text-muted]">Data is temporarily unavailable. Please try again shortly.</p>
+      <h1 className="font-display text-5xl tracking-widest text-(--color-clay-500)">RESULTS</h1>
+      <p className="text-(--color-text-muted)">Data is temporarily unavailable. Please try again shortly.</p>
     </div>
   );
 }
@@ -36,7 +36,7 @@ export default async function ResultsPage() {
 
   if (!season) {
     return (
-      <div className="mx-auto max-w-7xl px-4 py-16 text-center text-[--color-text-muted]">
+      <div className="mx-auto max-w-7xl px-4 py-16 text-center text-(--color-text-muted)">
         No active season found.
       </div>
     );
@@ -45,16 +45,16 @@ export default async function ResultsPage() {
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 space-y-8">
       <div>
-        <h1 className="font-display text-5xl tracking-widest text-[--color-clay-500]">
+        <h1 className="font-display text-5xl tracking-widest text-(--color-clay-500)">
           RESULTS
         </h1>
-        <p className="mt-1 text-sm text-[--color-text-muted]">
+        <p className="mt-1 text-sm text-(--color-text-muted)">
           Reverse-chronological match ledger for {season.name}
         </p>
       </div>
 
       {completedMatches.length === 0 && (
-        <p className="text-[--color-text-muted]">No completed matches yet.</p>
+        <p className="text-(--color-text-muted)">No completed matches yet.</p>
       )}
 
       <div className="grid gap-4 lg:grid-cols-2 animate-stagger">
@@ -81,33 +81,35 @@ export default async function ResultsPage() {
           return (
             <article
               key={match.id}
-              className="rounded-xl border border-[--color-border] bg-[--color-surface] p-4 space-y-4 shadow-sm"
+              className="rounded-xl border border-(--color-border) bg-(--color-surface) overflow-hidden shadow-sm"
             >
-              <div className="flex items-start justify-between gap-3">
+              <div className="bg-(--color-clay-800) px-4 py-3 flex items-start justify-between gap-3">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-wider text-[--color-text-muted]">
+                  <p className="text-sm font-semibold uppercase tracking-wider text-(--color-clay-100)">
                     {match.slot?.slotDate ? formatDate(match.slot.slotDate) : `Week ${match.weekNumber}`}
                   </p>
-                  <p className="text-sm text-[--color-text-muted]">
+                  <p className="text-xs text-(--color-clay-300)">
                     {match.slot?.label ?? match.court ?? "Court TBD"}
                   </p>
                 </div>
-                <span className="whitespace-nowrap rounded-full bg-[--color-forest-100] px-3 py-1 text-xs font-semibold uppercase tracking-wider text-[--color-forest-700]">
+                <span className="whitespace-nowrap rounded-full bg-(--color-forest-200) px-3 py-1 text-xs font-semibold uppercase tracking-wider text-(--color-forest-800)">
                   ✓ Completed{match.matchNumber ? ` · Match #${match.matchNumber}` : ""}
                 </span>
               </div>
+
+              <div className="p-4 space-y-4">
 
               <div className="grid gap-2 sm:grid-cols-2">
                 {lineup.map((id, index) => (
                   <div
                     key={id}
-                    className="flex items-center justify-between rounded-lg bg-[--color-clay-50] px-3 py-2 text-sm font-semibold"
+                    className="flex items-center justify-between rounded-lg bg-(--color-clay-50) px-3 py-2 text-sm font-semibold"
                   >
                     <span>
-                      <span className="mr-2 text-[--color-text-muted]">{index + 1}</span>
+                      <span className="mr-2 text-(--color-text-muted)">{index + 1}</span>
                       {playerName(displayNameMap, id)}
                     </span>
-                    <span className="font-display text-lg tracking-wider text-[--color-clay-700]">
+                    <span className="font-display text-lg tracking-wider text-(--color-clay-700)">
                       {matchScorecards.get(id) ?? 0}
                     </span>
                   </div>
@@ -116,7 +118,7 @@ export default async function ResultsPage() {
 
               {setRows.length > 0 && (
                 <div className="space-y-2">
-                  <p className="text-xs font-semibold uppercase tracking-widest text-[--color-text-muted]">
+                  <p className="text-xs font-semibold uppercase tracking-widest text-(--color-text-muted)">
                     Match Results
                   </p>
                   {setRows.map((set) => (
@@ -128,9 +130,9 @@ export default async function ResultsPage() {
                         {playerName(displayNameMap, set.team1Player1Id)}
                         {set.team1Player2Id ? ` & ${playerName(displayNameMap, set.team1Player2Id)}` : ""}
                       </span>
-                      <span className="text-right font-bold text-[--color-clay-600]">{set.team1Games}</span>
-                      <span className="text-center text-xs text-[--color-text-muted]">S{set.setNumber}</span>
-                      <span className="font-bold text-[--color-clay-600]">{set.team2Games}</span>
+                      <span className="text-right font-bold text-(--color-clay-600)">{set.team1Games}</span>
+                      <span className="text-center text-xs text-(--color-text-muted)">S{set.setNumber}</span>
+                      <span className="font-bold text-(--color-clay-600)">{set.team2Games}</span>
                       <span className="text-right font-medium">
                         {playerName(displayNameMap, set.team2Player1Id)}
                         {set.team2Player2Id ? ` & ${playerName(displayNameMap, set.team2Player2Id)}` : ""}
@@ -141,10 +143,11 @@ export default async function ResultsPage() {
               )}
 
               {setRows.length === 0 && (
-                <p className="text-sm text-[--color-text-muted]">
+                <p className="text-sm text-(--color-text-muted)">
                   Match completed, but no set scorecards have been recorded yet.
                 </p>
               )}
+              </div>
             </article>
           );
         })}

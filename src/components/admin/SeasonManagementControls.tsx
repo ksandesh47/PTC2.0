@@ -32,7 +32,7 @@ export function SeasonActivateButton({ seasonId, isActive }: Readonly<{ seasonId
 
   if (isActive) {
     return (
-      <span className="inline-block rounded-full bg-[--color-forest-100] text-[--color-forest-700] px-2 py-0.5 text-xs font-semibold">
+      <span className="inline-block rounded-full bg-(--color-forest-100) text-(--color-forest-700) px-2 py-0.5 text-xs font-semibold">
         Active
       </span>
     );
@@ -44,7 +44,7 @@ export function SeasonActivateButton({ seasonId, isActive }: Readonly<{ seasonId
         type="button"
         onClick={activate}
         disabled={loading}
-        className="rounded border border-[--color-border] bg-[--color-surface] px-2 py-1 text-xs font-semibold hover:bg-[--color-clay-50] disabled:opacity-60"
+        className="rounded border border-(--color-border) bg-(--color-surface) px-2 py-1 text-xs font-semibold hover:bg-(--color-clay-50) disabled:opacity-60"
       >
         {loading ? "Activating…" : "Activate"}
       </button>
@@ -93,7 +93,7 @@ export function CreateSeasonForm() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="rounded-md border border-[--color-border] bg-[--color-surface] px-3 py-2 text-sm font-semibold hover:bg-[--color-clay-50]"
+        className="rounded-md border border-(--color-border) bg-(--color-surface) px-3 py-2 text-sm font-semibold hover:bg-(--color-clay-50)"
       >
         + New Season
       </button>
@@ -101,37 +101,37 @@ export function CreateSeasonForm() {
   }
 
   return (
-    <form onSubmit={submit} className="rounded-lg border border-[--color-border] bg-[--color-surface] p-4 space-y-3">
+    <form onSubmit={submit} className="rounded-lg border border-(--color-border) bg-(--color-surface) p-4 space-y-3">
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <label className="text-sm space-y-1">
-          <span className="block text-xs font-semibold uppercase tracking-wider text-[--color-text-muted]">Name</span>
+          <span className="block text-xs font-semibold uppercase tracking-wider text-(--color-text-muted)">Name</span>
           <input
             type="text"
             required
             placeholder="Summer 2026"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full rounded-md border border-[--color-border] px-2 py-1.5"
+            className="w-full rounded-md border border-(--color-border) px-2 py-1.5"
           />
         </label>
         <label className="text-sm space-y-1">
-          <span className="block text-xs font-semibold uppercase tracking-wider text-[--color-text-muted]">Start date</span>
+          <span className="block text-xs font-semibold uppercase tracking-wider text-(--color-text-muted)">Start date</span>
           <input
             type="date"
             required
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
-            className="w-full rounded-md border border-[--color-border] px-2 py-1.5"
+            className="w-full rounded-md border border-(--color-border) px-2 py-1.5"
           />
         </label>
         <label className="text-sm space-y-1">
-          <span className="block text-xs font-semibold uppercase tracking-wider text-[--color-text-muted]">End date</span>
+          <span className="block text-xs font-semibold uppercase tracking-wider text-(--color-text-muted)">End date</span>
           <input
             type="date"
             required
             value={endDate}
             onChange={(e) => setEndDate(e.target.value)}
-            className="w-full rounded-md border border-[--color-border] px-2 py-1.5"
+            className="w-full rounded-md border border-(--color-border) px-2 py-1.5"
           />
         </label>
       </div>
@@ -140,14 +140,14 @@ export function CreateSeasonForm() {
         <button
           type="submit"
           disabled={loading}
-          className="rounded-md bg-[--color-clay-500] px-3 py-1.5 text-sm font-semibold text-white hover:bg-[--color-clay-600] disabled:opacity-60"
+          className="rounded-md bg-(--color-clay-500) px-3 py-1.5 text-sm font-semibold text-white hover:bg-(--color-clay-600) disabled:opacity-60"
         >
           {loading ? "Creating…" : "Create Season"}
         </button>
         <button
           type="button"
           onClick={() => setOpen(false)}
-          className="rounded-md border border-[--color-border] px-3 py-1.5 text-sm font-semibold hover:bg-[--color-clay-50]"
+          className="rounded-md border border-(--color-border) px-3 py-1.5 text-sm font-semibold hover:bg-(--color-clay-50)"
         >
           Cancel
         </button>

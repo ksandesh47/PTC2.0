@@ -14,8 +14,8 @@ const MIN_MATCHES = palominoLeagueRules.standings.topMatchCount;
 function DataUnavailable() {
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 text-center space-y-4">
-      <h1 className="font-display text-5xl tracking-widest text-[--color-clay-500]">STATS</h1>
-      <p className="text-[--color-text-muted]">Data is temporarily unavailable. Please try again shortly.</p>
+      <h1 className="font-display text-5xl tracking-widest text-(--color-clay-500)">STATS</h1>
+      <p className="text-(--color-text-muted)">Data is temporarily unavailable. Please try again shortly.</p>
     </div>
   );
 }
@@ -56,7 +56,7 @@ export default async function StatsPage() {
 
   if (!season) {
     return (
-      <div className="mx-auto max-w-7xl px-4 py-16 text-center text-[--color-text-muted]">
+      <div className="mx-auto max-w-7xl px-4 py-16 text-center text-(--color-text-muted)">
         No active season found.
       </div>
     );
@@ -74,17 +74,17 @@ export default async function StatsPage() {
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 space-y-8">
       <div>
-        <h1 className="font-display text-5xl tracking-widest text-[--color-clay-500]">
+        <h1 className="font-display text-5xl tracking-widest text-(--color-clay-500)">
           STATS
         </h1>
-        <p className="mt-1 text-sm text-[--color-text-muted]">
+        <p className="mt-1 text-sm text-(--color-text-muted)">
           {season.name} · sorted by average · league scoring: {getStandingsLabel()} match scores over {palominoLeagueRules.matchFormat.setsPerMatch} rotating sets.
         </p>
       </div>
 
-      <div className="overflow-x-auto rounded-lg border border-[--color-border] bg-[--color-surface]">
+      <div className="overflow-x-auto rounded-lg border border-(--color-border) bg-(--color-surface)">
         <table className="w-full text-sm" aria-label="League stats table">
-          <thead className="bg-[--color-clay-50] text-xs uppercase tracking-widest text-[--color-text-muted]">
+          <thead className="bg-(--color-clay-50) text-xs uppercase tracking-widest text-(--color-text-muted)">
             <tr>
               <th className="px-3 py-3 text-right">#</th>
               <th className="px-3 py-3 text-left">Player</th>
@@ -98,26 +98,26 @@ export default async function StatsPage() {
               <th className="px-3 py-3 text-right">SL</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-[--color-border]">
+          <tbody className="divide-y divide-(--color-border)">
             {sortedByAvg.map((row, index) => {
               const rosterEntry = rosterMap.get(row.playerId);
               const tooltip = rosterEntry && row.matchesPlayed < MIN_MATCHES
                 ? `${rosterEntry.firstName} needs ${MIN_MATCHES - row.matchesPlayed} more ${pluralMatches(MIN_MATCHES - row.matchesPlayed)}`
                 : undefined;
               return (
-                <tr key={row.playerId} className="hover:bg-[--color-clay-50] transition-colors">
-                  <td className="px-3 py-3 text-right text-[--color-text-muted] font-mono">
+                <tr key={row.playerId} className="hover:bg-(--color-clay-50) transition-colors">
+                  <td className="px-3 py-3 text-right text-(--color-text-muted) font-mono">
                     {medalFor(index + 1)}
                   </td>
                   <td className="px-3 py-3 font-semibold">
                     <span className="inline-flex items-baseline gap-1" title={tooltip}>
                       <span>{displayNameMap.get(row.playerId) ?? row.playerName}</span>
-                      <span className="text-[0.65em] font-mono font-normal text-[--color-text-muted]">
+                      <span className="text-[0.65em] font-mono font-normal text-(--color-text-muted)">
                         {row.matchesPlayed}
                       </span>
                     </span>
                   </td>
-                  <td className="px-3 py-3 text-right font-bold text-[--color-clay-600]">
+                  <td className="px-3 py-3 text-right font-bold text-(--color-clay-600)">
                     {row.averageScore.toFixed(1)}
                   </td>
                   <td className="px-3 py-3 text-right">{row.total}</td>
@@ -248,13 +248,13 @@ function HighlightCard({
   subtitle,
 }: Readonly<{ icon: string; title: string; value: string | number; subtitle: string }>) {
   return (
-    <div className="rounded-xl border border-[--color-border] bg-[--color-surface] p-5 shadow-sm">
-      <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-[--color-text-muted]">
+    <div className="rounded-xl border border-(--color-border) border-l-4 border-l-(--color-clay-400) bg-(--color-surface) p-5 shadow-sm">
+      <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-(--color-text-muted)">
         <span className="text-lg leading-none">{icon}</span>
         <span>{title}</span>
       </div>
-      <p className="mt-2 font-display text-3xl tracking-wider text-[--color-clay-600]">{value}</p>
-      {subtitle && <p className="mt-1 text-xs text-[--color-text-muted]">{subtitle}</p>}
+      <p className="mt-2 font-display text-3xl tracking-wider text-(--color-clay-600)">{value}</p>
+      {subtitle && <p className="mt-1 text-xs text-(--color-text-muted)">{subtitle}</p>}
     </div>
   );
 }

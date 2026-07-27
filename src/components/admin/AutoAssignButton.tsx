@@ -39,7 +39,7 @@ export function AutoAssignButton({
         onClick={run}
         disabled={isDisabled}
         title={insufficient ? `Only ${availableCount} available (need 4)` : "Pick 4 available players with fewest games"}
-        className="w-full rounded-md border border-[--color-border] bg-[--color-surface] px-3 py-1.5 text-xs font-semibold hover:bg-[--color-clay-50] disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full rounded-md border border-(--color-border) bg-(--color-surface) px-3 py-1.5 text-xs font-semibold hover:bg-(--color-clay-50) disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {loading ? "Auto-assigning…" : "⚡ Auto-Assign"}
       </button>

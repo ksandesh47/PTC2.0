@@ -390,8 +390,8 @@ export default async function AdminScoresPage({ searchParams }: Readonly<PagePro
   if (!activeSeason) {
     return (
       <div className="p-6 lg:p-8 max-w-5xl">
-        <h1 className="font-display text-4xl tracking-widest text-[--color-clay-500]">SCORE ENTRY</h1>
-        <p className="mt-3 text-sm text-[--color-text-muted]">No active season configured.</p>
+        <h1 className="font-display text-4xl tracking-widest text-(--color-clay-500)">SCORE ENTRY</h1>
+        <p className="mt-3 text-sm text-(--color-text-muted)">No active season configured.</p>
       </div>
     );
   }
@@ -554,24 +554,24 @@ export default async function AdminScoresPage({ searchParams }: Readonly<PagePro
   return (
     <div className="p-6 lg:p-8 max-w-6xl space-y-6">
       <div>
-        <h1 className="font-display text-4xl tracking-widest text-[--color-clay-500]">SCORE ENTRY</h1>
-        <p className="mt-1 text-sm text-[--color-text-muted]">
+        <h1 className="font-display text-4xl tracking-widest text-(--color-clay-500)">SCORE ENTRY</h1>
+        <p className="mt-1 text-sm text-(--color-text-muted)">
           {activeSeason.name} · Week {selectedWeek} of {maxWeek} · {displayWeekMatches.length}/9 matches · {readyForScoring.length} pending
         </p>
       </div>
 
       {selectedWeekRange && (
-        <div className="rounded-xl border border-[--color-border] bg-[--color-surface] px-4 py-3">
+        <div className="rounded-xl border border-(--color-border) bg-(--color-surface) px-4 py-3">
           <div className="flex items-center justify-between gap-3">
             {canGoPrev ? (
               <Link
                 href={`/admin/scores?week=${selectedWeek - 1}`}
-                className="rounded-md border border-[--color-border] px-3 py-1.5 text-sm font-semibold hover:bg-[--color-clay-50]"
+                className="rounded-md border border-(--color-border) px-3 py-1.5 text-sm font-semibold hover:bg-(--color-clay-50)"
               >
                 ← Prev
               </Link>
             ) : (
-              <span className="rounded-md border border-[--color-border] px-3 py-1.5 text-sm font-semibold text-[--color-text-muted] opacity-60">
+              <span className="rounded-md border border-(--color-border) px-3 py-1.5 text-sm font-semibold text-(--color-text-muted) opacity-60">
                 ← Prev
               </span>
             )}
@@ -583,12 +583,12 @@ export default async function AdminScoresPage({ searchParams }: Readonly<PagePro
             {canGoNext ? (
               <Link
                 href={`/admin/scores?week=${selectedWeek + 1}`}
-                className="rounded-md border border-[--color-border] px-3 py-1.5 text-sm font-semibold hover:bg-[--color-clay-50]"
+                className="rounded-md border border-(--color-border) px-3 py-1.5 text-sm font-semibold hover:bg-(--color-clay-50)"
               >
                 Next →
               </Link>
             ) : (
-              <span className="rounded-md border border-[--color-border] px-3 py-1.5 text-sm font-semibold text-[--color-text-muted] opacity-60">
+              <span className="rounded-md border border-(--color-border) px-3 py-1.5 text-sm font-semibold text-(--color-text-muted) opacity-60">
                 Next →
               </span>
             )}
@@ -597,10 +597,10 @@ export default async function AdminScoresPage({ searchParams }: Readonly<PagePro
       )}
 
       <div className="flex flex-wrap gap-3 text-sm">
-        <Link href="/results" className="rounded-md border border-[--color-border] px-3 py-1.5 font-semibold hover:bg-[--color-clay-50]">
+        <Link href="/results" className="rounded-md border border-(--color-border) px-3 py-1.5 font-semibold hover:bg-(--color-clay-50)">
           Open Results
         </Link>
-        <Link href="/admin/matches" className="rounded-md border border-[--color-border] px-3 py-1.5 font-semibold hover:bg-[--color-clay-50]">
+        <Link href="/admin/matches" className="rounded-md border border-(--color-border) px-3 py-1.5 font-semibold hover:bg-(--color-clay-50)">
           Review Match Assignments
         </Link>
       </div>
@@ -625,15 +625,15 @@ export default async function AdminScoresPage({ searchParams }: Readonly<PagePro
       )}
 
       {displayWeekMatches.length > 0 && (
-        <div className="flex flex-wrap gap-1 rounded-lg border border-[--color-border] bg-[--color-surface] p-2 text-xs">
+        <div className="flex flex-wrap gap-1 rounded-lg border border-(--color-border) bg-(--color-surface) p-2 text-xs">
           {slotLayout.slots.map((slot) => {
             const match = slot.match;
             const scored = match ? (setCountByMatch.get(match.id) ?? 0) > 0 : false;
             const isCancelled = match?.status === "cancelled" || match?.status === "abandoned";
             let chipStyle: string;
             if (isCancelled) chipStyle = "bg-red-50 text-red-700 border-red-200";
-            else if (scored) chipStyle = "bg-[--color-forest-100] text-[--color-forest-700] border-[--color-forest-200]";
-            else chipStyle = "border-[--color-border] hover:bg-[--color-clay-50]";
+            else if (scored) chipStyle = "bg-(--color-forest-100) text-(--color-forest-700) border-(--color-forest-200)";
+            else chipStyle = "border-(--color-border) hover:bg-(--color-clay-50)";
             const monthDay = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric" }).format(slot.date);
             let suffix = "";
             if (scored) suffix = " ✓";
@@ -673,7 +673,7 @@ export default async function AdminScoresPage({ searchParams }: Readonly<PagePro
               <article
                 key={slot.key}
                 id={anchorId}
-                className="rounded-lg border border-[--color-border] bg-[--color-surface] p-3 space-y-2 scroll-mt-24"
+                className="rounded-lg border border-(--color-border) bg-(--color-surface) p-3 space-y-2 scroll-mt-24"
               >
                 <div className="flex items-start justify-between gap-2">
                   <div>
@@ -682,35 +682,35 @@ export default async function AdminScoresPage({ searchParams }: Readonly<PagePro
                   </div>
                   <div className="flex flex-col items-end gap-1">
                     {match?.matchNumber ? (
-                      <span className="whitespace-nowrap rounded-full bg-[--color-clay-100] px-2 py-0.5 text-xs font-semibold text-[--color-clay-700]">
+                      <span className="whitespace-nowrap rounded-full bg-(--color-clay-100) px-2 py-0.5 text-xs font-semibold text-(--color-clay-700)">
                         Match #{match.matchNumber}
                       </span>
                     ) : null}
-                    <span className="text-[10px] font-semibold uppercase tracking-wider text-[--color-text-muted]">
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-(--color-text-muted)">
                       {availableCount} available
                     </span>
                     {match ? (
-                      <p className="text-xs font-semibold uppercase tracking-wider text-[--color-clay-600]">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-(--color-clay-600)">
                         {match.status.replace("_", " ")}
                       </p>
                     ) : (
-                      <p className="text-xs font-semibold uppercase tracking-wider text-[--color-text-muted]">Open</p>
+                      <p className="text-xs font-semibold uppercase tracking-wider text-(--color-text-muted)">Open</p>
                     )}
                   </div>
                 </div>
                 {match ? (
                   <>
-                    <p className="text-xs text-[--color-text-muted]">{match.slot?.label ?? match.court ?? "Court TBD"}</p>
+                    <p className="text-xs text-(--color-text-muted)">{match.slot?.label ?? match.court ?? "Court TBD"}</p>
                     <p className="text-xs">{scoringSummary}</p>
                     {scoredSets.length > 0 && (
                       <div className="space-y-1 pt-1">
                         {scoredSets.map((set) => (
-                          <div key={set.setNumber} className="rounded border border-[--color-border] px-2 py-1 text-xs">
-                            <p className="font-semibold uppercase tracking-wider text-[--color-text-muted]">Set {set.setNumber}</p>
+                          <div key={set.setNumber} className="rounded border border-(--color-border) px-2 py-1 text-xs">
+                            <p className="font-semibold uppercase tracking-wider text-(--color-text-muted)">Set {set.setNumber}</p>
                             <div className="grid grid-cols-[1fr_auto_auto_1fr] items-center gap-1">
                               <span className="font-semibold truncate">{set.team1Label}</span>
-                              <span className="font-semibold text-[--color-clay-600]">{set.team1Games}</span>
-                              <span className="font-semibold text-[--color-clay-600]">{set.team2Games}</span>
+                              <span className="font-semibold text-(--color-clay-600)">{set.team1Games}</span>
+                              <span className="font-semibold text-(--color-clay-600)">{set.team2Games}</span>
                               <span className="font-semibold truncate text-right">{set.team2Label}</span>
                             </div>
                           </div>
@@ -743,7 +743,7 @@ export default async function AdminScoresPage({ searchParams }: Readonly<PagePro
                   </>
                 ) : (
                   <div className="space-y-2">
-                    <p className="text-xs text-[--color-text-muted]">No match created for this slot yet.</p>
+                    <p className="text-xs text-(--color-text-muted)">No match created for this slot yet.</p>
                     {slot.slotId ? (
                       <>
                         <AutoAssignButton
@@ -757,7 +757,7 @@ export default async function AdminScoresPage({ searchParams }: Readonly<PagePro
                         />
                       </>
                     ) : (
-                      <p className="text-xs text-[--color-text-muted]">No availability slot exists yet for assignment.</p>
+                      <p className="text-xs text-(--color-text-muted)">No availability slot exists yet for assignment.</p>
                     )}
                   </div>
                 )}
@@ -767,7 +767,7 @@ export default async function AdminScoresPage({ searchParams }: Readonly<PagePro
         </div>
 
         {displayWeekMatches.every((m) => (setCountByMatch.get(m.id) ?? 0) === 0) && (
-          <p className="text-sm text-[--color-text-muted]">No scored matches yet.</p>
+          <p className="text-sm text-(--color-text-muted)">No scored matches yet.</p>
         )}
       </section>
 
@@ -775,11 +775,11 @@ export default async function AdminScoresPage({ searchParams }: Readonly<PagePro
         <section className="space-y-3">
           <div className="flex items-center justify-between">
             <h2 className="font-display text-2xl tracking-wider">CANCELED MATCHES</h2>
-            <span className="text-xs font-semibold text-[--color-text-muted]">
+            <span className="text-xs font-semibold text-(--color-text-muted)">
               {canceledMatches.length} canceled
             </span>
           </div>
-          <div className="rounded-lg border border-[--color-border] bg-[--color-surface] divide-y divide-[--color-border]">
+          <div className="rounded-lg border border-(--color-border) bg-(--color-surface) divide-y divide-(--color-border)">
             {canceledMatches.map((m) => {
               const lineup = m.pairings.flatMap((p) => [p.team1Player1, p.team1Player2, p.team2Player1, p.team2Player2])
                 .filter((p): p is NonNullable<typeof p> => !!p);
@@ -799,7 +799,7 @@ export default async function AdminScoresPage({ searchParams }: Readonly<PagePro
                       compact
                     />
                   </div>
-                  {names && <p className="text-xs text-[--color-text-muted]">{names}</p>}
+                  {names && <p className="text-xs text-(--color-text-muted)">{names}</p>}
                   {m.abandonReason && (
                     <p className="text-xs text-red-700">Reason: {m.abandonReason}</p>
                   )}
@@ -814,15 +814,15 @@ export default async function AdminScoresPage({ searchParams }: Readonly<PagePro
   } catch {
     return (
       <div className="p-6 lg:p-8 max-w-5xl space-y-3">
-        <h1 className="font-display text-4xl tracking-widest text-[--color-clay-500]">SCORE ENTRY</h1>
-        <p className="text-sm text-[--color-text-muted]">
+        <h1 className="font-display text-4xl tracking-widest text-(--color-clay-500)">SCORE ENTRY</h1>
+        <p className="text-sm text-(--color-text-muted)">
           Data is temporarily unavailable. Please refresh or try again in a moment.
         </p>
         <div className="flex flex-wrap gap-3 text-sm">
-          <Link href="/admin" className="rounded-md border border-[--color-border] px-3 py-1.5 font-semibold hover:bg-[--color-clay-50]">
+          <Link href="/admin" className="rounded-md border border-(--color-border) px-3 py-1.5 font-semibold hover:bg-(--color-clay-50)">
             Back to Dashboard
           </Link>
-          <Link href="/schedule" className="rounded-md border border-[--color-border] px-3 py-1.5 font-semibold hover:bg-[--color-clay-50]">
+          <Link href="/schedule" className="rounded-md border border-(--color-border) px-3 py-1.5 font-semibold hover:bg-(--color-clay-50)">
             Open Public Schedule
           </Link>
         </div>

@@ -23,10 +23,10 @@ export default async function AvailabilityPage() {
     if (!player) {
       return (
         <div className="mx-auto max-w-2xl px-4 py-16 text-center space-y-4">
-          <h1 className="font-display text-4xl text-[--color-clay-500] tracking-widest">
+          <h1 className="font-display text-4xl text-(--color-clay-500) tracking-widest">
             NO PLAYER PROFILE
           </h1>
-          <p className="text-[--color-text-muted]">
+          <p className="text-(--color-text-muted)">
             Your account is not linked to a player record yet. Contact your admin.
           </p>
         </div>
@@ -40,7 +40,7 @@ export default async function AvailabilityPage() {
     if (!activeSeason) {
       return (
         <div className="mx-auto max-w-2xl px-4 py-16 text-center">
-          <p className="text-[--color-text-muted]">No active season.</p>
+          <p className="text-(--color-text-muted)">No active season.</p>
         </div>
       );
     }
@@ -61,8 +61,8 @@ export default async function AvailabilityPage() {
   } catch {
     return (
       <div className="mx-auto max-w-2xl px-4 py-16 text-center space-y-4">
-        <h1 className="font-display text-4xl tracking-widest text-[--color-clay-500]">MY AVAILABILITY</h1>
-        <p className="text-[--color-text-muted]">Data is temporarily unavailable. Please try again shortly.</p>
+        <h1 className="font-display text-4xl tracking-widest text-(--color-clay-500)">MY AVAILABILITY</h1>
+        <p className="text-(--color-text-muted)">Data is temporarily unavailable. Please try again shortly.</p>
       </div>
     );
   }
@@ -83,10 +83,10 @@ export default async function AvailabilityPage() {
   return (
     <div className="mx-auto max-w-2xl px-4 sm:px-6 py-12 space-y-8">
       <div>
-        <h1 className="font-display text-4xl tracking-widest text-[--color-clay-500]">
+        <h1 className="font-display text-4xl tracking-widest text-(--color-clay-500)">
           MY AVAILABILITY
         </h1>
-        <p className="text-sm text-[--color-text-muted] mt-1">
+        <p className="text-sm text-(--color-text-muted) mt-1">
           {activeSeason.name} — {player.firstName} {player.lastName}
         </p>
       </div>

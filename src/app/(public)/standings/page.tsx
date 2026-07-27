@@ -11,8 +11,8 @@ const MIN_MATCHES = palominoLeagueRules.standings.topMatchCount;
 function DataUnavailable({ title }: Readonly<{ title: string }>) {
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 text-center space-y-4">
-      <h1 className="font-display text-5xl tracking-widest text-[--color-clay-500]">{title}</h1>
-      <p className="text-[--color-text-muted]">Data is temporarily unavailable. Please try again shortly.</p>
+      <h1 className="font-display text-5xl tracking-widest text-(--color-clay-500)">{title}</h1>
+      <p className="text-(--color-text-muted)">Data is temporarily unavailable. Please try again shortly.</p>
     </div>
   );
 }
@@ -58,7 +58,7 @@ export default async function StandingsPage() {
 
   if (!season) {
     return (
-      <div className="mx-auto max-w-7xl px-4 py-16 text-center text-[--color-text-muted]">
+      <div className="mx-auto max-w-7xl px-4 py-16 text-center text-(--color-text-muted)">
         No active season found.
       </div>
     );
@@ -69,10 +69,10 @@ export default async function StandingsPage() {
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 space-y-8">
       <div>
-        <h1 className="font-display text-5xl tracking-widest text-[--color-clay-500]">
+        <h1 className="font-display text-5xl tracking-widest text-(--color-clay-500)">
           STANDINGS
         </h1>
-        <p className="text-sm text-[--color-text-muted] mt-1">
+        <p className="text-sm text-(--color-text-muted) mt-1">
           {season.name} · {getStandingsLabel()} league model · updated {formatDate(new Date())}
         </p>
       </div>
@@ -91,72 +91,13 @@ export default async function StandingsPage() {
         </div>
       )}
 
-      {/* Standings table */}
-      <div className="overflow-x-auto rounded-lg border border-[--color-border]">
-        <table className="w-full text-sm" aria-label="Season standings">
-          <thead className="bg-[--color-clay-50] text-[--color-text-muted] text-xs uppercase tracking-widest">
-            <tr>
-              <th scope="col" className="px-3 py-3 text-right w-10">#</th>
-              <th scope="col" className="px-3 py-3 text-left">Player</th>
-              <th scope="col" className="px-3 py-3 text-right">{getStandingsLabel()}</th>
-              <th scope="col" className="px-3 py-3 text-right hidden sm:table-cell">Total</th>
-              <th scope="col" className="px-3 py-3 text-right">Avg</th>
-              <th scope="col" className="px-3 py-3 text-right">M</th>
-              <th scope="col" className="px-3 py-3 text-right hidden sm:table-cell">SW</th>
-              <th scope="col" className="px-3 py-3 text-right hidden sm:table-cell">SL</th>
-              <th scope="col" className="px-3 py-3 text-right hidden md:table-cell">GW</th>
-              <th scope="col" className="px-3 py-3 text-right hidden md:table-cell">GL</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-[--color-border] bg-[--color-surface]">
-            {standings.map((row) => {
-              const rosterEntry = rosterMap.get(row.playerId);
-              const tooltip = rosterEntry
-                ? needsMoreTooltip({ ...rosterEntry, matchesPlayed: row.matchesPlayed })
-                : undefined;
-              return (
-                <tr key={row.playerId} className="hover:bg-[--color-clay-50] transition-colors">
-                  <td className="px-3 py-3 text-right text-[--color-text-muted] font-mono">
-                    {medalFor(row.rank)}
-                  </td>
-                  <td className="px-3 py-3 font-semibold">
-                    <PlayerNameBadge
-                      name={displayNameMap.get(row.playerId) ?? row.playerName}
-                      matchesPlayed={row.matchesPlayed}
-                      tooltip={tooltip}
-                    />
-                  </td>
-                  <td className="px-3 py-3 text-right font-bold text-[--color-clay-600]">
-                    {row.standingsTotal}
-                  </td>
-                  <td className="px-3 py-3 text-right hidden sm:table-cell">{row.total}</td>
-                  <td className="px-3 py-3 text-right">{row.averageScore.toFixed(1)}</td>
-                  <td className="px-3 py-3 text-right">{row.matchesPlayed}</td>
-                  <td className="px-3 py-3 text-right hidden sm:table-cell">{row.setsWon}</td>
-                  <td className="px-3 py-3 text-right hidden sm:table-cell">{row.setsLost}</td>
-                  <td className="px-3 py-3 text-right hidden md:table-cell">{row.gamesWon}</td>
-                  <td className="px-3 py-3 text-right hidden md:table-cell">{row.gamesLost}</td>
-                </tr>
-              );
-            })}
-            {standings.length === 0 && (
-              <tr>
-                <td colSpan={10} className="px-4 py-8 text-center text-[--color-text-muted]">
-                  No standings data yet.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-
       {/* Top-8 match score breakdown */}
       {standings.some((row) => row.countedScorecards.length > 0) && (
         <section className="space-y-3">
           <h2 className="font-display text-2xl tracking-wider">🏅 Top {MIN_MATCHES} Match Score Breakdown</h2>
-          <div className="overflow-x-auto rounded-lg border border-[--color-border]">
+          <div className="overflow-x-auto rounded-lg border border-(--color-border)">
             <table className="w-full text-sm" aria-label="Top match breakdown">
-              <thead className="bg-[--color-clay-50] text-[--color-text-muted] text-xs uppercase tracking-widest">
+              <thead className="bg-(--color-clay-50) text-(--color-text-muted) text-xs uppercase tracking-widest">
                 <tr>
                   <th scope="col" className="px-3 py-3 text-right w-10">#</th>
                   <th scope="col" className="px-3 py-3 text-left">Player</th>
@@ -168,7 +109,7 @@ export default async function StandingsPage() {
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[--color-border] bg-[--color-surface]">
+              <tbody className="divide-y divide-(--color-border) bg-(--color-surface)">
                 {standings.map((row) => {
                   const scores = Array.from({ length: MIN_MATCHES }).map(
                     (_, i) => row.countedScorecards[i]?.score
@@ -178,8 +119,8 @@ export default async function StandingsPage() {
                     ? needsMoreTooltip({ ...rosterEntry, matchesPlayed: row.matchesPlayed })
                     : undefined;
                   return (
-                    <tr key={row.playerId} className="hover:bg-[--color-clay-50]">
-                      <td className="px-3 py-2 text-right text-[--color-text-muted] font-mono">
+                    <tr key={row.playerId} className="hover:bg-(--color-clay-50)">
+                      <td className="px-3 py-2 text-right text-(--color-text-muted) font-mono">
                         {medalFor(row.rank)}
                       </td>
                       <td className="px-3 py-2 font-semibold">
@@ -189,7 +130,7 @@ export default async function StandingsPage() {
                           tooltip={tooltip}
                         />
                       </td>
-                      <td className="px-3 py-2 text-right font-bold text-[--color-clay-600]">
+                      <td className="px-3 py-2 text-right font-bold text-(--color-clay-600)">
                         {row.standingsTotal}
                       </td>
                       {scores.map((score, i) => (
@@ -203,7 +144,7 @@ export default async function StandingsPage() {
               </tbody>
             </table>
           </div>
-          <p className="text-xs text-[--color-text-muted]">
+          <p className="text-xs text-(--color-text-muted)">
             M1–M{MIN_MATCHES} = top {MIN_MATCHES} match scores (sorted high→low).
           </p>
         </section>
@@ -225,14 +166,15 @@ function PodiumCard({
     ? needsMoreTooltip({ ...rosterEntry, matchesPlayed: entry.matchesPlayed })
     : undefined;
   return (
-    <article className="rounded-xl border border-[--color-border] bg-[--color-surface] p-5 shadow-sm">
-      <div className="flex items-center justify-between">
+    <article className="rounded-xl border border-(--color-border) bg-(--color-surface) overflow-hidden shadow-sm">
+      <div className="bg-(--color-clay-100) px-5 pt-4 pb-3 flex items-center justify-between">
         <span className="text-3xl leading-none">{medalFor(entry.rank)}</span>
-        <span className="text-xs uppercase tracking-widest text-[--color-text-muted]">
+        <span className="text-xs uppercase tracking-widest text-(--color-clay-600)">
           Rank {entry.rank}
         </span>
       </div>
-      <h2 className="mt-3 font-display text-3xl tracking-wider text-[--color-text]">
+      <div className="p-5">
+      <h2 className="mt-3 font-display text-3xl tracking-wider text-(--color-text)">
         <PlayerNameBadge
           name={displayName}
           matchesPlayed={entry.matchesPlayed}
@@ -241,18 +183,19 @@ function PodiumCard({
       </h2>
       <div className="mt-4 flex items-end justify-between">
         <div>
-          <p className="text-xs uppercase tracking-widest text-[--color-text-muted]">
+          <p className="text-xs uppercase tracking-widest text-(--color-text-muted)">
             {getStandingsLabel()}
           </p>
-          <p className="font-display text-4xl tracking-wider text-[--color-clay-600]">
+          <p className="font-display text-4xl tracking-wider text-(--color-clay-600)">
             {entry.standingsTotal}
           </p>
         </div>
-        <div className="text-right text-sm text-[--color-text-muted]">
+        <div className="text-right text-sm text-(--color-text-muted)">
           <p>Total: {entry.total}</p>
           <p>Avg: {entry.averageScore.toFixed(1)} · {entry.matchesPlayed}M</p>
           <p>SW-SL: {entry.setsWon}-{entry.setsLost}</p>
         </div>
+      </div>
       </div>
     </article>
   );
@@ -266,7 +209,7 @@ function PlayerNameBadge({
   return (
     <span className="inline-flex items-baseline gap-1" title={tooltip}>
       <span>{name}</span>
-      <span className="text-[0.65em] font-mono font-normal text-[--color-text-muted]">
+      <span className="text-[0.65em] font-mono font-normal text-(--color-text-muted)">
         {matchesPlayed}
       </span>
     </span>

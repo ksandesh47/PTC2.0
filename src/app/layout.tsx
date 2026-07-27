@@ -30,7 +30,7 @@ export default function RootLayout({
       lang="en"
       className={`${bebasNeue.variable} ${sourceSans.variable} h-full`}
     >
-      <body className="min-h-full flex flex-col bg-[--color-background] text-[--color-text]">
+      <body className="min-h-full flex flex-col bg-(--color-background) text-(--color-text)">
         <SiteHeader />
         <main className="flex-1">{children}</main>
       </body>

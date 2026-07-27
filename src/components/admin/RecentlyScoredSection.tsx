@@ -122,12 +122,12 @@ export function RecentlyScoredSection({ matches, setCountByMatch }: Readonly<Rec
 
   if (matches.length === 0) {
     return (
-      <p className="text-sm text-[--color-text-muted]">No scored matches for this week.</p>
+      <p className="text-sm text-(--color-text-muted)">No scored matches for this week.</p>
     );
   }
 
   return (
-    <div className="rounded-xl border border-[--color-border] bg-[--color-surface] divide-y divide-[--color-border]">
+    <div className="rounded-xl border border-(--color-border) bg-(--color-surface) divide-y divide-(--color-border)">
         {matches.map((m) => {
           if (m.pairings.length === 0) return null;
           const currentSets = buildSetCards(m);
@@ -139,23 +139,23 @@ export function RecentlyScoredSection({ matches, setCountByMatch }: Readonly<Rec
               <div className="flex items-center justify-between gap-3">
                 <div>
                   <p className="font-semibold">{m.slot?.slotDate ? formatDate(m.slot.slotDate) : 'Date pending'}</p>
-                  <p className="text-xs text-[--color-text-muted]">{m.slot?.label ?? m.court ?? 'Court TBD'}</p>
+                  <p className="text-xs text-(--color-text-muted)">{m.slot?.label ?? m.court ?? 'Court TBD'}</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-[--color-clay-600]">{m.status.replace('_', ' ')}</p>
-                  <p className="text-xs text-[--color-text-muted]">{setCountByMatch[m.id] ?? 0} sets</p>
+                  <p className="text-xs font-semibold uppercase tracking-wider text-(--color-clay-600)">{m.status.replace('_', ' ')}</p>
+                  <p className="text-xs text-(--color-text-muted)">{setCountByMatch[m.id] ?? 0} sets</p>
                 </div>
               </div>
 
               {currentSets.length > 0 && (
                 <div className="space-y-2 text-xs">
                   {currentSets.map((set) => (
-                    <div key={set.setNumber} className="rounded-md border border-[--color-border] bg-[--color-clay-50] px-3 py-2">
-                      <p className="font-semibold uppercase tracking-wider text-[--color-text-muted]">Set {set.setNumber}</p>
+                    <div key={set.setNumber} className="rounded-md border border-(--color-border) bg-(--color-clay-50) px-3 py-2">
+                      <p className="font-semibold uppercase tracking-wider text-(--color-text-muted)">Set {set.setNumber}</p>
                       <div className="mt-1 grid grid-cols-[1fr_auto_auto_1fr] items-center gap-2">
                         <span className="font-semibold">{set.team1Label}</span>
-                        <span className="text-right font-semibold text-[--color-clay-600]">{set.team1Games}</span>
-                        <span className="font-semibold text-[--color-clay-600]">{set.team2Games}</span>
+                        <span className="text-right font-semibold text-(--color-clay-600)">{set.team1Games}</span>
+                        <span className="font-semibold text-(--color-clay-600)">{set.team2Games}</span>
                         <span className="text-right font-semibold">{set.team2Label}</span>
                       </div>
                     </div>
@@ -170,21 +170,21 @@ export function RecentlyScoredSection({ matches, setCountByMatch }: Readonly<Rec
               {!isEditing && (
                 <button
                   onClick={() => setEditingMatchId(m.id)}
-                  className="text-xs font-semibold px-2 py-1 text-[--color-clay-600] hover:bg-[--color-clay-50] rounded"
+                  className="text-xs font-semibold px-2 py-1 text-(--color-clay-600) hover:bg-(--color-clay-50) rounded"
                 >
                   Edit Scores
                 </button>
               )}
 
               {isEditing && (
-                <div className="space-y-2 pt-2 border-t border-[--color-border]">
+                <div className="space-y-2 pt-2 border-t border-(--color-border)">
                   <EditScoreForm
                     matchId={m.id}
                     initialSetCards={currentSets}
                   />
                   <button
                     onClick={() => setEditingMatchId(null)}
-                    className="text-xs font-semibold px-2 py-1 text-[--color-text-muted] hover:bg-[--color-clay-50] rounded"
+                    className="text-xs font-semibold px-2 py-1 text-(--color-text-muted) hover:bg-(--color-clay-50) rounded"
                   >
                     Cancel
                   </button>

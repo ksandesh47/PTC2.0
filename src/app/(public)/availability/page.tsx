@@ -90,8 +90,8 @@ export default async function AvailabilityPage({ searchParams }: Readonly<PagePr
   } catch {
     return (
       <div className="mx-auto max-w-3xl px-4 sm:px-6 py-16 text-center space-y-4">
-        <h1 className="font-display text-4xl tracking-widest text-[--color-clay-500]">AVAILABILITY</h1>
-        <p className="text-[--color-text-muted]">Data is temporarily unavailable. Please try again shortly.</p>
+        <h1 className="font-display text-4xl tracking-widest text-(--color-clay-500)">AVAILABILITY</h1>
+        <p className="text-(--color-text-muted)">Data is temporarily unavailable. Please try again shortly.</p>
       </div>
     );
   }
@@ -99,7 +99,7 @@ export default async function AvailabilityPage({ searchParams }: Readonly<PagePr
   if (!activeSeason) {
     return (
       <div className="mx-auto max-w-3xl px-4 sm:px-6 py-12">
-        <p className="text-sm text-[--color-text-muted]">No active season.</p>
+        <p className="text-sm text-(--color-text-muted)">No active season.</p>
       </div>
     );
   }
@@ -131,8 +131,8 @@ export default async function AvailabilityPage({ searchParams }: Readonly<PagePr
   } catch {
     return (
       <div className="mx-auto max-w-3xl px-4 sm:px-6 py-16 text-center space-y-4">
-        <h1 className="font-display text-4xl tracking-widest text-[--color-clay-500]">AVAILABILITY</h1>
-        <p className="text-[--color-text-muted]">Data is temporarily unavailable. Please try again shortly.</p>
+        <h1 className="font-display text-4xl tracking-widest text-(--color-clay-500)">AVAILABILITY</h1>
+        <p className="text-(--color-text-muted)">Data is temporarily unavailable. Please try again shortly.</p>
       </div>
     );
   }
@@ -144,22 +144,22 @@ export default async function AvailabilityPage({ searchParams }: Readonly<PagePr
     return (
       <div className="mx-auto max-w-4xl px-4 sm:px-6 py-10 space-y-6">
         <div className="flex items-center justify-between text-sm">
-          <Link href="/" className="font-semibold text-[--color-clay-600] hover:opacity-90">
+          <Link href="/" className="font-semibold text-(--color-clay-600) hover:opacity-90">
             📅 View Schedule & Standings
           </Link>
-          <Link href="/admin" className="font-semibold text-[--color-clay-600] hover:opacity-90">
+          <Link href="/admin" className="font-semibold text-(--color-clay-600) hover:opacity-90">
             ⚙ Admin
           </Link>
         </div>
 
-        <div className="rounded-2xl border border-[--color-border] bg-gradient-to-br from-[--color-clay-100] via-[--color-cream] to-white px-6 py-7 shadow-sm">
+        <div className="rounded-2xl border border-(--color-border) bg-gradient-to-br from-(--color-clay-100) via-(--color-cream) to-white px-6 py-7 shadow-sm">
           <div className="text-center space-y-2">
             <div className="text-3xl">🎾</div>
-            <h1 className="font-display text-5xl tracking-widest text-[--color-clay-700]">PALOMINO TENNIS CLUB</h1>
-            <p className="text-sm text-[--color-text-muted]">
+            <h1 className="font-display text-5xl tracking-widest text-(--color-clay-700)">PALOMINO TENNIS CLUB</h1>
+            <p className="text-sm text-(--color-text-muted)">
               Select your name to submit your availability for the next {dayWindow(activeSeason.startDate, activeSeason.endDate)} days.
             </p>
-            <p className="text-xs font-semibold uppercase tracking-widest text-[--color-forest-700]">
+            <p className="text-xs font-semibold uppercase tracking-widest text-(--color-forest-700)">
               {formatDate(activeSeason.startDate)} - {formatDate(activeSeason.endDate)}
             </p>
           </div>
@@ -177,7 +177,7 @@ export default async function AvailabilityPage({ searchParams }: Readonly<PagePr
             const letters = [...groups.keys()].sort((a, b) => a.localeCompare(b));
             return letters.map((letter) => (
               <section key={letter} className="space-y-2">
-                <h2 className="font-display text-2xl tracking-widest text-[--color-clay-500]">
+                <h2 className="font-display text-2xl tracking-widest text-(--color-clay-500)">
                   {letter}
                 </h2>
                 {(groups.get(letter) ?? []).map((player) => {
@@ -187,20 +187,20 @@ export default async function AvailabilityPage({ searchParams }: Readonly<PagePr
                     <Link
                       key={player.id}
                       href={`/availability?player=${player.id}`}
-                      className="group flex items-center justify-between rounded-xl border border-[--color-border] bg-[--color-surface] px-4 py-3 shadow-sm transition-all hover:-translate-y-0.5 hover:border-[--color-clay-300] hover:shadow-md"
+                      className="group flex items-center justify-between rounded-xl border border-(--color-border) bg-(--color-surface) px-4 py-3 shadow-sm transition-all hover:-translate-y-0.5 hover:border-(--color-clay-300) hover:shadow-md"
                     >
                       <div className="flex items-center gap-3">
-                        <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[--color-clay-100] text-sm font-bold text-[--color-clay-700]">
+                        <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-(--color-clay-100) text-sm font-bold text-(--color-clay-700)">
                           {initials(name)}
                         </span>
                         <div>
                           <p className="font-semibold leading-tight">{name}</p>
-                          <p className="text-xs text-[--color-text-muted]">
+                          <p className="text-xs text-(--color-text-muted)">
                             {stats.played}M played · {stats.scheduled} scheduled
                           </p>
                         </div>
                       </div>
-                      <span className="text-sm font-bold text-[--color-text-muted] transition-transform group-hover:translate-x-0.5">
+                      <span className="text-sm font-bold text-(--color-text-muted) transition-transform group-hover:translate-x-0.5">
                         →
                       </span>
                     </Link>
@@ -242,21 +242,21 @@ export default async function AvailabilityPage({ searchParams }: Readonly<PagePr
   return (
     <div className="mx-auto max-w-2xl px-4 sm:px-6 py-10 space-y-6">
       <div className="flex items-center justify-between text-sm">
-        <Link href="/availability" className="font-semibold text-[--color-clay-600] hover:opacity-90">
+        <Link href="/availability" className="font-semibold text-(--color-clay-600) hover:opacity-90">
           ← Back to players
         </Link>
-        <span className="text-[--color-text-muted]">
+        <span className="text-(--color-text-muted)">
           {formatDate(activeSeason.startDate)} - {formatDate(activeSeason.endDate)}
         </span>
       </div>
 
-      <div className="rounded-2xl border border-[--color-border] bg-gradient-to-br from-[--color-clay-50] via-white to-[--color-forest-50] px-5 py-5 shadow-sm">
-        <h1 className="font-display text-4xl tracking-widest text-[--color-clay-600]">MY AVAILABILITY</h1>
-        <p className="mt-1 text-sm text-[--color-text-muted]">{activeSeason.name} - {fullName}</p>
+      <div className="rounded-2xl border border-(--color-border) bg-gradient-to-br from-(--color-clay-50) via-white to-(--color-forest-50) px-5 py-5 shadow-sm">
+        <h1 className="font-display text-4xl tracking-widest text-(--color-clay-600)">MY AVAILABILITY</h1>
+        <p className="mt-1 text-sm text-(--color-text-muted)">{activeSeason.name} - {fullName}</p>
       </div>
 
       {saved && (
-        <div className="rounded-lg border border-[--color-forest-200] bg-[--color-forest-50] px-4 py-3 text-sm font-semibold text-[--color-forest-700]">
+        <div className="rounded-lg border border-(--color-forest-200) bg-(--color-forest-50) px-4 py-3 text-sm font-semibold text-(--color-forest-700)">
           Availability saved successfully.
         </div>
       )}

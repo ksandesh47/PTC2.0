@@ -119,51 +119,52 @@ export function PlayersRoster({ roster }: Readonly<{ roster: PlayerRow[] }>) {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-wrap items-center gap-3 flex-1 min-w-[220px]">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center flex-1">
           <input
             type="text"
-            placeholder="Filter by name, email, or phone…"
+            placeholder="Filter…"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="flex-1 min-w-[220px] rounded-md border border-[--color-border] bg-[--color-surface] px-3 py-2 text-sm"
+            className="flex-1 min-w-0 rounded-md border border-(--color-border) bg-(--color-surface) px-3 py-2 text-sm"
           />
-          <label className="flex items-center gap-2 text-sm whitespace-nowrap">
+          <label className="flex items-center gap-2 text-xs sm:text-sm whitespace-nowrap">
             <input
               type="checkbox"
               checked={showInactive}
               onChange={(e) => setShowInactive(e.target.checked)}
             />
-            Include inactive ({inactiveCount})
+            Inactive ({inactiveCount})
           </label>
         </div>
         <button
           type="button"
           onClick={() => setEditMode(!editMode)}
-          className={`rounded-md px-3 py-2 text-sm font-semibold transition-colors ${
+          className={`w-full sm:w-auto rounded-md px-2 sm:px-3 py-2 text-xs sm:text-sm font-semibold transition-colors ${
             editMode
-              ? "bg-[--color-clay-500] text-white hover:bg-[--color-clay-600]"
-              : "border border-[--color-border] bg-[--color-surface] hover:bg-[--color-clay-50]"
+              ? "bg-(--color-clay-500) text-white hover:bg-(--color-clay-600)"
+              : "border border-(--color-border) bg-(--color-surface) hover:bg-(--color-clay-50)"
           }`}
         >
-          {editMode ? "✓ Done Editing" : "✏ Edit Mode"}
+          {editMode ? "✓ Done" : "✏ Edit"}
         </button>
       </div>
 
-      <div className="rounded-lg border border-[--color-border] bg-[--color-surface] overflow-hidden">
-        <table className="w-full text-sm">
-          <thead className="bg-[--color-clay-50] text-xs uppercase tracking-wider text-[--color-text-muted]">
+      <div className="rounded-lg border border-(--color-border) bg-(--color-surface) overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm min-w-max">
+          <thead className="bg-(--color-clay-50) text-xs uppercase tracking-wider text-(--color-text-muted)">
             <tr>
-              <th className="px-3 py-2 text-left w-10">#</th>
-              <th className="px-3 py-2 text-left">Name</th>
-              <th className="px-3 py-2 text-left">Phone</th>
-              <th className="px-3 py-2 text-left">Email</th>
-              <th className="px-3 py-2 text-left">NTRP</th>
-              <th className="px-3 py-2 text-left">Status</th>
-              <th className="px-3 py-2 text-center">Actions</th>
+              <th className="px-2 py-2 text-left w-10 min-w-max">#</th>
+              <th className="px-2 py-2 text-left min-w-[100px]">Name</th>
+              <th className="px-2 py-2 text-left min-w-[90px]">Phone</th>
+              <th className="px-2 py-2 text-left min-w-[110px]">Email</th>
+              <th className="px-2 py-2 text-left min-w-[45px]">NTRP</th>
+              <th className="px-2 py-2 text-left min-w-[65px]">Status</th>
+              <th className="px-2 py-2 text-center min-w-[90px]">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-[--color-border]">
+          <tbody className="divide-y divide-(--color-border)">
             {filtered.map((p, idx) => {
               const isEditing = editing.has(p.id);
               const edit = editing.get(p.id);
@@ -171,11 +172,11 @@ export function PlayersRoster({ roster }: Readonly<{ roster: PlayerRow[] }>) {
               const isSaving = saving.has(p.id);
 
               return (
-                <tr key={p.id} className={isEditing ? "bg-[--color-clay-50]" : p.isActive ? "" : "opacity-60"}>
-                  <td className="px-3 py-2 text-[--color-text-muted]">{idx + 1}</td>
-                  <td className="px-3 py-2">
+                <tr key={p.id} className={isEditing ? "bg-(--color-clay-50)" : p.isActive ? "" : "opacity-60"}>
+                  <td className="px-2 py-2 text-(--color-text-muted)">{idx + 1}</td>
+                  <td className="px-2 py-2">
                     {isEditing && edit ? (
-                      <div className="space-y-1">
+                      <div className="space-y-0.5">
                         <input
                           type="text"
                           value={edit.firstName}
@@ -183,7 +184,7 @@ export function PlayersRoster({ roster }: Readonly<{ roster: PlayerRow[] }>) {
                             setEditing((m) => new Map(m).set(p.id, { ...edit, firstName: e.target.value }))
                           }
                           placeholder="First"
-                          className="w-full rounded border border-[--color-border] px-2 py-1 text-xs"
+                          className="w-full rounded border border-(--color-border) px-1.5 py-0.5 text-xs h-7"
                         />
                         <input
                           type="text"
@@ -192,7 +193,7 @@ export function PlayersRoster({ roster }: Readonly<{ roster: PlayerRow[] }>) {
                             setEditing((m) => new Map(m).set(p.id, { ...edit, lastName: e.target.value }))
                           }
                           placeholder="Last"
-                          className="w-full rounded border border-[--color-border] px-2 py-1 text-xs"
+                          className="w-full rounded border border-(--color-border) px-1.5 py-0.5 text-xs h-7"
                         />
                       </div>
                     ) : (
@@ -201,7 +202,7 @@ export function PlayersRoster({ roster }: Readonly<{ roster: PlayerRow[] }>) {
                       </span>
                     )}
                   </td>
-                  <td className="px-3 py-2 text-[--color-text-muted]">
+                  <td className="px-2 py-2 text-(--color-text-muted)">
                     {isEditing && edit ? (
                       <input
                         type="tel"
@@ -210,13 +211,13 @@ export function PlayersRoster({ roster }: Readonly<{ roster: PlayerRow[] }>) {
                           setEditing((m) => new Map(m).set(p.id, { ...edit, phone: e.target.value || null }))
                         }
                         placeholder="123-456-7890"
-                        className="w-full rounded border border-[--color-border] px-2 py-1 text-xs"
+                        className="w-full rounded border border-(--color-border) px-1.5 py-0.5 text-xs h-7"
                       />
                     ) : (
                       formatPhone(p.phone)
                     )}
                   </td>
-                  <td className="px-3 py-2 text-[--color-text-muted]">
+                  <td className="px-2 py-2 text-(--color-text-muted)">
                     {isEditing && edit ? (
                       <input
                         type="email"
@@ -225,13 +226,13 @@ export function PlayersRoster({ roster }: Readonly<{ roster: PlayerRow[] }>) {
                           setEditing((m) => new Map(m).set(p.id, { ...edit, email: e.target.value || null }))
                         }
                         placeholder="player@example.com"
-                        className="w-full rounded border border-[--color-border] px-2 py-1 text-xs"
+                        className="w-full rounded border border-(--color-border) px-1.5 py-0.5 text-xs h-7"
                       />
                     ) : (
                       p.email ?? "—"
                     )}
                   </td>
-                  <td className="px-3 py-2">
+                  <td className="px-2 py-2">
                     {isEditing && edit ? (
                       <input
                         type="text"
@@ -242,13 +243,13 @@ export function PlayersRoster({ roster }: Readonly<{ roster: PlayerRow[] }>) {
                           )
                         }
                         placeholder="3.5"
-                        className="w-full rounded border border-[--color-border] px-2 py-1 text-xs"
+                        className="w-full rounded border border-(--color-border) px-1.5 py-0.5 text-xs h-7"
                       />
                     ) : (
                       p.ntrpRating ?? "—"
                     )}
                   </td>
-                  <td className="px-3 py-2">
+                  <td className="px-2 py-2">
                     {isEditing && edit ? (
                       <label className="flex items-center gap-2 text-xs">
                         <input
@@ -264,7 +265,7 @@ export function PlayersRoster({ roster }: Readonly<{ roster: PlayerRow[] }>) {
                       <span
                         className={`inline-block rounded-full px-2 py-0.5 text-xs font-semibold ${
                           p.isActive
-                            ? "bg-[--color-forest-100] text-[--color-forest-700]"
+                            ? "bg-(--color-forest-100) text-(--color-forest-700)"
                             : "bg-gray-100 text-gray-600"
                         }`}
                       >
@@ -272,14 +273,14 @@ export function PlayersRoster({ roster }: Readonly<{ roster: PlayerRow[] }>) {
                       </span>
                     )}
                   </td>
-                  <td className="px-3 py-2 min-w-[120px]">
+                  <td className="px-2 py-2 min-w-[90px]">
                     {isEditing ? (
-                      <div className="flex flex-wrap gap-1 justify-center">
+                      <div className="flex flex-wrap gap-0.5 justify-center">
                         <button
                           type="button"
                           onClick={() => savePlayer(p)}
                           disabled={isSaving}
-                          className="rounded px-2 py-1 text-xs font-semibold bg-[--color-forest-500] text-white hover:bg-[--color-forest-600] disabled:opacity-50"
+                          className="rounded px-1.5 py-0.5 text-xs font-semibold bg-(--color-forest-500) text-white hover:bg-(--color-forest-600) disabled:opacity-50"
                         >
                           Save
                         </button>
@@ -287,7 +288,7 @@ export function PlayersRoster({ roster }: Readonly<{ roster: PlayerRow[] }>) {
                           type="button"
                           onClick={() => cancelEdit(p.id)}
                           disabled={isSaving}
-                          className="rounded px-2 py-1 text-xs font-semibold border border-[--color-border] hover:bg-[--color-clay-50] disabled:opacity-50"
+                          className="rounded px-1.5 py-0.5 text-xs font-semibold border border-(--color-border) hover:bg-(--color-clay-50) disabled:opacity-50"
                         >
                           ✕
                         </button>
@@ -296,7 +297,7 @@ export function PlayersRoster({ roster }: Readonly<{ roster: PlayerRow[] }>) {
                       <button
                         type="button"
                         onClick={() => startEdit(p)}
-                        className="rounded px-2 py-1 text-xs font-semibold border border-[--color-border] hover:bg-[--color-clay-50]"
+                        className="rounded px-2 py-1 text-xs font-semibold border border-(--color-border) hover:bg-(--color-clay-50)"
                       >
                         Edit
                       </button>
@@ -308,13 +309,14 @@ export function PlayersRoster({ roster }: Readonly<{ roster: PlayerRow[] }>) {
             })}
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={7} className="px-3 py-6 text-center text-sm text-[--color-text-muted]">
+                <td colSpan={7} className="px-3 py-6 text-center text-sm text-(--color-text-muted)">
                   No players match.
                 </td>
               </tr>
             )}
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   );

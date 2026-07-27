@@ -57,13 +57,13 @@ export function AvailabilityWindowControl({
   }
 
   return (
-    <div className="rounded-lg border border-[--color-border] bg-[--color-surface] p-4 space-y-3">
+    <div className="rounded-lg border border-(--color-border) bg-(--color-surface) p-4 space-y-3">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="font-display text-2xl tracking-wider">
             AVAILABILITY WINDOW
           </h2>
-          <p className="text-xs text-[--color-text-muted] mt-1">
+          <p className="text-xs text-(--color-text-muted) mt-1">
             {formatDate(startDate)} – {formatDate(endDate)}
           </p>
         </div>
@@ -72,8 +72,8 @@ export function AvailabilityWindowControl({
           onClick={() => setOpen(!open)}
           className={`rounded-md px-3 py-2 text-sm font-semibold transition-colors ${
             open
-              ? "bg-[--color-clay-500] text-white hover:bg-[--color-clay-600]"
-              : "border border-[--color-border] bg-[--color-surface] hover:bg-[--color-clay-50]"
+              ? "bg-(--color-clay-500) text-white hover:bg-(--color-clay-600)"
+              : "border border-(--color-border) bg-(--color-surface) hover:bg-(--color-clay-50)"
           }`}
         >
           {open ? "✓ Done" : "Edit Window"}
@@ -85,7 +85,7 @@ export function AvailabilityWindowControl({
           <form onSubmit={submit} className="space-y-3">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <label className="space-y-1">
-                <span className="text-xs font-semibold uppercase tracking-widest text-[--color-text-muted]">
+                <span className="text-xs font-semibold uppercase tracking-widest text-(--color-text-muted)">
                   From
                 </span>
                 <input
@@ -93,11 +93,11 @@ export function AvailabilityWindowControl({
                   required
                   value={customStart}
                   onChange={(e) => setCustomStart(e.target.value)}
-                  className="w-full rounded-md border border-[--color-border] px-3 py-2 text-sm"
+                  className="w-full rounded-md border border-(--color-border) px-3 py-2 text-sm"
                 />
               </label>
               <label className="space-y-1">
-                <span className="text-xs font-semibold uppercase tracking-widest text-[--color-text-muted]">
+                <span className="text-xs font-semibold uppercase tracking-widest text-(--color-text-muted)">
                   To
                 </span>
                 <input
@@ -105,7 +105,7 @@ export function AvailabilityWindowControl({
                   required
                   value={customEnd}
                   onChange={(e) => setCustomEnd(e.target.value)}
-                  className="w-full rounded-md border border-[--color-border] px-3 py-2 text-sm"
+                  className="w-full rounded-md border border-(--color-border) px-3 py-2 text-sm"
                 />
               </label>
             </div>
@@ -116,22 +116,22 @@ export function AvailabilityWindowControl({
               <button
                 type="submit"
                 disabled={loading}
-                className="rounded-md bg-[--color-clay-500] px-3 py-2 text-sm font-semibold text-white hover:bg-[--color-clay-600] disabled:opacity-60"
+                className="rounded-md bg-(--color-clay-500) px-3 py-2 text-sm font-semibold text-white hover:bg-(--color-clay-600) disabled:opacity-60"
               >
                 {loading ? "Saving…" : "Save Custom Window"}
               </button>
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                className="rounded-md border border-[--color-border] px-3 py-2 text-sm font-semibold hover:bg-[--color-clay-50]"
+                className="rounded-md border border-(--color-border) px-3 py-2 text-sm font-semibold hover:bg-(--color-clay-50)"
               >
                 Cancel
               </button>
             </div>
           </form>
 
-          <div className="border-t border-[--color-border] pt-3">
-            <p className="text-xs font-semibold uppercase tracking-widest text-[--color-text-muted] mb-2">
+          <div className="border-t border-(--color-border) pt-3">
+            <p className="text-xs font-semibold uppercase tracking-widest text-(--color-text-muted) mb-2">
               Quick Extend
             </p>
             <div className="flex flex-wrap gap-2">
@@ -141,7 +141,7 @@ export function AvailabilityWindowControl({
                   type="button"
                   onClick={() => extendDays(days)}
                   disabled={loading}
-                  className="rounded-md border border-[--color-border] px-3 py-1.5 text-xs font-semibold hover:bg-[--color-clay-50] disabled:opacity-50"
+                  className="rounded-md border border-(--color-border) px-3 py-1.5 text-xs font-semibold hover:bg-(--color-clay-50) disabled:opacity-50"
                 >
                   +{days} days
                 </button>

@@ -13,7 +13,7 @@ export default function LoginPage() {
     <Suspense
       fallback={
         <div className="flex min-h-[calc(100vh-3.5rem)] items-center justify-center px-4">
-          <p className="text-sm text-[--color-text-muted]">Loading login...</p>
+          <p className="text-sm text-(--color-text-muted)">Loading login...</p>
         </div>
       }
     >
@@ -53,17 +53,17 @@ function LoginPageContent() {
     <div className="flex min-h-[calc(100vh-3.5rem)] items-center justify-center px-4">
       <div className="w-full max-w-sm space-y-6">
         <div className="text-center">
-          <h1 className="font-display text-4xl tracking-widest text-[--color-clay-500]">
+          <h1 className="font-display text-4xl tracking-widest text-(--color-clay-500)">
             SIGN IN
           </h1>
-          <p className="mt-1 text-sm text-[--color-text-muted]">
+          <p className="mt-1 text-sm text-(--color-text-muted)">
             Enter your league credentials
           </p>
         </div>
 
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="space-y-4 rounded-lg border border-[--color-border] bg-[--color-surface] p-6"
+          className="space-y-4 rounded-lg border border-(--color-border) bg-(--color-surface) p-6"
           noValidate
         >
           {serverError && (
@@ -81,7 +81,7 @@ function LoginPageContent() {
               type="email"
               autoComplete="email"
               {...register("email")}
-              className="w-full rounded-md border border-[--color-border] bg-white px-3 py-2 text-sm focus:border-[--color-clay-400] focus:outline-none focus:ring-1 focus:ring-[--color-clay-400]"
+              className="w-full rounded-md border border-(--color-border) bg-white px-3 py-2 text-sm focus:border-(--color-clay-400) focus:outline-none focus:ring-1 focus:ring-(--color-clay-400)"
             />
             {errors.email && (
               <p className="text-xs text-red-600">{errors.email.message}</p>
@@ -97,7 +97,7 @@ function LoginPageContent() {
               type="password"
               autoComplete="current-password"
               {...register("password")}
-              className="w-full rounded-md border border-[--color-border] bg-white px-3 py-2 text-sm focus:border-[--color-clay-400] focus:outline-none focus:ring-1 focus:ring-[--color-clay-400]"
+              className="w-full rounded-md border border-(--color-border) bg-white px-3 py-2 text-sm focus:border-(--color-clay-400) focus:outline-none focus:ring-1 focus:ring-(--color-clay-400)"
             />
             {errors.password && (
               <p className="text-xs text-red-600">{errors.password.message}</p>
@@ -107,15 +107,15 @@ function LoginPageContent() {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full rounded-md bg-[--color-accent] py-2.5 text-sm font-semibold text-white hover:bg-[--color-accent-hover] disabled:opacity-60 transition-colors"
+            className="w-full rounded-md bg-(--color-accent) py-2.5 text-sm font-semibold text-white hover:bg-(--color-accent-hover) disabled:opacity-60 transition-colors"
           >
             {isSubmitting ? "Signing in…" : "Sign in"}
           </button>
         </form>
 
-        <p className="text-center text-sm text-[--color-text-muted]">
+        <p className="text-center text-sm text-(--color-text-muted)">
           New to the league?{" "}
-          <Link href="/auth/signup" className="font-semibold text-[--color-clay-600] hover:underline">
+          <Link href="/auth/signup" className="font-semibold text-(--color-clay-600) hover:underline">
             Create account
           </Link>
         </p>

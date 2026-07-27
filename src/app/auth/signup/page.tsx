@@ -49,16 +49,16 @@ export default function SignupPage() {
     <div className="flex min-h-[calc(100vh-3.5rem)] items-center justify-center px-4">
       <div className="w-full max-w-sm space-y-6">
         <div className="text-center">
-          <h1 className="font-display text-4xl tracking-widest text-[--color-clay-500]">CREATE ACCOUNT</h1>
-          <p className="mt-1 text-sm text-[--color-text-muted]">Join the league portal</p>
+          <h1 className="font-display text-4xl tracking-widest text-(--color-clay-500)">CREATE ACCOUNT</h1>
+          <p className="mt-1 text-sm text-(--color-text-muted)">Join the league portal</p>
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 rounded-lg border border-[--color-border] bg-[--color-surface] p-6" noValidate>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 rounded-lg border border-(--color-border) bg-(--color-surface) p-6" noValidate>
           {serverError && (
             <p role="alert" className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{serverError}</p>
           )}
           {successMessage && (
-            <p role="status" className="rounded-md bg-[--color-forest-100] px-3 py-2 text-sm text-[--color-forest-700]">{successMessage}</p>
+            <p role="status" className="rounded-md bg-(--color-forest-100) px-3 py-2 text-sm text-(--color-forest-700)">{successMessage}</p>
           )}
 
           <div className="grid grid-cols-2 gap-3">
@@ -68,7 +68,7 @@ export default function SignupPage() {
                 id="firstName"
                 type="text"
                 {...register("firstName")}
-                className="w-full rounded-md border border-[--color-border] bg-white px-3 py-2 text-sm focus:border-[--color-clay-400] focus:outline-none focus:ring-1 focus:ring-[--color-clay-400]"
+                className="w-full rounded-md border border-(--color-border) bg-white px-3 py-2 text-sm focus:border-(--color-clay-400) focus:outline-none focus:ring-1 focus:ring-(--color-clay-400)"
               />
               {errors.firstName && <p className="text-xs text-red-600">{errors.firstName.message}</p>}
             </div>
@@ -79,7 +79,7 @@ export default function SignupPage() {
                 id="lastName"
                 type="text"
                 {...register("lastName")}
-                className="w-full rounded-md border border-[--color-border] bg-white px-3 py-2 text-sm focus:border-[--color-clay-400] focus:outline-none focus:ring-1 focus:ring-[--color-clay-400]"
+                className="w-full rounded-md border border-(--color-border) bg-white px-3 py-2 text-sm focus:border-(--color-clay-400) focus:outline-none focus:ring-1 focus:ring-(--color-clay-400)"
               />
               {errors.lastName && <p className="text-xs text-red-600">{errors.lastName.message}</p>}
             </div>
@@ -92,7 +92,7 @@ export default function SignupPage() {
               type="email"
               autoComplete="email"
               {...register("email")}
-              className="w-full rounded-md border border-[--color-border] bg-white px-3 py-2 text-sm focus:border-[--color-clay-400] focus:outline-none focus:ring-1 focus:ring-[--color-clay-400]"
+              className="w-full rounded-md border border-(--color-border) bg-white px-3 py-2 text-sm focus:border-(--color-clay-400) focus:outline-none focus:ring-1 focus:ring-(--color-clay-400)"
             />
             {errors.email && <p className="text-xs text-red-600">{errors.email.message}</p>}
           </div>
@@ -104,7 +104,7 @@ export default function SignupPage() {
               type="password"
               autoComplete="new-password"
               {...register("password")}
-              className="w-full rounded-md border border-[--color-border] bg-white px-3 py-2 text-sm focus:border-[--color-clay-400] focus:outline-none focus:ring-1 focus:ring-[--color-clay-400]"
+              className="w-full rounded-md border border-(--color-border) bg-white px-3 py-2 text-sm focus:border-(--color-clay-400) focus:outline-none focus:ring-1 focus:ring-(--color-clay-400)"
             />
             {errors.password && <p className="text-xs text-red-600">{errors.password.message}</p>}
           </div>
@@ -112,14 +112,14 @@ export default function SignupPage() {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full rounded-md bg-[--color-accent] py-2.5 text-sm font-semibold text-white hover:bg-[--color-accent-hover] disabled:opacity-60 transition-colors"
+            className="w-full rounded-md bg-(--color-accent) py-2.5 text-sm font-semibold text-white hover:bg-(--color-accent-hover) disabled:opacity-60 transition-colors"
           >
             {isSubmitting ? "Creating…" : "Create account"}
           </button>
         </form>
 
-        <p className="text-center text-sm text-[--color-text-muted]">
-          Already have an account? <Link href="/auth/login" className="font-semibold text-[--color-clay-600] hover:underline">Sign in</Link>
+        <p className="text-center text-sm text-(--color-text-muted)">
+          Already have an account? <Link href="/auth/login" className="font-semibold text-(--color-clay-600) hover:underline">Sign in</Link>
         </p>
       </div>
     </div>

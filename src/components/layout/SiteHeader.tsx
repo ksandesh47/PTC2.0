@@ -30,14 +30,14 @@ export async function SiteHeader() {
   }
 
   return (
-    <header className="border-b border-[--color-border] bg-[--color-surface]">
+    <header className="bg-(--color-clay-900) shadow-md">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between gap-6">
         {/* Logo */}
         <Link
           href="/"
-          className="font-display text-2xl tracking-widest text-[--color-accent] leading-none"
+          className="font-display text-2xl tracking-widest text-(--color-clay-200) hover:text-white leading-none transition-colors flex items-center gap-2"
         >
-          PTC
+          <span>🎾</span> PTC
         </Link>
 
         {/* Primary nav */}
@@ -46,7 +46,7 @@ export async function SiteHeader() {
             <Link
               key={link.href}
               href={link.href}
-              className="text-sm font-semibold text-[--color-text-muted] hover:text-[--color-text] transition-colors"
+              className="text-sm font-semibold text-(--color-clay-300) hover:text-white transition-colors"
             >
               {link.label}
             </Link>
@@ -59,14 +59,14 @@ export async function SiteHeader() {
             <>
               <Link
                 href="/player/availability"
-                className="text-sm font-semibold text-[--color-text-muted] hover:text-[--color-text] transition-colors"
+                className="text-sm font-semibold text-(--color-clay-300) hover:text-white transition-colors"
               >
                 My Availability
               </Link>
               <form action="/auth/signout" method="POST">
                 <button
                   type="submit"
-                  className="text-sm font-semibold text-[--color-clay-600] hover:text-[--color-clay-700] transition-colors"
+                  className="text-sm font-semibold text-(--color-clay-400) hover:text-(--color-clay-200) transition-colors"
                 >
                   Sign out
                 </button>
@@ -75,7 +75,7 @@ export async function SiteHeader() {
           ) : (
             <Link
               href="/auth/login"
-              className="rounded-md bg-[--color-accent] px-3 py-1.5 text-sm font-semibold text-white hover:bg-[--color-accent-hover] transition-colors"
+              className="rounded-md bg-(--color-clay-600) px-3 py-1.5 text-sm font-semibold text-white hover:bg-(--color-clay-500) transition-colors"
             >
               Sign in
             </Link>

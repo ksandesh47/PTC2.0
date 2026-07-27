@@ -169,8 +169,8 @@ export default async function SchedulePage({ searchParams }: Readonly<PageProps>
   } catch {
     return (
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 text-center space-y-4">
-        <h1 className="font-display text-5xl tracking-widest text-[--color-clay-500]">SCHEDULE</h1>
-        <p className="text-[--color-text-muted]">Data is temporarily unavailable. Please try again shortly.</p>
+        <h1 className="font-display text-5xl tracking-widest text-(--color-clay-500)">SCHEDULE</h1>
+        <p className="text-(--color-text-muted)">Data is temporarily unavailable. Please try again shortly.</p>
       </div>
     );
   }
@@ -179,7 +179,7 @@ export default async function SchedulePage({ searchParams }: Readonly<PageProps>
 
   if (!season) {
     return (
-      <div className="mx-auto max-w-7xl px-4 py-16 text-center text-[--color-text-muted]">
+      <div className="mx-auto max-w-7xl px-4 py-16 text-center text-(--color-text-muted)">
         No active season found.
       </div>
     );
@@ -240,27 +240,27 @@ export default async function SchedulePage({ searchParams }: Readonly<PageProps>
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 space-y-8">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="font-display text-5xl tracking-widest text-[--color-clay-500]">
+          <h1 className="font-display text-5xl tracking-widest text-(--color-clay-500)">
             SCHEDULE
           </h1>
-          <p className="text-sm text-[--color-text-muted] mt-1">
+          <p className="text-sm text-(--color-text-muted) mt-1">
             {season.name} &middot; {getMatchFormatLabel()} &middot; availability window {palominoLeagueRules.availabilityWindowDays} days
           </p>
         </div>
         <PersonalToggle personalMode={personalMode} selectedWeek={selectedWeek} />
       </div>
 
-      <div className="rounded-xl border border-[--color-border] bg-[--color-surface] px-4 py-3">
+      <div className="rounded-xl border border-(--color-border) bg-(--color-surface) px-4 py-3">
         <div className="flex items-center justify-between gap-3">
           {canGoPrev ? (
             <Link
               href={`${linkBase}${selectedWeek - 1}`}
-              className="rounded-md border border-[--color-border] px-3 py-1.5 text-sm font-semibold hover:bg-[--color-clay-50]"
+              className="rounded-md border border-(--color-border) px-3 py-1.5 text-sm font-semibold hover:bg-(--color-clay-50)"
             >
               ← Prev
             </Link>
           ) : (
-            <span className="rounded-md border border-[--color-border] px-3 py-1.5 text-sm font-semibold text-[--color-text-muted] opacity-60">
+            <span className="rounded-md border border-(--color-border) px-3 py-1.5 text-sm font-semibold text-(--color-text-muted) opacity-60">
               ← Prev
             </span>
           )}
@@ -268,7 +268,7 @@ export default async function SchedulePage({ searchParams }: Readonly<PageProps>
           <div className="text-center">
             <p className="font-display text-xl tracking-wider">{rangeLabel}</p>
             {isThisWeek && (
-              <p className="text-xs text-[--color-text-muted] uppercase tracking-wide">
+              <p className="text-xs text-(--color-text-muted) uppercase tracking-wide">
                 This Week
               </p>
             )}
@@ -277,12 +277,12 @@ export default async function SchedulePage({ searchParams }: Readonly<PageProps>
           {canGoNext ? (
             <Link
               href={`${linkBase}${selectedWeek + 1}`}
-              className="rounded-md border border-[--color-border] px-3 py-1.5 text-sm font-semibold hover:bg-[--color-clay-50]"
+              className="rounded-md border border-(--color-border) px-3 py-1.5 text-sm font-semibold hover:bg-(--color-clay-50)"
             >
               Next →
             </Link>
           ) : (
-            <span className="rounded-md border border-[--color-border] px-3 py-1.5 text-sm font-semibold text-[--color-text-muted] opacity-60">
+            <span className="rounded-md border border-(--color-border) px-3 py-1.5 text-sm font-semibold text-(--color-text-muted) opacity-60">
               Next →
             </span>
           )}
@@ -290,14 +290,14 @@ export default async function SchedulePage({ searchParams }: Readonly<PageProps>
       </div>
 
       {personalMode && viewerPlayerId === null && (
-        <p className="rounded-lg border border-[--color-border] bg-[--color-clay-50] px-4 py-3 text-sm text-[--color-text-muted]">
+        <p className="rounded-lg border border-(--color-border) bg-(--color-clay-50) px-4 py-3 text-sm text-(--color-text-muted)">
           Sign in with a linked player account to filter to your matches.
         </p>
       )}
 
       <div className="grid gap-4 lg:grid-cols-2 animate-stagger">
         {visibleSlots.length === 0 && (
-          <p className="text-[--color-text-muted]">
+          <p className="text-(--color-text-muted)">
             {personalMode ? "No personal matches this week." : "No slots configured for this week."}
           </p>
         )}
@@ -317,7 +317,7 @@ function PersonalToggle({
     return (
       <Link
         href={`/schedule?week=${selectedWeek}`}
-        className="self-start rounded-md border border-[--color-clay-500] bg-[--color-clay-500] px-3 py-1.5 text-sm font-semibold text-white hover:opacity-90"
+        className="self-start rounded-md border border-(--color-clay-500) bg-(--color-clay-500) px-3 py-1.5 text-sm font-semibold text-white hover:opacity-90"
       >
         All matches
       </Link>
@@ -326,7 +326,7 @@ function PersonalToggle({
   return (
     <Link
       href={`/schedule?me=1&week=${selectedWeek}`}
-      className="self-start rounded-md border border-[--color-border] px-3 py-1.5 text-sm font-semibold hover:bg-[--color-clay-50]"
+      className="self-start rounded-md border border-(--color-border) px-3 py-1.5 text-sm font-semibold hover:bg-(--color-clay-50)"
     >
       Personal schedule
     </Link>
@@ -351,19 +351,19 @@ function ScheduleSlotCard({
 
   if (!match) {
     return (
-      <div className="rounded-xl border border-dashed border-[--color-border] bg-[--color-surface] p-4 space-y-2 shadow-sm">
+      <div className="rounded-xl border border-dashed border-(--color-border) bg-(--color-surface) p-4 space-y-2 shadow-sm">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-[--color-text-muted]">
+            <p className="text-xs font-semibold uppercase tracking-wider text-(--color-text-muted)">
               {dayLabel}
             </p>
-            <p className="text-sm text-[--color-text-muted]">{time}</p>
+            <p className="text-sm text-(--color-text-muted)">{time}</p>
           </div>
           <span className="inline-block rounded-full bg-gray-100 px-2 py-0.5 text-xs font-semibold text-gray-600">
             No match
           </span>
         </div>
-        <p className="text-sm text-[--color-text-muted]">No match scheduled</p>
+        <p className="text-sm text-(--color-text-muted)">No match scheduled</p>
       </div>
     );
   }
@@ -391,30 +391,33 @@ function ScheduleMatchCard({
   );
 
   return (
-    <div className="rounded-xl border border-[--color-border] bg-[--color-surface] p-4 space-y-4 shadow-sm">
-      <div className="flex items-start justify-between gap-3">
+    <div className="rounded-xl border border-(--color-border) bg-(--color-surface) overflow-hidden shadow-sm">
+      {/* Colored date strip like V1 */}
+      <div className="bg-(--color-clay-800) px-4 py-3 flex items-start justify-between gap-3">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wider text-[--color-text-muted]">
+          <p className="text-sm font-semibold uppercase tracking-wider text-(--color-clay-100)">
             {match.slot?.slotDate ? formatDate(match.slot.slotDate) : dayLabel}
           </p>
-          {time && <p className="text-sm text-[--color-text-muted]">{time}</p>}
+          {time && <p className="text-xs text-(--color-clay-300)">{time}</p>}
         </div>
         <StatusBadge match={match} />
       </div>
+
+      <div className="p-4 space-y-4">
 
       {match.pairings.length > 0 ? (
         <div className="grid gap-2 sm:grid-cols-2">
           {lineup.map((id, index) => (
             <div
               key={id}
-              className="flex items-center justify-between rounded-lg bg-[--color-clay-50] px-3 py-2 text-sm font-semibold"
+              className="flex items-center justify-between rounded-lg bg-(--color-clay-50) px-3 py-2 text-sm font-semibold"
             >
               <span>
-                <span className="mr-2 text-[--color-text-muted]">{index + 1}</span>
+                <span className="mr-2 text-(--color-text-muted)">{index + 1}</span>
                 {playerName(displayNameMap, id)}
               </span>
               {match.status === "completed" && (
-                <span className="font-display text-lg tracking-wider text-[--color-clay-700]">
+                <span className="font-display text-lg tracking-wider text-(--color-clay-700)">
                   {scoreByPlayer.get(id) ?? 0}
                 </span>
               )}
@@ -422,7 +425,7 @@ function ScheduleMatchCard({
           ))}
         </div>
       ) : (
-        <p className="text-sm text-[--color-text-muted]">Lineup not assigned yet.</p>
+        <p className="text-sm text-(--color-text-muted)">Lineup not assigned yet.</p>
       )}
 
       {(match.status === "cancelled" || match.status === "abandoned") && match.abandonReason && (
@@ -430,7 +433,7 @@ function ScheduleMatchCard({
           className={`rounded-lg border px-3 py-2 text-sm italic ${
             match.status === "abandoned"
               ? "border-red-200 bg-red-50 text-red-700"
-              : "border-[--color-border] bg-gray-50 text-gray-600"
+              : "border-(--color-border) bg-gray-50 text-gray-600"
           }`}
         >
           {match.abandonReason}
@@ -439,7 +442,7 @@ function ScheduleMatchCard({
 
       {match.status === "completed" && setRows.length > 0 && (
         <div className="space-y-2">
-          <p className="text-xs font-semibold uppercase tracking-widest text-[--color-text-muted]">
+          <p className="text-xs font-semibold uppercase tracking-widest text-(--color-text-muted)">
             Match Results
           </p>
           {setRows.map((set) => (
@@ -448,14 +451,15 @@ function ScheduleMatchCard({
               className="grid grid-cols-[1fr_auto_2.5rem_auto_1fr] items-center gap-2 text-sm"
             >
               <span className="font-medium">{set.team1Label}</span>
-              <span className="text-right font-bold text-[--color-clay-600]">{set.team1Games}</span>
-              <span className="text-center text-xs text-[--color-text-muted]">S{set.setNumber}</span>
-              <span className="font-bold text-[--color-clay-600]">{set.team2Games}</span>
+              <span className="text-right font-bold text-(--color-clay-600)">{set.team1Games}</span>
+              <span className="text-center text-xs text-(--color-text-muted)">S{set.setNumber}</span>
+              <span className="font-bold text-(--color-clay-600)">{set.team2Games}</span>
               <span className="text-right font-medium">{set.team2Label}</span>
             </div>
           ))}
         </div>
       )}
+      </div>
     </div>
   );
 }
@@ -463,9 +467,9 @@ function ScheduleMatchCard({
 function StatusBadge({ match }: Readonly<{ match: LeagueMatch }>) {
   const status = match.status;
   const styles: Record<string, string> = {
-    scheduled: "bg-[--color-clay-100] text-[--color-clay-700]",
+    scheduled: "bg-(--color-clay-100) text-(--color-clay-700)",
     in_progress: "bg-yellow-100 text-yellow-700",
-    completed: "bg-[--color-forest-100] text-[--color-forest-700]",
+    completed: "bg-(--color-forest-100) text-(--color-forest-700)",
     abandoned: "bg-red-100 text-red-700",
     cancelled: "bg-gray-100 text-gray-600",
   };

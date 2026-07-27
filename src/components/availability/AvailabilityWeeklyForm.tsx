@@ -102,30 +102,30 @@ export default function AvailabilityWeeklyForm({
   }
 
   if (slots.length === 0) {
-    return <p className="text-[--color-text-muted]">No slots defined yet.</p>;
+    return <p className="text-(--color-text-muted)">No slots defined yet.</p>;
   }
 
   return (
     <form action={formAction} method="POST" className="space-y-6">
       <input type="hidden" name="playerId" value={playerId} />
 
-      <div className="sticky top-14 z-10 flex items-center justify-between rounded-xl border border-[--color-border] bg-[--color-surface]/95 px-4 py-3 shadow-sm backdrop-blur-sm">
-        <p className="text-sm font-semibold text-[--color-text-muted]">Tap slots to toggle your availability</p>
-        <p className="text-sm font-semibold text-[--color-clay-600]">{selectedCount} selected</p>
+      <div className="sticky top-14 z-10 flex items-center justify-between rounded-xl border border-(--color-border) bg-(--color-surface)/95 px-4 py-3 shadow-sm backdrop-blur-sm">
+        <p className="text-sm font-semibold text-(--color-text-muted)">Tap slots to toggle your availability</p>
+        <p className="text-sm font-semibold text-(--color-clay-600)">{selectedCount} selected</p>
       </div>
 
       <div className="space-y-6">
         {groupedWeeks.map((week) => (
-          <section key={week.key} className="space-y-3 rounded-xl border border-[--color-border] bg-[--color-surface] p-3 shadow-sm">
+          <section key={week.key} className="space-y-3 rounded-xl border border-(--color-border) bg-(--color-surface) p-3 shadow-sm">
             <div className="flex items-center justify-between">
-              <h2 className="text-sm font-bold uppercase tracking-widest text-[--color-clay-600]">
+              <h2 className="text-sm font-bold uppercase tracking-widest text-(--color-clay-600)">
                 {week.title}
               </h2>
               <div className="flex gap-2 text-xs font-semibold">
                 <button
                   type="button"
                   onClick={() => setWeekStatus(week, "available")}
-                  className="rounded-md bg-[--color-forest-100] px-2 py-1 text-[--color-forest-700]"
+                  className="rounded-md bg-(--color-forest-100) px-2 py-1 text-(--color-forest-700)"
                 >
                   All ✓
                 </button>
@@ -154,8 +154,8 @@ export default function AvailabilityWeeklyForm({
                     className={[
                       "flex w-full items-center justify-between rounded-lg border px-3 py-3 text-left transition-all",
                       isSelected
-                        ? "border-[--color-clay-800] bg-[--color-clay-900] text-[--color-accent]"
-                        : "border-[--color-border] bg-[--color-surface] text-[--color-text] hover:border-[--color-clay-300]",
+                        ? "border-(--color-clay-800) bg-(--color-clay-900) text-(--color-accent)"
+                        : "border-(--color-border) bg-(--color-surface) text-(--color-text) hover:border-(--color-clay-300)",
                     ].join(" ")}
                   >
                     <div className="flex items-center gap-3">
@@ -163,21 +163,21 @@ export default function AvailabilityWeeklyForm({
                         className={[
                           "inline-flex h-6 w-6 items-center justify-center rounded-md text-xs font-bold",
                           isSelected
-                            ? "bg-[--color-accent] text-[--color-clay-900]"
-                            : "bg-[--color-border] text-transparent",
+                            ? "bg-(--color-accent) text-(--color-clay-900)"
+                            : "bg-(--color-border) text-transparent",
                         ].join(" ")}
                       >
                         ✓
                       </span>
                       <div>
                         <div className="font-semibold">{displayDate}</div>
-                        <div className={isSelected ? "text-[--color-accent] text-sm" : "text-[--color-text-muted] text-sm"}>
+                        <div className={isSelected ? "text-(--color-accent) text-sm" : "text-(--color-text-muted) text-sm"}>
                           {time}
                         </div>
                       </div>
                     </div>
                     {isWeekend && (
-                      <span className="rounded-full bg-[--color-border] px-2 py-1 text-[10px] font-semibold uppercase text-[--color-text-muted]">
+                      <span className="rounded-full bg-(--color-border) px-2 py-1 text-[10px] font-semibold uppercase text-(--color-text-muted)">
                         Weekend
                       </span>
                     )}
@@ -192,7 +192,7 @@ export default function AvailabilityWeeklyForm({
 
       <button
         type="submit"
-        className="w-full rounded-md bg-[--color-clay-900] py-3 text-sm font-bold tracking-wide text-[--color-accent] hover:opacity-95"
+        className="w-full rounded-md bg-(--color-clay-900) py-3 text-sm font-bold tracking-wide text-(--color-accent) hover:opacity-95"
       >
         SUBMIT AVAILABILITY ({selectedCount} SLOTS)
       </button>
