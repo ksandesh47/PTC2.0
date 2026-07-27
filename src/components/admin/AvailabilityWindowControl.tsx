@@ -72,8 +72,8 @@ export function AvailabilityWindowControl({
           onClick={() => setOpen(!open)}
           className={`rounded-md px-3 py-2 text-sm font-semibold transition-colors ${
             open
-              ? "bg-(--color-clay-500) text-white hover:bg-(--color-clay-600)"
-              : "border border-(--color-border) bg-(--color-surface) hover:bg-(--color-clay-50)"
+              ? "bg-(--color-navy-500) text-white hover:bg-(--color-navy-600)"
+              : "border border-(--color-border) bg-(--color-surface) hover:bg-(--color-navy-50)"
           }`}
         >
           {open ? "✓ Done" : "Edit Window"}
@@ -116,14 +116,14 @@ export function AvailabilityWindowControl({
               <button
                 type="submit"
                 disabled={loading}
-                className="rounded-md bg-(--color-clay-500) px-3 py-2 text-sm font-semibold text-white hover:bg-(--color-clay-600) disabled:opacity-60"
+                className="rounded-md bg-(--color-navy-500) px-3 py-2 text-sm font-semibold text-white hover:bg-(--color-navy-600) disabled:opacity-60"
               >
                 {loading ? "Saving…" : "Save Custom Window"}
               </button>
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                className="rounded-md border border-(--color-border) px-3 py-2 text-sm font-semibold hover:bg-(--color-clay-50)"
+                className="rounded-md border border-(--color-border) px-3 py-2 text-sm font-semibold hover:bg-(--color-navy-50)"
               >
                 Cancel
               </button>
@@ -141,7 +141,7 @@ export function AvailabilityWindowControl({
                   type="button"
                   onClick={() => extendDays(days)}
                   disabled={loading}
-                  className="rounded-md border border-(--color-border) px-3 py-1.5 text-xs font-semibold hover:bg-(--color-clay-50) disabled:opacity-50"
+                  className="rounded-md border border-(--color-border) px-3 py-1.5 text-xs font-semibold hover:bg-(--color-navy-50) disabled:opacity-50"
                 >
                   +{days} days
                 </button>

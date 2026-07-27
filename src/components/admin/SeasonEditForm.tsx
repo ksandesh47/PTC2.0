@@ -69,7 +69,7 @@ export function SeasonEditForm({
     return (
       <button
         onClick={() => setIsOpen(true)}
-        className="text-xs rounded-md border border-(--color-border) px-2 py-1 hover:bg-(--color-clay-50) text-(--color-clay-600) font-semibold"
+        className="text-xs rounded-md border border-(--color-border) px-2 py-1 hover:bg-(--color-navy-50) text-(--color-navy-600) font-semibold"
       >
         Edit Dates
       </button>
@@ -77,7 +77,7 @@ export function SeasonEditForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="text-xs space-y-2 p-3 rounded-lg bg-(--color-clay-50) border border-(--color-clay-200)">
+    <form onSubmit={handleSubmit} className="text-xs space-y-2 p-3 rounded-lg bg-(--color-navy-50) border border-(--color-navy-200)">
       <div className="space-y-1">
         <label htmlFor="season-start-date" className="block font-semibold text-(--color-text-muted)">Start Date</label>
         <input

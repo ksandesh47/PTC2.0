@@ -13,7 +13,7 @@ export default async function AdminSeasonsPage() {
   return (
     <div className="p-6 lg:p-8 max-w-5xl space-y-4">
       <div className="flex items-center justify-between gap-3">
-        <h1 className="font-display text-4xl tracking-widest text-(--color-clay-500)">SEASONS</h1>
+        <h1 className="font-display text-4xl tracking-widest text-(--color-navy-500)">SEASONS</h1>
         <p className="text-sm text-(--color-text-muted)">{list.length} total</p>
       </div>
 

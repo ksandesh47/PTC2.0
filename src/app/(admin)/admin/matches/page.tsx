@@ -17,7 +17,7 @@ export default async function AdminMatchesPage() {
   if (!activeSeason) {
     return (
       <div className="p-6 lg:p-8 max-w-5xl">
-        <h1 className="font-display text-4xl tracking-widest text-(--color-clay-500)">MATCH BUILDER</h1>
+        <h1 className="font-display text-4xl tracking-widest text-(--color-navy-500)">MATCH BUILDER</h1>
         <p className="mt-3 text-sm text-(--color-text-muted)">No active season configured.</p>
       </div>
     );
@@ -54,17 +54,17 @@ export default async function AdminMatchesPage() {
   return (
     <div className="p-6 lg:p-8 max-w-6xl space-y-6">
       <div>
-        <h1 className="font-display text-4xl tracking-widest text-(--color-clay-500)">MATCH BUILDER</h1>
+        <h1 className="font-display text-4xl tracking-widest text-(--color-navy-500)">MATCH BUILDER</h1>
         <p className="mt-1 text-sm text-(--color-text-muted)">
           {activeSeason.name} · {scheduledCount} scheduled · {completedCount} completed
         </p>
       </div>
 
       <div className="flex flex-wrap gap-3 text-sm">
-        <Link href="/schedule" className="rounded-md border border-(--color-border) px-3 py-1.5 font-semibold hover:bg-(--color-clay-50)">
+        <Link href="/schedule" className="rounded-md border border-(--color-border) px-3 py-1.5 font-semibold hover:bg-(--color-navy-50)">
           Open Public Schedule
         </Link>
-        <Link href="/admin/scores" className="rounded-md border border-(--color-border) px-3 py-1.5 font-semibold hover:bg-(--color-clay-50)">
+        <Link href="/admin/scores" className="rounded-md border border-(--color-border) px-3 py-1.5 font-semibold hover:bg-(--color-navy-50)">
           Open Score Entry
         </Link>
       </div>
@@ -82,7 +82,7 @@ export default async function AdminMatchesPage() {
                     {m.slot?.slotDate ? formatDate(m.slot.slotDate) : "Date pending"} · {m.slot?.label ?? m.court ?? "Court TBD"}
                   </p>
                 </div>
-                <span className="rounded-full bg-(--color-clay-100) px-2 py-0.5 text-xs font-semibold capitalize text-(--color-clay-700)">
+                <span className="rounded-full bg-(--color-navy-100) px-2 py-0.5 text-xs font-semibold capitalize text-(--color-navy-700)">
                   {m.status.replace("_", " ")}
                 </span>
               </div>
@@ -91,7 +91,7 @@ export default async function AdminMatchesPage() {
                 <p className="text-sm text-(--color-text-muted)">No lineup assigned yet.</p>
               ) : (
                 m.pairings.map((pairing) => (
-                  <div key={pairing.id} className="rounded-lg border border-(--color-border) bg-(--color-clay-50) px-3 py-2 text-sm space-y-1">
+                  <div key={pairing.id} className="rounded-lg border border-(--color-border) bg-(--color-navy-50) px-3 py-2 text-sm space-y-1">
                     <p className="font-semibold">
                       {playerName(playerMap, pairing.team1Player1Id)}
                       {pairing.team1Player2Id ? ` & ${playerName(playerMap, pairing.team1Player2Id)}` : ""}

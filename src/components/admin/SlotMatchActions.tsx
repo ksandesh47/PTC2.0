@@ -110,7 +110,7 @@ export function SlotMatchActions({
           type="button"
           onClick={() => setShowEditor((prev) => !prev)}
           disabled={statusBusy || initialSetCards.length === 0}
-          className="rounded border border-(--color-border) px-2 py-1 text-xs font-semibold hover:bg-(--color-clay-50) disabled:opacity-60"
+          className="rounded border border-(--color-border) px-2 py-1 text-xs font-semibold hover:bg-(--color-navy-50) disabled:opacity-60"
         >
           {showEditor ? 'Close Editor' : scoreLabel}
         </button>
@@ -118,7 +118,7 @@ export function SlotMatchActions({
           type="button"
           onClick={isClosed ? reopenSlot : openCancelDialog}
           disabled={statusBusy}
-          className="rounded border border-(--color-border) px-2 py-1 text-xs font-semibold hover:bg-(--color-clay-50) disabled:opacity-60"
+          className="rounded border border-(--color-border) px-2 py-1 text-xs font-semibold hover:bg-(--color-navy-50) disabled:opacity-60"
         >
           {cancelButtonLabel}
         </button>
@@ -145,7 +145,7 @@ export function SlotMatchActions({
             className="fixed inset-x-2 top-16 z-50 mx-auto w-full max-w-sm rounded-xl border border-(--color-border) bg-(--color-surface) p-0 text-inherit shadow-2xl sm:inset-x-auto"
           >
             <div className="border-b border-(--color-border) px-4 py-3">
-              <p className="font-display text-lg tracking-widest text-(--color-clay-500)">
+              <p className="font-display text-lg tracking-widest text-(--color-navy-500)">
                 Cancel Match
               </p>
               <p className="text-xs text-(--color-text-muted)">
@@ -171,7 +171,7 @@ export function SlotMatchActions({
                     key={preset}
                     type="button"
                     onClick={() => setReason(preset)}
-                    className="rounded-full border border-(--color-border) px-2 py-0.5 text-xs hover:bg-(--color-clay-50)"
+                    className="rounded-full border border-(--color-border) px-2 py-0.5 text-xs hover:bg-(--color-navy-50)"
                   >
                     {preset}
                   </button>
@@ -181,7 +181,7 @@ export function SlotMatchActions({
                 <button
                   type="button"
                   onClick={() => setShowCancelDialog(false)}
-                  className="rounded border border-(--color-border) px-3 py-1.5 text-xs font-semibold hover:bg-(--color-clay-50)"
+                  className="rounded border border-(--color-border) px-3 py-1.5 text-xs font-semibold hover:bg-(--color-navy-50)"
                 >
                   Close
                 </button>

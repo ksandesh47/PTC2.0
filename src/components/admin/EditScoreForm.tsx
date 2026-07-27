@@ -116,7 +116,7 @@ export function EditScoreForm({
         {setCards.map((setCard, idx) => (
           <div
             key={`${setCard.team1Player1Id}-${setCard.team1Player2Id}-${setCard.team2Player1Id}-${setCard.team2Player2Id}`}
-            className="rounded-md border border-(--color-border) bg-(--color-clay-50) p-2 space-y-2 text-sm"
+            className="rounded-md border border-(--color-border) bg-(--color-navy-50) p-2 space-y-2 text-sm"
             draggable
             onDragStart={() => setDraggingIndex(idx)}
             onDragOver={(e) => e.preventDefault()}
@@ -138,7 +138,7 @@ export function EditScoreForm({
               const p2 = t2 > t1 ? 2 * t2 - t1 : t2;
               return (
                 <p className="text-[10px] uppercase tracking-wider text-(--color-text-muted)">
-                  Spreadsheet points: <span className="font-mono font-semibold text-(--color-clay-600)">{p1} - {p2}</span>
+                  Spreadsheet points: <span className="font-mono font-semibold text-(--color-navy-600)">{p1} - {p2}</span>
                 </p>
               );
             })()}
@@ -175,7 +175,7 @@ export function EditScoreForm({
       <button
         type="submit"
         disabled={loading || setCards.length === 0}
-        className="text-sm font-semibold px-3 py-1.5 bg-(--color-clay-600) text-white rounded hover:bg-(--color-clay-700) disabled:opacity-50"
+        className="text-sm font-semibold px-3 py-1.5 bg-(--color-navy-600) text-white rounded hover:bg-(--color-navy-700) disabled:opacity-50"
       >
         {loading ? 'Saving...' : 'Save Changes'}
       </button>

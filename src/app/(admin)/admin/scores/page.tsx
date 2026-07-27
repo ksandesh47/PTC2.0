@@ -390,7 +390,7 @@ export default async function AdminScoresPage({ searchParams }: Readonly<PagePro
   if (!activeSeason) {
     return (
       <div className="p-6 lg:p-8 max-w-5xl">
-        <h1 className="font-display text-4xl tracking-widest text-(--color-clay-500)">SCORE ENTRY</h1>
+        <h1 className="font-display text-4xl tracking-widest text-(--color-navy-500)">SCORE ENTRY</h1>
         <p className="mt-3 text-sm text-(--color-text-muted)">No active season configured.</p>
       </div>
     );
@@ -554,7 +554,7 @@ export default async function AdminScoresPage({ searchParams }: Readonly<PagePro
   return (
     <div className="p-6 lg:p-8 max-w-6xl space-y-6">
       <div>
-        <h1 className="font-display text-4xl tracking-widest text-(--color-clay-500)">SCORE ENTRY</h1>
+        <h1 className="font-display text-4xl tracking-widest text-(--color-navy-500)">SCORE ENTRY</h1>
         <p className="mt-1 text-sm text-(--color-text-muted)">
           {activeSeason.name} · Week {selectedWeek} of {maxWeek} · {displayWeekMatches.length}/9 matches · {readyForScoring.length} pending
         </p>
@@ -566,7 +566,7 @@ export default async function AdminScoresPage({ searchParams }: Readonly<PagePro
             {canGoPrev ? (
               <Link
                 href={`/admin/scores?week=${selectedWeek - 1}`}
-                className="rounded-md border border-(--color-border) px-3 py-1.5 text-sm font-semibold hover:bg-(--color-clay-50)"
+                className="rounded-md border border-(--color-border) px-3 py-1.5 text-sm font-semibold hover:bg-(--color-navy-50)"
               >
                 ← Prev
               </Link>
@@ -583,7 +583,7 @@ export default async function AdminScoresPage({ searchParams }: Readonly<PagePro
             {canGoNext ? (
               <Link
                 href={`/admin/scores?week=${selectedWeek + 1}`}
-                className="rounded-md border border-(--color-border) px-3 py-1.5 text-sm font-semibold hover:bg-(--color-clay-50)"
+                className="rounded-md border border-(--color-border) px-3 py-1.5 text-sm font-semibold hover:bg-(--color-navy-50)"
               >
                 Next →
               </Link>
@@ -597,10 +597,10 @@ export default async function AdminScoresPage({ searchParams }: Readonly<PagePro
       )}
 
       <div className="flex flex-wrap gap-3 text-sm">
-        <Link href="/results" className="rounded-md border border-(--color-border) px-3 py-1.5 font-semibold hover:bg-(--color-clay-50)">
+        <Link href="/results" className="rounded-md border border-(--color-border) px-3 py-1.5 font-semibold hover:bg-(--color-navy-50)">
           Open Results
         </Link>
-        <Link href="/admin/matches" className="rounded-md border border-(--color-border) px-3 py-1.5 font-semibold hover:bg-(--color-clay-50)">
+        <Link href="/admin/matches" className="rounded-md border border-(--color-border) px-3 py-1.5 font-semibold hover:bg-(--color-navy-50)">
           Review Match Assignments
         </Link>
       </div>
@@ -633,7 +633,7 @@ export default async function AdminScoresPage({ searchParams }: Readonly<PagePro
             let chipStyle: string;
             if (isCancelled) chipStyle = "bg-red-50 text-red-700 border-red-200";
             else if (scored) chipStyle = "bg-(--color-forest-100) text-(--color-forest-700) border-(--color-forest-200)";
-            else chipStyle = "border-(--color-border) hover:bg-(--color-clay-50)";
+            else chipStyle = "border-(--color-border) hover:bg-(--color-navy-50)";
             const monthDay = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric" }).format(slot.date);
             let suffix = "";
             if (scored) suffix = " ✓";
@@ -682,7 +682,7 @@ export default async function AdminScoresPage({ searchParams }: Readonly<PagePro
                   </div>
                   <div className="flex flex-col items-end gap-1">
                     {match?.matchNumber ? (
-                      <span className="whitespace-nowrap rounded-full bg-(--color-clay-100) px-2 py-0.5 text-xs font-semibold text-(--color-clay-700)">
+                      <span className="whitespace-nowrap rounded-full bg-(--color-navy-100) px-2 py-0.5 text-xs font-semibold text-(--color-navy-700)">
                         Match #{match.matchNumber}
                       </span>
                     ) : null}
@@ -690,7 +690,7 @@ export default async function AdminScoresPage({ searchParams }: Readonly<PagePro
                       {availableCount} available
                     </span>
                     {match ? (
-                      <p className="text-xs font-semibold uppercase tracking-wider text-(--color-clay-600)">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-(--color-navy-600)">
                         {match.status.replace("_", " ")}
                       </p>
                     ) : (
@@ -709,8 +709,8 @@ export default async function AdminScoresPage({ searchParams }: Readonly<PagePro
                             <p className="font-semibold uppercase tracking-wider text-(--color-text-muted)">Set {set.setNumber}</p>
                             <div className="grid grid-cols-[1fr_auto_auto_1fr] items-center gap-1">
                               <span className="font-semibold truncate">{set.team1Label}</span>
-                              <span className="font-semibold text-(--color-clay-600)">{set.team1Games}</span>
-                              <span className="font-semibold text-(--color-clay-600)">{set.team2Games}</span>
+                              <span className="font-semibold text-(--color-navy-600)">{set.team1Games}</span>
+                              <span className="font-semibold text-(--color-navy-600)">{set.team2Games}</span>
                               <span className="font-semibold truncate text-right">{set.team2Label}</span>
                             </div>
                           </div>
@@ -814,15 +814,15 @@ export default async function AdminScoresPage({ searchParams }: Readonly<PagePro
   } catch {
     return (
       <div className="p-6 lg:p-8 max-w-5xl space-y-3">
-        <h1 className="font-display text-4xl tracking-widest text-(--color-clay-500)">SCORE ENTRY</h1>
+        <h1 className="font-display text-4xl tracking-widest text-(--color-navy-500)">SCORE ENTRY</h1>
         <p className="text-sm text-(--color-text-muted)">
           Data is temporarily unavailable. Please refresh or try again in a moment.
         </p>
         <div className="flex flex-wrap gap-3 text-sm">
-          <Link href="/admin" className="rounded-md border border-(--color-border) px-3 py-1.5 font-semibold hover:bg-(--color-clay-50)">
+          <Link href="/admin" className="rounded-md border border-(--color-border) px-3 py-1.5 font-semibold hover:bg-(--color-navy-50)">
             Back to Dashboard
           </Link>
-          <Link href="/schedule" className="rounded-md border border-(--color-border) px-3 py-1.5 font-semibold hover:bg-(--color-clay-50)">
+          <Link href="/schedule" className="rounded-md border border-(--color-border) px-3 py-1.5 font-semibold hover:bg-(--color-navy-50)">
             Open Public Schedule
           </Link>
         </div>

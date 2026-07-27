@@ -44,7 +44,7 @@ export function SeasonActivateButton({ seasonId, isActive }: Readonly<{ seasonId
         type="button"
         onClick={activate}
         disabled={loading}
-        className="rounded border border-(--color-border) bg-(--color-surface) px-2 py-1 text-xs font-semibold hover:bg-(--color-clay-50) disabled:opacity-60"
+        className="rounded border border-(--color-border) bg-(--color-surface) px-2 py-1 text-xs font-semibold hover:bg-(--color-navy-50) disabled:opacity-60"
       >
         {loading ? "Activating…" : "Activate"}
       </button>
@@ -93,7 +93,7 @@ export function CreateSeasonForm() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="rounded-md border border-(--color-border) bg-(--color-surface) px-3 py-2 text-sm font-semibold hover:bg-(--color-clay-50)"
+        className="rounded-md border border-(--color-border) bg-(--color-surface) px-3 py-2 text-sm font-semibold hover:bg-(--color-navy-50)"
       >
         + New Season
       </button>
@@ -140,14 +140,14 @@ export function CreateSeasonForm() {
         <button
           type="submit"
           disabled={loading}
-          className="rounded-md bg-(--color-clay-500) px-3 py-1.5 text-sm font-semibold text-white hover:bg-(--color-clay-600) disabled:opacity-60"
+          className="rounded-md bg-(--color-navy-500) px-3 py-1.5 text-sm font-semibold text-white hover:bg-(--color-navy-600) disabled:opacity-60"
         >
           {loading ? "Creating…" : "Create Season"}
         </button>
         <button
           type="button"
           onClick={() => setOpen(false)}
-          className="rounded-md border border-(--color-border) px-3 py-1.5 text-sm font-semibold hover:bg-(--color-clay-50)"
+          className="rounded-md border border-(--color-border) px-3 py-1.5 text-sm font-semibold hover:bg-(--color-navy-50)"
         >
           Cancel
         </button>

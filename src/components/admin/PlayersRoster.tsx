@@ -142,8 +142,8 @@ export function PlayersRoster({ roster }: Readonly<{ roster: PlayerRow[] }>) {
           onClick={() => setEditMode(!editMode)}
           className={`w-full sm:w-auto rounded-md px-2 sm:px-3 py-2 text-xs sm:text-sm font-semibold transition-colors ${
             editMode
-              ? "bg-(--color-clay-500) text-white hover:bg-(--color-clay-600)"
-              : "border border-(--color-border) bg-(--color-surface) hover:bg-(--color-clay-50)"
+              ? "bg-(--color-navy-500) text-white hover:bg-(--color-navy-600)"
+              : "border border-(--color-border) bg-(--color-surface) hover:bg-(--color-navy-50)"
           }`}
         >
           {editMode ? "✓ Done" : "✏ Edit"}
@@ -153,7 +153,7 @@ export function PlayersRoster({ roster }: Readonly<{ roster: PlayerRow[] }>) {
       <div className="rounded-lg border border-(--color-border) bg-(--color-surface) overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm min-w-max">
-          <thead className="bg-(--color-clay-50) text-xs uppercase tracking-wider text-(--color-text-muted)">
+          <thead className="bg-(--color-navy-50) text-xs uppercase tracking-wider text-(--color-text-muted)">
             <tr>
               <th className="px-2 py-2 text-left w-10 min-w-max">#</th>
               <th className="px-2 py-2 text-left min-w-[100px]">Name</th>
@@ -172,7 +172,7 @@ export function PlayersRoster({ roster }: Readonly<{ roster: PlayerRow[] }>) {
               const isSaving = saving.has(p.id);
 
               return (
-                <tr key={p.id} className={isEditing ? "bg-(--color-clay-50)" : p.isActive ? "" : "opacity-60"}>
+                <tr key={p.id} className={isEditing ? "bg-(--color-navy-50)" : p.isActive ? "" : "opacity-60"}>
                   <td className="px-2 py-2 text-(--color-text-muted)">{idx + 1}</td>
                   <td className="px-2 py-2">
                     {isEditing && edit ? (
@@ -288,7 +288,7 @@ export function PlayersRoster({ roster }: Readonly<{ roster: PlayerRow[] }>) {
                           type="button"
                           onClick={() => cancelEdit(p.id)}
                           disabled={isSaving}
-                          className="rounded px-1.5 py-0.5 text-xs font-semibold border border-(--color-border) hover:bg-(--color-clay-50) disabled:opacity-50"
+                          className="rounded px-1.5 py-0.5 text-xs font-semibold border border-(--color-border) hover:bg-(--color-navy-50) disabled:opacity-50"
                         >
                           ✕
                         </button>
@@ -297,7 +297,7 @@ export function PlayersRoster({ roster }: Readonly<{ roster: PlayerRow[] }>) {
                       <button
                         type="button"
                         onClick={() => startEdit(p)}
-                        className="rounded px-2 py-1 text-xs font-semibold border border-(--color-border) hover:bg-(--color-clay-50)"
+                        className="rounded px-2 py-1 text-xs font-semibold border border-(--color-border) hover:bg-(--color-navy-50)"
                       >
                         Edit
                       </button>

@@ -103,7 +103,7 @@ export function ScoreEntryForm({
       {setCards.map((setCard, idx) => (
         <div
           key={`${setCard.team1Player1Id}-${setCard.team1Player2Id}-${setCard.team2Player1Id}-${setCard.team2Player2Id}`}
-          className="space-y-2 rounded-lg border border-(--color-border) bg-(--color-clay-50) p-3"
+          className="space-y-2 rounded-lg border border-(--color-border) bg-(--color-navy-50) p-3"
           draggable
           onDragStart={() => setDraggingIndex(idx)}
           onDragOver={(e) => e.preventDefault()}
@@ -150,7 +150,7 @@ export function ScoreEntryForm({
       <button
         type="submit"
         disabled={loading || setCards.length === 0}
-        className="w-full rounded-md bg-(--color-clay-600) px-3 py-2 text-sm font-semibold text-white hover:bg-(--color-clay-700) disabled:opacity-60"
+        className="w-full rounded-md bg-(--color-navy-600) px-3 py-2 text-sm font-semibold text-white hover:bg-(--color-navy-700) disabled:opacity-60"
       >
         {loading ? 'Submitting...' : 'Submit Scores'}
       </button>

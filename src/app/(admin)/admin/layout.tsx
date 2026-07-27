@@ -35,15 +35,15 @@ export default async function AdminLayout({ children }: Readonly<{ children: Rea
   return (
     <div className="flex min-h-[calc(100vh-3.5rem)]">
       {/* Sticky action rail */}
-      <aside className="hidden lg:flex flex-col w-56 border-r border-(--color-clay-800) bg-(--color-clay-900) py-6 px-4 gap-1 sticky top-14 h-[calc(100vh-3.5rem)] overflow-y-auto">
-        <p className="text-xs font-bold uppercase tracking-widest text-(--color-clay-400) mb-3 px-2">
+      <aside className="hidden lg:flex flex-col w-56 border-r border-(--color-navy-800) bg-(--color-navy-900) py-6 px-4 gap-1 sticky top-14 h-[calc(100vh-3.5rem)] overflow-y-auto">
+        <p className="text-xs font-bold uppercase tracking-widest text-(--color-navy-400) mb-3 px-2">
           Admin
         </p>
         {adminNav.map((item) => (
           <Link
             key={item.href}
             href={item.href}
-            className="rounded-md px-3 py-2 text-sm font-semibold text-(--color-clay-300) hover:bg-(--color-clay-800) hover:text-white transition-colors"
+            className="rounded-md px-3 py-2 text-sm font-semibold text-(--color-navy-300) hover:bg-(--color-navy-800) hover:text-white transition-colors"
           >
             {item.label}
           </Link>
@@ -51,7 +51,7 @@ export default async function AdminLayout({ children }: Readonly<{ children: Rea
       </aside>
 
       {/* Command area */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto bg-(--color-navy-50)">
         {children}
       </div>
     </div>

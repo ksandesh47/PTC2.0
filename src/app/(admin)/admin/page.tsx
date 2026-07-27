@@ -90,7 +90,7 @@ export default async function AdminDashboardPage() {
   return (
     <div className="p-6 lg:p-8 space-y-8 max-w-5xl">
       <div>
-        <h1 className="font-display text-4xl tracking-widest text-(--color-clay-500)">
+        <h1 className="font-display text-4xl tracking-widest text-(--color-navy-500)">
           DASHBOARD
         </h1>
         {activeSeason && (
@@ -116,7 +116,7 @@ export default async function AdminDashboardPage() {
             <p className="text-xs uppercase tracking-widest text-(--color-text-muted)">
               {stat.label}
             </p>
-            <p className="mt-1 font-display text-3xl tracking-wider text-(--color-clay-600)">
+            <p className="mt-1 font-display text-3xl tracking-wider text-(--color-navy-600)">
               {stat.value}
             </p>
           </div>
@@ -193,25 +193,25 @@ export default async function AdminDashboardPage() {
           </Link>
           <Link
             href="/admin/scores"
-            className="rounded-md border border-(--color-border) px-4 py-2 text-sm font-semibold hover:bg-(--color-clay-50) transition-colors"
+            className="rounded-md border border-(--color-border) px-4 py-2 text-sm font-semibold hover:bg-(--color-navy-50) transition-colors"
           >
             Enter Scores
           </Link>
           <Link
             href="/admin/players"
-            className="rounded-md border border-(--color-border) px-4 py-2 text-sm font-semibold hover:bg-(--color-clay-50) transition-colors"
+            className="rounded-md border border-(--color-border) px-4 py-2 text-sm font-semibold hover:bg-(--color-navy-50) transition-colors"
           >
             Manage Players
           </Link>
           <Link
             href="/admin/availability"
-            className="rounded-md border border-(--color-border) px-4 py-2 text-sm font-semibold hover:bg-(--color-clay-50) transition-colors"
+            className="rounded-md border border-(--color-border) px-4 py-2 text-sm font-semibold hover:bg-(--color-navy-50) transition-colors"
           >
             View Availability
           </Link>
           <Link
             href="/admin/seasons"
-            className="rounded-md border border-(--color-border) px-4 py-2 text-sm font-semibold hover:bg-(--color-clay-50) transition-colors"
+            className="rounded-md border border-(--color-border) px-4 py-2 text-sm font-semibold hover:bg-(--color-navy-50) transition-colors"
           >
             Manage Seasons
           </Link>
@@ -231,7 +231,7 @@ export default async function AdminDashboardPage() {
       <div>
         <div className="flex items-center justify-between mb-3">
           <h2 className="font-display text-2xl tracking-wider">RECENT ACTIVITY</h2>
-          <Link href="/admin/audit" className="text-sm text-(--color-clay-600) hover:underline">
+          <Link href="/admin/audit" className="text-sm text-(--color-navy-600) hover:underline">
             View all →
           </Link>
         </div>
@@ -242,7 +242,7 @@ export default async function AdminDashboardPage() {
           {recentAudit.map((event) => (
             <div key={event.id} className="flex items-center justify-between px-4 py-3">
               <div>
-                <span className="text-xs font-semibold uppercase tracking-wider text-(--color-clay-600)">
+                <span className="text-xs font-semibold uppercase tracking-wider text-(--color-navy-600)">
                   {event.action}
                 </span>{" "}
                 <span className="text-sm text-(--color-text-muted)">
@@ -261,15 +261,15 @@ export default async function AdminDashboardPage() {
   } catch {
     return (
       <div className="p-6 lg:p-8 max-w-5xl space-y-3">
-        <h1 className="font-display text-4xl tracking-widest text-(--color-clay-500)">DASHBOARD</h1>
+        <h1 className="font-display text-4xl tracking-widest text-(--color-navy-500)">DASHBOARD</h1>
         <p className="text-sm text-(--color-text-muted)">
           Data is temporarily unavailable. Please refresh or try again in a moment.
         </p>
         <div className="flex flex-wrap gap-3 text-sm">
-          <Link href="/admin/scores" className="rounded-md border border-(--color-border) px-3 py-1.5 font-semibold hover:bg-(--color-clay-50)">
+          <Link href="/admin/scores" className="rounded-md border border-(--color-border) px-3 py-1.5 font-semibold hover:bg-(--color-navy-50)">
             Open Score Entry
           </Link>
-          <Link href="/schedule" className="rounded-md border border-(--color-border) px-3 py-1.5 font-semibold hover:bg-(--color-clay-50)">
+          <Link href="/schedule" className="rounded-md border border-(--color-border) px-3 py-1.5 font-semibold hover:bg-(--color-navy-50)">
             Open Public Schedule
           </Link>
         </div>

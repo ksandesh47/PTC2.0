@@ -24,7 +24,7 @@ export default async function AdminAvailabilityPage() {
   if (!activeSeason) {
     return (
       <div className="p-6 lg:p-8">
-        <h1 className="font-display text-4xl tracking-widest text-(--color-clay-500)">AVAILABILITY</h1>
+        <h1 className="font-display text-4xl tracking-widest text-(--color-navy-500)">AVAILABILITY</h1>
         <p className="mt-3 text-sm text-(--color-text-muted)">No active season found.</p>
       </div>
     );
@@ -66,7 +66,7 @@ export default async function AdminAvailabilityPage() {
   return (
     <div className="p-6 lg:p-8 space-y-6 max-w-[1400px]">
       <div>
-        <h1 className="font-display text-4xl tracking-widest text-(--color-clay-500)">ALL AVAILABILITY</h1>
+        <h1 className="font-display text-4xl tracking-widest text-(--color-navy-500)">ALL AVAILABILITY</h1>
         <p className="mt-1 text-sm text-(--color-text-muted)">
           {activeSeason.name} · {formatDate(activeSeason.startDate)} - {formatDate(activeSeason.endDate)}
         </p>
@@ -84,8 +84,8 @@ export default async function AdminAvailabilityPage() {
         <div className="overflow-x-auto rounded-lg border border-(--color-border) bg-(--color-surface)">
           <table className="min-w-full border-collapse text-xs">
             <thead>
-              <tr className="border-b border-(--color-border) bg-(--color-clay-50)">
-                <th className="sticky left-0 z-10 bg-(--color-clay-50) px-3 py-2 text-left font-semibold">Player</th>
+              <tr className="border-b border-(--color-border) bg-(--color-navy-50)">
+                <th className="sticky left-0 z-10 bg-(--color-navy-50) px-3 py-2 text-left font-semibold">Player</th>
                 {slots.map((slot) => (
                   <th key={slot.id} className="min-w-36 border-l border-(--color-border) px-2 py-2 text-center font-semibold">
                     <div>{slot.label}</div>

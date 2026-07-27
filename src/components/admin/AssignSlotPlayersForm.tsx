@@ -46,7 +46,7 @@ function availabilityChip(status: AvailabilityStatus): string {
   if (status === 'available') return 'bg-(--color-forest-100) text-(--color-forest-700)';
   if (status === 'maybe') return 'bg-yellow-100 text-yellow-800';
   if (status === 'unavailable') return 'bg-red-100 text-red-700';
-  return 'bg-(--color-clay-100) text-(--color-text-muted)';
+  return 'bg-(--color-navy-100) text-(--color-text-muted)';
 }
 
 export function AssignSlotPlayersForm({
@@ -140,7 +140,7 @@ export function AssignSlotPlayersForm({
         type="button"
         onClick={() => setOpen(true)}
         disabled={disabled}
-        className="rounded border border-(--color-border) px-2 py-1 text-xs font-semibold hover:bg-(--color-clay-50) disabled:opacity-60"
+        className="rounded border border-(--color-border) px-2 py-1 text-xs font-semibold hover:bg-(--color-navy-50) disabled:opacity-60"
       >
         {toggleLabel}
       </button>
@@ -163,20 +163,20 @@ export function AssignSlotPlayersForm({
           >
             <div className="flex items-start justify-between gap-3 border-b border-(--color-border) px-4 py-3">
               <div>
-                <p className="font-display text-lg tracking-widest text-(--color-clay-500)">Pick Players</p>
+                <p className="font-display text-lg tracking-widest text-(--color-navy-500)">Pick Players</p>
                 <p className="text-xs text-(--color-text-muted)">{slotHeader ?? 'Select exactly 4'}</p>
               </div>
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                className="rounded px-2 py-1 text-sm hover:bg-(--color-clay-50)"
+                className="rounded px-2 py-1 text-sm hover:bg-(--color-navy-50)"
                 aria-label="Close"
               >
                 ✕
               </button>
             </div>
 
-            <div className="border-b border-(--color-border) bg-(--color-clay-50) px-4 py-2 text-xs">
+            <div className="border-b border-(--color-border) bg-(--color-navy-50) px-4 py-2 text-xs">
               {selected.length === 0 ? (
                 <p className="text-(--color-text-muted)">No players selected yet</p>
               ) : (
@@ -186,7 +186,7 @@ export function AssignSlotPlayersForm({
                     return (
                       <span
                         key={id}
-                        className="inline-flex items-center gap-1 rounded-full bg-(--color-clay-600) px-2 py-0.5 text-white"
+                        className="inline-flex items-center gap-1 rounded-full bg-(--color-navy-600) px-2 py-0.5 text-white"
                       >
                         <span className="font-mono">{index + 1}</span>
                         <span>{player?.name ?? '?'}</span>
@@ -216,14 +216,14 @@ export function AssignSlotPlayersForm({
                     disabled={disableBtn}
                     onClick={() => toggleSelection(player.id)}
                     className={`flex w-full items-center justify-between gap-3 border-b border-(--color-border) px-4 py-2.5 text-left text-sm transition-colors last:border-b-0 disabled:cursor-not-allowed disabled:opacity-40 ${
-                      isSelected ? 'bg-(--color-clay-50)' : 'hover:bg-(--color-clay-50)'
+                      isSelected ? 'bg-(--color-navy-50)' : 'hover:bg-(--color-navy-50)'
                     }`}
                   >
                     <div className="flex items-center gap-3">
                       <span
                         className={`inline-flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold ${
                           isSelected
-                            ? 'bg-(--color-clay-600) text-white'
+                            ? 'bg-(--color-navy-600) text-white'
                             : 'border border-(--color-border) text-(--color-text-muted)'
                         }`}
                       >
@@ -250,7 +250,7 @@ export function AssignSlotPlayersForm({
                 type="button"
                 onClick={submit}
                 disabled={!canSubmit}
-                className="w-full rounded bg-(--color-clay-600) px-3 py-2 text-sm font-semibold text-white hover:bg-(--color-clay-700) disabled:opacity-60"
+                className="w-full rounded bg-(--color-navy-600) px-3 py-2 text-sm font-semibold text-white hover:bg-(--color-navy-700) disabled:opacity-60"
               >
                 {submitLabel}
               </button>
