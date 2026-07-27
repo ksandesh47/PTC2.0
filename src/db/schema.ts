@@ -159,6 +159,7 @@ export const matches = pgTable(
     slotId: uuid("slot_id").references(() => availabilitySlots.id, {
       onDelete: "set null",
     }),
+    matchNumber: integer("match_number"), // sequential per season, assigned on lineup creation
     weekNumber: smallint("week_number").notNull(),
     court: text("court"),
     status: matchStatusEnum("status").notNull().default("scheduled"),
@@ -171,7 +172,10 @@ export const matches = pgTable(
       .notNull()
       .defaultNow(),
   },
-  (t) => [index("matches_season_week_idx").on(t.seasonId, t.weekNumber)]
+  (t) => [
+    index("matches_season_week_idx").on(t.seasonId, t.weekNumber),
+    unique("matches_season_match_number_unique").on(t.seasonId, t.matchNumber),
+  ]
 );
 
 // ─── match_pairings ───────────────────────────────────────────────────────────

@@ -17,18 +17,20 @@ const adminNav = [
 ];
 
 export default async function AdminLayout({ children }: Readonly<{ children: ReactNode }>) {
-  // TODO: Re-enable authentication for production
-  // const supabase = await createClient();
-  // const { data: { user } } = await supabase.auth.getUser();
-  // if (!user) redirect("/auth/login?next=/admin");
+  // Enforce admin auth only in production; local development bypasses.
+  if (process.env.NODE_ENV === "production") {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) redirect("/auth/login?next=/admin");
 
-  // const profile = await db.query.users.findFirst({
-  //   where: eq(users.id, user.id),
-  // });
+    const profile = await db.query.users.findFirst({
+      where: eq(users.id, user.id),
+    });
 
-  // if (profile?.role !== "admin") {
-  //   redirect("/");
-  // }
+    if (profile?.role !== "admin" && profile?.role !== "captain") {
+      redirect("/");
+    }
+  }
 
   return (
     <div className="flex min-h-[calc(100vh-3.5rem)]">

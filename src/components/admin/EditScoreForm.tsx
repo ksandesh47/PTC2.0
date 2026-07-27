@@ -79,6 +79,17 @@ export function EditScoreForm({
         }
       }
 
+      const statusResponse = await fetch(`/api/matches/${matchId}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'completed', abandonReason: null }),
+      });
+
+      if (!statusResponse.ok) {
+        const data = await statusResponse.json();
+        throw new Error(data.error?.message || 'Scores saved but failed to update match status');
+      }
+
       setSuccess(true);
       setTimeout(() => {
         window.location.reload();
@@ -119,6 +130,18 @@ export function EditScoreForm({
               <span>Set {setCard.setNumber}</span>
               <span className="rounded border border-dashed border-[--color-border] px-2 py-0.5 normal-case">Drag</span>
             </div>
+            {(() => {
+              const t1 = setCard.team1Games;
+              const t2 = setCard.team2Games;
+              if (t1 === 0 && t2 === 0) return null;
+              const p1 = t1 > t2 ? 2 * t1 - t2 : t1;
+              const p2 = t2 > t1 ? 2 * t2 - t1 : t2;
+              return (
+                <p className="text-[10px] uppercase tracking-wider text-[--color-text-muted]">
+                  Spreadsheet points: <span className="font-mono font-semibold text-[--color-clay-600]">{p1} - {p2}</span>
+                </p>
+              );
+            })()}
             <div className="grid grid-cols-[1fr_auto_auto_1fr] gap-2 items-center">
               <label className="text-xs text-[--color-text-muted]">{setCard.team1Label}</label>
               <input

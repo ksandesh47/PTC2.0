@@ -1,9 +1,12 @@
 import Link from "next/link";
 import { db } from "@/db";
-import { matches, seasons } from "@/db/schema";
-import { and, eq } from "drizzle-orm";
+import { availabilitySlots, matches, playerAvailability, players, seasonPlayers, seasons } from "@/db/schema";
+import { and, eq, inArray } from "drizzle-orm";
 import { formatDate } from "@/lib/utils";
-import { ScoreEntryForm } from "@/components/admin/ScoreEntryForm";
+import { buildMatchSetRows } from "@/lib/league/display";
+import { SlotMatchActions } from "@/components/admin/SlotMatchActions";
+import { AssignSlotPlayersForm } from "@/components/admin/AssignSlotPlayersForm";
+import { AutoAssignButton } from "@/components/admin/AutoAssignButton";
 
 type PageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
@@ -80,14 +83,25 @@ type WeekSlot<T> = {
   date: Date;
   dayLabel: string;
   slotNumber: number;
+  slotId?: string;
+  slotLabel?: string;
   match?: T;
+};
+
+type SlotRow = {
+  id: string;
+  label: string;
+  slotDate: string | Date;
 };
 
 function buildWeekSlotLayout<T extends { id: string; slot?: { slotDate: string | Date } | null }>(
   weekStart: Date,
-  rows: T[]
+  rows: T[],
+  slotRows: SlotRow[]
 ): { slots: Array<WeekSlot<T>>; selectedMatches: T[] } {
   const buckets = new Map<string, T[]>();
+  const slotBuckets = new Map<string, SlotRow[]>();
+
   for (const row of rows) {
     if (!row.slot?.slotDate) continue;
     const date = toMidnight(parseDateInput(row.slot.slotDate));
@@ -97,6 +111,14 @@ function buildWeekSlotLayout<T extends { id: string; slot?: { slotDate: string |
     buckets.set(key, list);
   }
 
+  for (const row of slotRows) {
+    const date = toMidnight(parseDateInput(row.slotDate));
+    const key = slotDateKey(date);
+    const list = slotBuckets.get(key) ?? [];
+    list.push(row);
+    slotBuckets.set(key, list);
+  }
+
   const slots: Array<WeekSlot<T>> = [];
   for (let dayIndex = 0; dayIndex < 7; dayIndex += 1) {
     const date = addDays(weekStart, dayIndex);
@@ -104,14 +126,18 @@ function buildWeekSlotLayout<T extends { id: string; slot?: { slotDate: string |
     const maxSlots = weekday === 0 || weekday === 6 ? 2 : 1;
     const key = slotDateKey(date);
     const dayMatches = buckets.get(key) ?? [];
+    const daySlots = slotBuckets.get(key) ?? [];
     const dayLabel = new Intl.DateTimeFormat("en-US", { weekday: "short" }).format(date).toUpperCase();
 
     for (let slotNumber = 1; slotNumber <= maxSlots; slotNumber += 1) {
+      const slotMeta = daySlots[slotNumber - 1];
       slots.push({
         key: `${key}-${slotNumber}`,
         date,
         dayLabel,
         slotNumber,
+        slotId: slotMeta?.id,
+        slotLabel: slotMeta?.label,
         match: dayMatches[slotNumber - 1],
       });
     }
@@ -157,7 +183,7 @@ function resolveRunningWeek(
     return weekRanges[0].week;
   }
 
-  return weekRanges[weekRanges.length - 1].week;
+  return weekRanges.at(-1)!.week;
 }
 
 function buildSetCountByMatch<T extends { id: string; pairings: Array<{ sets: Array<{ version: number }> }> }>(rows: T[]) {
@@ -292,38 +318,73 @@ function buildSetCards(match: {
       .filter((card): card is SetCard => !!card);
   }
 
-  const cards = match.pairings.flatMap((pairing, pairingIndex) => {
-    const newestVersion = pairing.sets[0]?.version;
-    if (!newestVersion) return [];
+  const playerById = new Map(
+    match.pairings.flatMap((pairing) => [
+      pairing.team1Player1 ? [[pairing.team1Player1.id, pairing.team1Player1] as const] : [],
+      pairing.team1Player2 ? [[pairing.team1Player2.id, pairing.team1Player2] as const] : [],
+      pairing.team2Player1 ? [[pairing.team2Player1.id, pairing.team2Player1] as const] : [],
+      pairing.team2Player2 ? [[pairing.team2Player2.id, pairing.team2Player2] as const] : [],
+    ]).flat()
+  );
 
-    const latestSets = pairing.sets
-      .filter((set) => set.version === newestVersion)
-      .sort((a, b) => a.setNumber - b.setNumber);
+  const pairingsForRows = match.pairings.map((pairing) => ({
+    id: pairing.id,
+    team1Player1Id: pairing.team1Player1?.id ?? null,
+    team1Player2Id: pairing.team1Player2?.id ?? null,
+    team2Player1Id: pairing.team2Player1?.id ?? null,
+    team2Player2Id: pairing.team2Player2?.id ?? null,
+    sets: pairing.sets,
+  }));
 
-    const p1 = pairing.team1Player1;
-    const p2 = pairing.team1Player2;
-    const p3 = pairing.team2Player1;
-    const p4 = pairing.team2Player2;
-    if (!p1 || !p2 || !p3 || !p4) return [];
+  return buildMatchSetRows(pairingsForRows)
+    .map((set) => {
+      const p1 = set.team1Player1Id ? playerById.get(set.team1Player1Id) : undefined;
+      const p2 = set.team1Player2Id ? playerById.get(set.team1Player2Id) : undefined;
+      const p3 = set.team2Player1Id ? playerById.get(set.team2Player1Id) : undefined;
+      const p4 = set.team2Player2Id ? playerById.get(set.team2Player2Id) : undefined;
+      if (!p1 || !p2 || !p3 || !p4) return null;
 
-    return latestSets.map((set) =>
-      cardFromPairing({
-        pairingId: pairing.id,
-        setNumber: latestSets.length === 1 && match.pairings.length > 1 ? pairingIndex + 1 : set.setNumber,
+      return cardFromPairing({
+        pairingId: set.pairingId,
+        setNumber: set.setNumber,
         team1Player1: p1,
         team1Player2: p2,
         team2Player1: p3,
         team2Player2: p4,
         team1Games: set.team1Games,
         team2Games: set.team2Games,
-      })
-    );
-  });
+      });
+    })
+    .filter((card): card is SetCard => !!card);
+}
 
-  return cards.sort((a, b) => a.setNumber - b.setNumber);
+function getInitialAssignment(match: {
+  pairings: Array<{
+    team1Player1?: { id: string } | null;
+    team1Player2?: { id: string } | null;
+    team2Player1?: { id: string } | null;
+    team2Player2?: { id: string } | null;
+  }>;
+}) {
+  const firstPairing = match.pairings[0];
+  if (!firstPairing) return null;
+
+  const p1 = firstPairing.team1Player1?.id;
+  const p2 = firstPairing.team1Player2?.id;
+  const p3 = firstPairing.team2Player1?.id;
+  const p4 = firstPairing.team2Player2?.id;
+  if (!p1 || !p2 || !p3 || !p4) return null;
+
+  return {
+    team1Player1Id: p1,
+    team1Player2Id: p2,
+    team2Player1Id: p3,
+    team2Player2Id: p4,
+  };
 }
 
 export default async function AdminScoresPage({ searchParams }: Readonly<PageProps>) {
+  try {
   const activeSeason = await db.query.seasons.findFirst({ where: eq(seasons.isActive, true) });
 
   if (!activeSeason) {
@@ -354,6 +415,79 @@ export default async function AdminScoresPage({ searchParams }: Readonly<PagePro
     orderBy: (t, { asc }) => [asc(t.weekNumber), asc(t.createdAt)],
   });
 
+  const slotRows = await db.query.availabilitySlots.findMany({
+    where: eq(availabilitySlots.seasonId, activeSeason.id),
+    orderBy: (t, { asc }) => [asc(t.slotDate), asc(t.createdAt)],
+  });
+
+  const enrolledPlayers = await db
+    .select({
+      id: players.id,
+      firstName: players.firstName,
+      lastName: players.lastName,
+    })
+    .from(seasonPlayers)
+    .innerJoin(players, eq(players.id, seasonPlayers.playerId))
+    .where(and(eq(seasonPlayers.seasonId, activeSeason.id), eq(players.isActive, true)));
+
+  // Games-played per player: distinct non-cancelled matches for the active season
+  const gamesPlayedByPlayer = new Map<string, number>();
+  const playedSet = new Set<string>();
+  for (const match of matchRows) {
+    if (match.status === "cancelled" || match.status === "abandoned") continue;
+    for (const pairing of match.pairings) {
+      for (const p of [pairing.team1Player1, pairing.team1Player2, pairing.team2Player1, pairing.team2Player2]) {
+        if (!p) continue;
+        const key = `${p.id}|${match.id}`;
+        if (playedSet.has(key)) continue;
+        playedSet.add(key);
+        gamesPlayedByPlayer.set(p.id, (gamesPlayedByPlayer.get(p.id) ?? 0) + 1);
+      }
+    }
+  }
+
+  // Availability per slot, keyed by "slotId|playerId"
+  const slotIdList = slotRows.map((s) => s.id);
+  const availabilityRows =
+    slotIdList.length > 0
+      ? await db
+          .select({
+            slotId: playerAvailability.slotId,
+            playerId: playerAvailability.playerId,
+            status: playerAvailability.status,
+          })
+          .from(playerAvailability)
+          .where(inArray(playerAvailability.slotId, slotIdList))
+      : [];
+
+  const availabilityBySlotPlayer = new Map<string, "available" | "maybe" | "unavailable">();
+  const availableCountBySlot = new Map<string, number>();
+  for (const row of availabilityRows) {
+    availabilityBySlotPlayer.set(`${row.slotId}|${row.playerId}`, row.status);
+    if (row.status === "available" || row.status === "maybe") {
+      availableCountBySlot.set(row.slotId, (availableCountBySlot.get(row.slotId) ?? 0) + 1);
+    }
+  }
+
+  function pickerPlayersForSlot(slotId: string | undefined) {
+    return enrolledPlayers.map((player) => ({
+      id: player.id,
+      name: `${player.firstName} ${player.lastName}`,
+      gamesPlayed: gamesPlayedByPlayer.get(player.id) ?? 0,
+      availability: slotId
+        ? (availabilityBySlotPlayer.get(`${slotId}|${player.id}`) ?? null)
+        : null,
+    }));
+  }
+
+  function slotHeaderFor(slotDate: Date | string | undefined, slotLabel: string | undefined) {
+    if (!slotDate) return slotLabel ?? "Select exactly 4";
+    const dayShort = new Intl.DateTimeFormat("en-US", { weekday: "short" }).format(parseDateInput(slotDate));
+    const time = slotLabel?.split(" - ")[1] ?? "";
+    const timePart = time ? ` · ${time}` : "";
+    return `${dayShort}${timePart} · Select exactly 4`;
+  }
+
   const params = (await searchParams) ?? {};
   const requestedWeek = Number.parseInt(asSingle(params.week) ?? "", 10);
 
@@ -379,8 +513,15 @@ export default async function AdminScoresPage({ searchParams }: Readonly<PagePro
       })
     : [];
 
+  const selectedWeekSlots = selectedWeekRange
+    ? slotRows.filter((slot) => {
+        const slotDate = toMidnight(parseDateInput(slot.slotDate));
+        return isBetweenInclusive(slotDate, selectedWeekRange.start, selectedWeekRange.end);
+      })
+    : [];
+
   const slotLayout = selectedWeekRange
-    ? buildWeekSlotLayout(selectedWeekRange.start, weekRows)
+    ? buildWeekSlotLayout(selectedWeekRange.start, weekRows, selectedWeekSlots)
     : {
         slots: [] as Array<WeekSlot<(typeof weekRows)[number]>>,
         selectedMatches: [] as typeof weekRows,
@@ -390,38 +531,25 @@ export default async function AdminScoresPage({ searchParams }: Readonly<PagePro
   const setCountByMatch = buildSetCountByMatch(displayWeekMatches);
 
   const readyForScoring = displayWeekMatches.filter((m) => m.status === "scheduled" || m.status === "in_progress");
-  let pendingSectionContent;
-  if (displayWeekMatches.length === 0) {
-    pendingSectionContent = (
-      <p className="text-sm text-[--color-text-muted]">No matches fall within this week range.</p>
-    );
-  } else if (readyForScoring.length === 0) {
-    pendingSectionContent = (
-      <p className="text-sm text-[--color-text-muted]">No scheduled or in-progress matches right now.</p>
-    );
-  } else {
-    pendingSectionContent = (
-      <div className="grid gap-4">
-        {readyForScoring.map((m) => {
-          if (m.pairings.length === 0) return null;
-          const initialSetCards = buildSetCards(m);
 
-          return (
-            <article key={m.id} className="rounded-xl border border-[--color-border] bg-[--color-surface] p-4 shadow-sm space-y-3">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-wider text-[--color-text-muted]">{m.slot?.slotDate ? formatDate(m.slot.slotDate) : "Date pending"}</p>
-                <p className="text-sm text-[--color-text-muted] mt-1">{m.slot?.label ?? m.court ?? "Court TBD"}</p>
-                <p className="mt-2 text-xs font-semibold uppercase tracking-wider text-[--color-clay-600]">
-                  Status: {m.status.replace("_", " ")}
-                </p>
-              </div>
-              <ScoreEntryForm matchId={m.id} initialSetCards={initialSetCards} />
-            </article>
-          );
-        })}
-      </div>
-    );
-  }
+  // Season-wide canceled matches retrospective (bottom of page)
+  const canceledMatches = matchRows
+    .filter((m) => m.status === "cancelled" || m.status === "abandoned")
+    .sort((a, b) => {
+      const da = a.slot?.slotDate ? new Date(a.slot.slotDate).getTime() : 0;
+      const db = b.slot?.slotDate ? new Date(b.slot.slotDate).getTime() : 0;
+      return db - da;
+    });
+
+  // Past scheduled matches missing scores (for header banner)
+  const today = toMidnight(new Date());
+  const pastMissingScores = matchRows.filter((m) => {
+    if (m.status !== "scheduled" && m.status !== "in_progress") return false;
+    if (!m.slot?.slotDate) return false;
+    const slotDate = toMidnight(parseDateInput(m.slot.slotDate));
+    if (slotDate.getTime() >= today.getTime()) return false;
+    return (setCountByMatch.get(m.id) ?? buildSetCountByMatch([m]).get(m.id) ?? 0) === 0;
+  });
 
   return (
     <div className="p-6 lg:p-8 max-w-6xl space-y-6">
@@ -477,40 +605,103 @@ export default async function AdminScoresPage({ searchParams }: Readonly<PagePro
         </Link>
       </div>
 
-      <section className="space-y-3">
-        <h2 className="font-display text-2xl tracking-wider">PENDING SCORES</h2>
-        {pendingSectionContent}
-      </section>
+      {pastMissingScores.length > 0 && (
+        <div className="rounded-lg border border-yellow-200 bg-yellow-50 px-4 py-3 text-sm">
+          <p className="font-semibold text-yellow-800">
+            Past Scheduled Matches Missing Scores: {pastMissingScores.length}
+          </p>
+          <ul className="mt-1 text-xs text-yellow-800/80 space-y-0.5">
+            {pastMissingScores.slice(0, 5).map((m) => (
+              <li key={m.id}>
+                {m.slot?.slotDate ? formatDate(m.slot.slotDate) : "?"} · {m.slot?.label ?? m.court ?? "?"}
+                {m.matchNumber ? ` · Match #${m.matchNumber}` : ""}
+              </li>
+            ))}
+            {pastMissingScores.length > 5 && (
+              <li>… and {pastMissingScores.length - 5} more</li>
+            )}
+          </ul>
+        </div>
+      )}
+
+      {displayWeekMatches.length > 0 && (
+        <div className="flex flex-wrap gap-1 rounded-lg border border-[--color-border] bg-[--color-surface] p-2 text-xs">
+          {slotLayout.slots.map((slot) => {
+            const match = slot.match;
+            const scored = match ? (setCountByMatch.get(match.id) ?? 0) > 0 : false;
+            const isCancelled = match?.status === "cancelled" || match?.status === "abandoned";
+            let chipStyle: string;
+            if (isCancelled) chipStyle = "bg-red-50 text-red-700 border-red-200";
+            else if (scored) chipStyle = "bg-[--color-forest-100] text-[--color-forest-700] border-[--color-forest-200]";
+            else chipStyle = "border-[--color-border] hover:bg-[--color-clay-50]";
+            const monthDay = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric" }).format(slot.date);
+            let suffix = "";
+            if (scored) suffix = " ✓";
+            else if (isCancelled) suffix = " • Canceled";
+            else if (match) suffix = " ·";
+            return (
+              <a
+                key={slot.key}
+                href={match ? `#match-${match.id}` : `#slot-${slot.key}`}
+                className={`rounded border px-2 py-1 font-semibold transition-colors ${chipStyle}`}
+              >
+                {slot.dayLabel} {monthDay}{suffix}
+              </a>
+            );
+          })}
+        </div>
+      )}
 
       <section className="space-y-3">
-        <h2 className="font-display text-2xl tracking-wider">RECENTLY SCORED</h2>
+        <h2 className="font-display text-2xl tracking-wider">THIS WEEK'S SLOTS</h2>
         <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
           {slotLayout.slots.map((slot) => {
             const match = slot.match;
             const slotLabel = `${slot.dayLabel} SLOT ${slot.slotNumber}`;
             const scoredSetCount = match ? (setCountByMatch.get(match.id) ?? 0) : 0;
             const scoredSets = match && scoredSetCount > 0 ? buildSetCards(match) : [];
+            const availableCount = slot.slotId ? (availableCountBySlot.get(slot.slotId) ?? 0) : 0;
+            let scoringSummary = "No players assigned";
+            if (scoredSetCount > 0) {
+              scoringSummary = `${scoredSetCount} sets scored`;
+            } else if (match && match.pairings.length > 0) {
+              scoringSummary = "Players assigned - awaiting scores";
+            }
+            const anchorId = match ? `match-${match.id}` : `slot-${slot.key}`;
+            const slotTimeLabel = slot.slotLabel?.split(" - ")[1];
             return (
-              <article key={slot.key} className="rounded-lg border border-[--color-border] bg-[--color-surface] p-3 space-y-2">
-                <div className="flex items-center justify-between gap-2">
-                  <p className="text-xs font-semibold uppercase tracking-wider">{slotLabel}</p>
-                  {match ? (
-                    <p className="text-xs font-semibold uppercase tracking-wider text-[--color-clay-600]">{match.status.replace("_", " ")}</p>
-                  ) : (
-                    <p className="text-xs font-semibold uppercase tracking-wider text-[--color-text-muted]">Open</p>
-                  )}
+              <article
+                key={slot.key}
+                id={anchorId}
+                className="rounded-lg border border-[--color-border] bg-[--color-surface] p-3 space-y-2 scroll-mt-24"
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wider">{slotLabel}</p>
+                    <p className="text-sm font-semibold">{formatDate(slot.date)}{slotTimeLabel ? ` · ${slotTimeLabel}` : ""}</p>
+                  </div>
+                  <div className="flex flex-col items-end gap-1">
+                    {match?.matchNumber ? (
+                      <span className="whitespace-nowrap rounded-full bg-[--color-clay-100] px-2 py-0.5 text-xs font-semibold text-[--color-clay-700]">
+                        Match #{match.matchNumber}
+                      </span>
+                    ) : null}
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-[--color-text-muted]">
+                      {availableCount} available
+                    </span>
+                    {match ? (
+                      <p className="text-xs font-semibold uppercase tracking-wider text-[--color-clay-600]">
+                        {match.status.replace("_", " ")}
+                      </p>
+                    ) : (
+                      <p className="text-xs font-semibold uppercase tracking-wider text-[--color-text-muted]">Open</p>
+                    )}
+                  </div>
                 </div>
-                <p className="text-sm font-semibold">{formatDate(slot.date)}</p>
                 {match ? (
                   <>
                     <p className="text-xs text-[--color-text-muted]">{match.slot?.label ?? match.court ?? "Court TBD"}</p>
-                    <p className="text-xs">
-                      {scoredSetCount > 0
-                        ? `${scoredSetCount} sets scored`
-                        : match.pairings.length > 0
-                          ? "Players assigned - awaiting scores"
-                          : "No players assigned"}
-                    </p>
+                    <p className="text-xs">{scoringSummary}</p>
                     {scoredSets.length > 0 && (
                       <div className="space-y-1 pt-1">
                         {scoredSets.map((set) => (
@@ -526,12 +717,49 @@ export default async function AdminScoresPage({ searchParams }: Readonly<PagePro
                         ))}
                       </div>
                     )}
-                    {match.status === "cancelled" && (
-                      <p className="text-xs font-semibold uppercase tracking-wider text-red-600">Match cancelled</p>
+                    {(match.status === "cancelled" || match.status === "abandoned") && (
+                      <p className="text-xs font-semibold uppercase tracking-wider text-red-600">
+                        Match {match.status}{match.abandonReason ? `: ${match.abandonReason}` : ""}
+                      </p>
+                    )}
+                    <SlotMatchActions
+                      matchId={match.id}
+                      matchStatus={match.status}
+                      initialSetCards={buildSetCards(match)}
+                      currentAbandonReason={match.abandonReason}
+                      compact
+                    />
+                    {match.slotId && (
+                      <AssignSlotPlayersForm
+                        slotId={match.slotId}
+                        slotHeader={slotHeaderFor(slot.date, slot.slotLabel)}
+                        matchId={match.id}
+                        players={pickerPlayersForSlot(match.slotId)}
+                        initialAssignment={getInitialAssignment(match)}
+                        disabled={scoredSetCount > 0}
+                        disabledMessage="Scored matches cannot be reassigned."
+                      />
                     )}
                   </>
                 ) : (
-                  <p className="text-xs text-[--color-text-muted]">No match created for this slot yet.</p>
+                  <div className="space-y-2">
+                    <p className="text-xs text-[--color-text-muted]">No match created for this slot yet.</p>
+                    {slot.slotId ? (
+                      <>
+                        <AutoAssignButton
+                          slotId={slot.slotId}
+                          availableCount={availableCountBySlot.get(slot.slotId) ?? 0}
+                        />
+                        <AssignSlotPlayersForm
+                          slotId={slot.slotId}
+                          slotHeader={slotHeaderFor(slot.date, slot.slotLabel)}
+                          players={pickerPlayersForSlot(slot.slotId)}
+                        />
+                      </>
+                    ) : (
+                      <p className="text-xs text-[--color-text-muted]">No availability slot exists yet for assignment.</p>
+                    )}
+                  </div>
                 )}
               </article>
             );
@@ -542,6 +770,63 @@ export default async function AdminScoresPage({ searchParams }: Readonly<PagePro
           <p className="text-sm text-[--color-text-muted]">No scored matches yet.</p>
         )}
       </section>
+
+      {canceledMatches.length > 0 && (
+        <section className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h2 className="font-display text-2xl tracking-wider">CANCELED MATCHES</h2>
+            <span className="text-xs font-semibold text-[--color-text-muted]">
+              {canceledMatches.length} canceled
+            </span>
+          </div>
+          <div className="rounded-lg border border-[--color-border] bg-[--color-surface] divide-y divide-[--color-border]">
+            {canceledMatches.map((m) => {
+              const lineup = m.pairings.flatMap((p) => [p.team1Player1, p.team1Player2, p.team2Player1, p.team2Player2])
+                .filter((p): p is NonNullable<typeof p> => !!p);
+              const names = [...new Set(lineup.map((p) => p.firstName))].join(" · ");
+              return (
+                <div key={m.id} className="px-4 py-3 space-y-1">
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="text-sm font-semibold">
+                      {m.slot?.slotDate ? formatDate(m.slot.slotDate) : "Date pending"}
+                      {m.slot?.label ? ` · ${m.slot.label.split(" - ")[1] ?? m.slot.label}` : ""}
+                    </p>
+                    <SlotMatchActions
+                      matchId={m.id}
+                      matchStatus={m.status}
+                      initialSetCards={buildSetCards(m)}
+                      currentAbandonReason={m.abandonReason}
+                      compact
+                    />
+                  </div>
+                  {names && <p className="text-xs text-[--color-text-muted]">{names}</p>}
+                  {m.abandonReason && (
+                    <p className="text-xs text-red-700">Reason: {m.abandonReason}</p>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
     </div>
   );
+  } catch {
+    return (
+      <div className="p-6 lg:p-8 max-w-5xl space-y-3">
+        <h1 className="font-display text-4xl tracking-widest text-[--color-clay-500]">SCORE ENTRY</h1>
+        <p className="text-sm text-[--color-text-muted]">
+          Data is temporarily unavailable. Please refresh or try again in a moment.
+        </p>
+        <div className="flex flex-wrap gap-3 text-sm">
+          <Link href="/admin" className="rounded-md border border-[--color-border] px-3 py-1.5 font-semibold hover:bg-[--color-clay-50]">
+            Back to Dashboard
+          </Link>
+          <Link href="/schedule" className="rounded-md border border-[--color-border] px-3 py-1.5 font-semibold hover:bg-[--color-clay-50]">
+            Open Public Schedule
+          </Link>
+        </div>
+      </div>
+    );
+  }
 }

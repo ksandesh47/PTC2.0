@@ -1,131 +1,9 @@
 import { db } from "@/db";
-import { matches, players, seasons, auditEvents, availabilitySlots } from "@/db/schema";
-import { and, eq, desc, count, gte, lte, sql } from "drizzle-orm";
+import { matches, players, seasons, auditEvents } from "@/db/schema";
+import { eq, desc, count, sql } from "drizzle-orm";
 import Link from "next/link";
 import { formatDate } from "@/lib/utils";
-import { revalidatePath } from "next/cache";
-
-function toDateOnly(value: string): Date | null {
-  const parsed = new Date(`${value}T00:00:00`);
-  return Number.isNaN(parsed.getTime()) ? null : parsed;
-}
-
-function toIsoDate(value: Date): string {
-  return value.toISOString().slice(0, 10);
-}
-
-function buildSlotLabel(day: Date, time: "5:30 PM" | "8:30 AM" | "11:00 AM"): string {
-  const dayLabel = new Intl.DateTimeFormat("en-US", {
-    weekday: "short",
-    month: "short",
-    day: "numeric",
-  })
-    .format(day)
-    .replace(",", "");
-  return `${dayLabel} - ${time}`;
-}
-
-function eachDateInclusive(startIso: string, endIso: string): Date[] {
-  const out: Date[] = [];
-  const cur = toDateOnly(startIso);
-  const end = toDateOnly(endIso);
-  if (!cur || !end) return out;
-
-  while (cur <= end) {
-    out.push(new Date(cur));
-    cur.setDate(cur.getDate() + 1);
-  }
-
-  return out;
-}
-
-async function updateAvailabilityWindow(formData: FormData) {
-  "use server";
-
-  const rawSeasonId = formData.get("seasonId");
-  const rawStartDate = formData.get("startDate");
-  const rawEndDate = formData.get("endDate");
-
-  const seasonId = typeof rawSeasonId === "string" ? rawSeasonId.trim() : "";
-  const startDate = typeof rawStartDate === "string" ? rawStartDate.trim() : "";
-  const endDate = typeof rawEndDate === "string" ? rawEndDate.trim() : "";
-  const rawExtendDays = formData.get("extendDays");
-  const extendDays = typeof rawExtendDays === "string" ? Number.parseInt(rawExtendDays, 10) : 0;
-
-  if (!seasonId || !startDate || !endDate) return;
-
-  let nextStartDate = startDate;
-  let nextEndDate = endDate;
-
-  if (Number.isFinite(extendDays) && extendDays > 0) {
-    const parsedEnd = toDateOnly(endDate);
-    if (!parsedEnd) return;
-    parsedEnd.setDate(parsedEnd.getDate() + extendDays);
-    nextEndDate = toIsoDate(parsedEnd);
-  }
-
-  if (nextStartDate > nextEndDate) return;
-
-  // Ensure slot rows actually exist for the selected player window.
-  const allDays = eachDateInclusive(nextStartDate, nextEndDate);
-  const desiredSlots: Array<{ seasonId: string; label: string; slotDate: string; weekNumber: number }> = [];
-  const start = toDateOnly(nextStartDate);
-  if (!start) return;
-
-  for (const day of allDays) {
-    const iso = toIsoDate(day);
-    const weekNumber = Math.floor((day.getTime() - start.getTime()) / (7 * 24 * 60 * 60 * 1000)) + 1;
-    const dow = day.getDay();
-    if (dow >= 1 && dow <= 5) {
-      desiredSlots.push({
-        seasonId,
-        label: buildSlotLabel(day, "5:30 PM"),
-        slotDate: iso,
-        weekNumber,
-      });
-    } else {
-      desiredSlots.push({
-        seasonId,
-        label: buildSlotLabel(day, "8:30 AM"),
-        slotDate: iso,
-        weekNumber,
-      });
-      desiredSlots.push({
-        seasonId,
-        label: buildSlotLabel(day, "11:00 AM"),
-        slotDate: iso,
-        weekNumber,
-      });
-    }
-  }
-
-  const existing = await db.query.availabilitySlots.findMany({
-    where: and(
-      eq(availabilitySlots.seasonId, seasonId),
-      gte(availabilitySlots.slotDate, nextStartDate),
-      lte(availabilitySlots.slotDate, nextEndDate)
-    ),
-    columns: {
-      label: true,
-      slotDate: true,
-    },
-  });
-
-  const existingKeys = new Set(existing.map((s) => `${s.slotDate}|${s.label}`));
-  const missing = desiredSlots.filter((s) => !existingKeys.has(`${s.slotDate}|${s.label}`));
-  if (missing.length > 0) {
-    await db.insert(availabilitySlots).values(missing);
-  }
-
-  await db
-    .update(seasons)
-    .set({ startDate: nextStartDate, endDate: nextEndDate, updatedAt: new Date() })
-    .where(eq(seasons.id, seasonId));
-
-  revalidatePath("/admin");
-  revalidatePath("/admin/availability");
-  revalidatePath("/player/availability");
-}
+import { AvailabilityWindowControl } from "@/components/admin/AvailabilityWindowControl";
 
 async function checkDbHealth(): Promise<{ ok: boolean; latencyMs: number }> {
   const t0 = Date.now();
@@ -137,7 +15,50 @@ async function checkDbHealth(): Promise<{ ok: boolean; latencyMs: number }> {
   }
 }
 
+async function computeDataHealth(seasonId: string) {
+  try {
+    // Match-level integrity checks - load all matches with pairings and sets
+    const seasonMatches = await db.query.matches.findMany({
+      where: eq(matches.seasonId, seasonId),
+      with: {
+        pairings: { with: { sets: true } },
+      },
+    });
+
+    const issues: string[] = [];
+    let matchesWithoutSlot = 0;
+    let cancelledWithSets = 0;
+    let scheduledPastNoScores = 0;
+    let completedWithoutSets = 0;
+
+    for (const match of seasonMatches) {
+      if (!match.slotId) matchesWithoutSlot += 1;
+      const setCount = match.pairings.reduce((sum, p) => sum + p.sets.length, 0);
+      if ((match.status === "cancelled" || match.status === "abandoned") && setCount > 0) {
+        cancelledWithSets += 1;
+      }
+      if (match.status === "completed" && setCount === 0) {
+        completedWithoutSets += 1;
+      }
+      if ((match.status === "scheduled" || match.status === "in_progress") && setCount === 0) {
+        scheduledPastNoScores += 1;
+      }
+    }
+
+    if (matchesWithoutSlot > 0) issues.push(`${matchesWithoutSlot} match(es) missing a slot`);
+    if (cancelledWithSets > 0) issues.push(`${cancelledWithSets} canceled match(es) still have sets recorded`);
+    if (scheduledPastNoScores > 0) issues.push(`${scheduledPastNoScores} unscored match(es)`);
+    if (completedWithoutSets > 0) issues.push(`${completedWithoutSets} completed match(es) with no sets`);
+
+    return { issues, scheduledPastNoScores };
+  } catch (error) {
+    console.error("Error computing data health:", error);
+    return { issues: [], scheduledPastNoScores: 0 };
+  }
+}
+
 export default async function AdminDashboardPage() {
+  try {
   const [activeSeason, totalPlayers, recentAudit, dbHealth] = await Promise.all([
     db.query.seasons.findFirst({ where: eq(seasons.isActive, true) }),
     db.select({ count: count() }).from(players).where(eq(players.isActive, true)),
@@ -158,6 +79,13 @@ export default async function AdminDashboardPage() {
 
   const scheduled = matchStats.find((r) => r.status === "scheduled")?.count ?? 0;
   const completed = matchStats.find((r) => r.status === "completed")?.count ?? 0;
+
+  const dataHealth = activeSeason
+    ? await computeDataHealth(activeSeason.id).catch(() => ({
+        issues: ["Unable to compute data health"],
+        scheduledPastNoScores: 0,
+      }))
+    : { issues: [] as string[], scheduledPastNoScores: 0 };
 
   return (
     <div className="p-6 lg:p-8 space-y-8 max-w-5xl">
@@ -213,6 +141,46 @@ export default async function AdminDashboardPage() {
         <span className="text-xs opacity-70">Weekly keepalive: Mon 10:00 UTC via cron</span>
       </div>
 
+      {/* Data integrity summary */}
+      {(() => {
+        const issueCount = dataHealth.issues.length;
+        const plural = issueCount === 1 ? "" : "s";
+        const heading = issueCount === 0 ? "Data Health" : `Data Health · ${issueCount} issue${plural}`;
+        return (
+          <div className={`rounded-lg border px-4 py-3 text-sm ${
+            issueCount === 0
+              ? "border-[--color-forest-200] bg-[--color-forest-50] text-[--color-forest-700]"
+              : "border-yellow-200 bg-yellow-50 text-yellow-800"
+          }`}>
+            <p className="font-semibold">{heading}</p>
+            {issueCount === 0 ? (
+              <p className="text-xs opacity-80 mt-0.5">
+                No data integrity issues detected in matches, pairings, and scores for the active season.
+              </p>
+            ) : (
+              <ul className="mt-1 space-y-0.5 text-xs">
+                {dataHealth.issues.map((issue) => (
+                  <li key={issue}>• {issue}</li>
+                ))}
+              </ul>
+            )}
+          </div>
+        );
+      })()}
+
+      {/* Past scheduled matches missing scores */}
+      {dataHealth.scheduledPastNoScores > 0 && (
+        <Link
+          href="/admin/scores"
+          className="block rounded-lg border border-yellow-200 bg-yellow-50 px-4 py-3 text-sm text-yellow-800 hover:bg-yellow-100"
+        >
+          <p className="font-semibold">
+            ⚠ Past Scheduled Matches Missing Scores: {dataHealth.scheduledPastNoScores}
+          </p>
+          <p className="text-xs opacity-80 mt-0.5">Open Score Entry to record scores →</p>
+        </Link>
+      )}
+
       {/* Quick actions */}
       <div>
         <h2 className="font-display text-2xl tracking-wider mb-3">QUICK ACTIONS</h2>
@@ -252,73 +220,11 @@ export default async function AdminDashboardPage() {
 
       {/* Availability window control */}
       {activeSeason && (
-        <div className="rounded-lg border border-[--color-border] bg-[--color-surface] p-4 space-y-3">
-          <h2 className="font-display text-2xl tracking-wider">AVAILABILITY WINDOW</h2>
-          <p className="text-sm text-[--color-text-muted]">
-            Admin controls which dates players can submit availability for.
-          </p>
-          <p className="rounded-md bg-[--color-clay-50] px-3 py-2 text-sm">
-            Current player window: <strong>{formatDate(activeSeason.startDate)}</strong> to{" "}
-            <strong>{formatDate(activeSeason.endDate)}</strong>
-          </p>
-
-          <form action={updateAvailabilityWindow} className="space-y-3">
-            <input type="hidden" name="seasonId" value={activeSeason.id} />
-            <div className="flex flex-wrap items-end gap-3">
-              <label className="space-y-1">
-                <span className="text-xs font-semibold uppercase tracking-widest text-[--color-text-muted]">From</span>
-                <input
-                  name="startDate"
-                  type="date"
-                  defaultValue={String(activeSeason.startDate)}
-                  className="rounded-md border border-[--color-border] bg-white px-3 py-2 text-sm"
-                />
-              </label>
-              <label className="space-y-1">
-                <span className="text-xs font-semibold uppercase tracking-widest text-[--color-text-muted]">To</span>
-                <input
-                  name="endDate"
-                  type="date"
-                  defaultValue={String(activeSeason.endDate)}
-                  className="rounded-md border border-[--color-border] bg-white px-3 py-2 text-sm"
-                />
-              </label>
-              <button
-                type="submit"
-                className="rounded-md bg-[--color-clay-900] px-4 py-2 text-sm font-semibold text-[--color-accent] hover:opacity-95 transition-opacity"
-              >
-                Submit Window
-              </button>
-            </div>
-
-            <div className="flex flex-wrap gap-2">
-              <button
-                type="submit"
-                name="extendDays"
-                value="7"
-                className="rounded-md border border-[--color-border] px-3 py-1.5 text-sm font-semibold hover:bg-[--color-clay-50]"
-              >
-                Extend +7 days
-              </button>
-              <button
-                type="submit"
-                name="extendDays"
-                value="14"
-                className="rounded-md border border-[--color-border] px-3 py-1.5 text-sm font-semibold hover:bg-[--color-clay-50]"
-              >
-                Extend +14 days
-              </button>
-              <button
-                type="submit"
-                name="extendDays"
-                value="30"
-                className="rounded-md border border-[--color-border] px-3 py-1.5 text-sm font-semibold hover:bg-[--color-clay-50]"
-              >
-                Extend +30 days
-              </button>
-            </div>
-          </form>
-        </div>
+        <AvailabilityWindowControl
+          seasonId={activeSeason.id}
+          startDate={String(activeSeason.startDate)}
+          endDate={String(activeSeason.endDate)}
+        />
       )}
 
       {/* Recent audit log */}
@@ -352,4 +258,22 @@ export default async function AdminDashboardPage() {
       </div>
     </div>
   );
+  } catch {
+    return (
+      <div className="p-6 lg:p-8 max-w-5xl space-y-3">
+        <h1 className="font-display text-4xl tracking-widest text-[--color-clay-500]">DASHBOARD</h1>
+        <p className="text-sm text-[--color-text-muted]">
+          Data is temporarily unavailable. Please refresh or try again in a moment.
+        </p>
+        <div className="flex flex-wrap gap-3 text-sm">
+          <Link href="/admin/scores" className="rounded-md border border-[--color-border] px-3 py-1.5 font-semibold hover:bg-[--color-clay-50]">
+            Open Score Entry
+          </Link>
+          <Link href="/schedule" className="rounded-md border border-[--color-border] px-3 py-1.5 font-semibold hover:bg-[--color-clay-50]">
+            Open Public Schedule
+          </Link>
+        </div>
+      </div>
+    );
+  }
 }

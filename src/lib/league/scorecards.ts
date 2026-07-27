@@ -1,5 +1,5 @@
 import { palominoLeagueRules } from "./rules";
-import { getLatestVersionSets } from "./display";
+import { buildMatchSetRows } from "./display";
 
 export type LeagueSet = {
   version: number;
@@ -19,9 +19,11 @@ export type LeaguePairing = {
 
 export type LeagueMatch = {
   id: string;
+  matchNumber: number | null;
   weekNumber: number;
   court: string | null;
   status: string;
+  abandonReason?: string | null;
   slot?: {
     label: string;
     slotDate: string | Date;
@@ -51,6 +53,7 @@ export type LeagueStandingsEntry = {
   playerName: string;
   rank: number;
   standingsTotal: number;
+  total: number;
   countedMatches: number;
   averageScore: number;
   highScore: number;
@@ -63,10 +66,6 @@ export type LeagueStandingsEntry = {
   scorecards: PlayerMatchScorecard[];
   countedScorecards: PlayerMatchScorecard[];
 };
-
-function uniquePlayers(ids: Array<string | null>) {
-  return ids.filter(Boolean) as string[];
-}
 
 export function computeProjectedMatchScore(input: {
   setPointEntries: Array<{
@@ -114,45 +113,35 @@ export function buildMatchScorecards(match: LeagueMatch) {
     return next;
   }
 
-  for (const pairing of match.pairings) {
-    const latestSets = getLatestVersionSets(pairing.sets);
-    const team1Players = uniquePlayers([
-      pairing.team1Player1Id,
-      pairing.team1Player2Id,
-    ]);
-    const team2Players = uniquePlayers([
-      pairing.team2Player1Id,
-      pairing.team2Player2Id,
-    ]);
+  for (const set of buildMatchSetRows(match.pairings)) {
+    const team1Players = [set.team1Player1Id, set.team1Player2Id].filter(Boolean) as string[];
+    const team2Players = [set.team2Player1Id, set.team2Player2Id].filter(Boolean) as string[];
+    const team1Won = set.team1Games > set.team2Games;
 
-    for (const set of latestSets) {
-      const team1Won = set.team1Games > set.team2Games;
+    for (const playerId of team1Players) {
+      const stats = ensure(playerId);
+      stats.gamesWon += set.team1Games;
+      stats.gamesLost += set.team2Games;
+      stats.setPointEntries.push({
+        teamGames: set.team1Games,
+        opponentGames: set.team2Games,
+        wonSet: team1Won,
+      });
+      if (team1Won) stats.setsWon += 1;
+      else stats.setsLost += 1;
+    }
 
-      for (const playerId of team1Players) {
-        const stats = ensure(playerId);
-        stats.gamesWon += set.team1Games;
-        stats.gamesLost += set.team2Games;
-        stats.setPointEntries.push({
-          teamGames: set.team1Games,
-          opponentGames: set.team2Games,
-          wonSet: team1Won,
-        });
-        if (team1Won) stats.setsWon += 1;
-        else stats.setsLost += 1;
-      }
-
-      for (const playerId of team2Players) {
-        const stats = ensure(playerId);
-        stats.gamesWon += set.team2Games;
-        stats.gamesLost += set.team1Games;
-        stats.setPointEntries.push({
-          teamGames: set.team2Games,
-          opponentGames: set.team1Games,
-          wonSet: !team1Won,
-        });
-        if (team1Won) stats.setsLost += 1;
-        else stats.setsWon += 1;
-      }
+    for (const playerId of team2Players) {
+      const stats = ensure(playerId);
+      stats.gamesWon += set.team2Games;
+      stats.gamesLost += set.team1Games;
+      stats.setPointEntries.push({
+        teamGames: set.team2Games,
+        opponentGames: set.team1Games,
+        wonSet: !team1Won,
+      });
+      if (team1Won) stats.setsLost += 1;
+      else stats.setsWon += 1;
     }
   }
 
@@ -195,6 +184,7 @@ export function buildLeagueStandings(input: {
       0
     );
     const matchesPlayed = scorecards.length;
+    const total = scorecards.reduce((sum, scorecard) => sum + scorecard.score, 0);
     const setsWon = scorecards.reduce((sum, scorecard) => sum + scorecard.setsWon, 0);
     const setsLost = scorecards.reduce((sum, scorecard) => sum + scorecard.setsLost, 0);
     const gamesWon = scorecards.reduce((sum, scorecard) => sum + scorecard.gamesWon, 0);
@@ -209,11 +199,9 @@ export function buildLeagueStandings(input: {
       playerName: `${player.firstName} ${player.lastName}`,
       rank: 0,
       standingsTotal,
+      total,
       countedMatches: countedScorecards.length,
-      averageScore:
-        countedScorecards.length > 0
-          ? standingsTotal / countedScorecards.length
-          : 0,
+      averageScore: matchesPlayed > 0 ? total / matchesPlayed : 0,
       highScore,
       lowScore,
       matchesPlayed,
@@ -227,17 +215,17 @@ export function buildLeagueStandings(input: {
   });
 
   return standings
-    .sort((a, b) => {
+    .toSorted((a, b) => {
       if (b.standingsTotal !== a.standingsTotal) {
         return b.standingsTotal - a.standingsTotal;
-      }
-      if (b.averageScore !== a.averageScore) {
-        return b.averageScore - a.averageScore;
       }
       if (b.setsWon !== a.setsWon) {
         return b.setsWon - a.setsWon;
       }
-      return b.gamesWon - a.gamesWon;
+      if (b.gamesWon !== a.gamesWon) {
+        return b.gamesWon - a.gamesWon;
+      }
+      return a.playerName.localeCompare(b.playerName);
     })
     .map((entry, index) => ({
       ...entry,

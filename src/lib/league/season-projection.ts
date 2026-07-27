@@ -1,11 +1,13 @@
 import { db } from "@/db";
 import { matches, players, seasonPlayers, seasons } from "@/db/schema";
-import { and, asc, desc, eq } from "drizzle-orm";
+import { asc, desc, eq } from "drizzle-orm";
 import {
   buildLeagueStandings,
   buildScorecardsByMatch,
   type LeagueMatch,
 } from "./scorecards";
+import { buildDisplayNameMap } from "./display";
+import { parseDateInput } from "./week-slots";
 
 export async function getActiveSeasonProjection() {
   const activeSeason = await db.query.seasons.findFirst({
@@ -21,6 +23,7 @@ export async function getActiveSeasonProjection() {
       standings: [],
       scorecardsByMatch: new Map(),
       playerMap: new Map<string, string>(),
+      displayNameMap: new Map<string, string>(),
     };
   }
 
@@ -48,11 +51,25 @@ export async function getActiveSeasonProjection() {
     orderBy: [asc(matches.weekNumber), desc(matches.createdAt)],
   })) as LeagueMatch[];
 
-  const completedMatches = allMatches.filter((match) => match.status === "completed");
+  const completedMatches = allMatches
+    .filter((match) => match.status === "completed")
+    .toSorted((a, b) => {
+      const aTime = a.slot?.slotDate
+        ? parseDateInput(a.slot.slotDate).getTime()
+        : 0;
+      const bTime = b.slot?.slotDate
+        ? parseDateInput(b.slot.slotDate).getTime()
+        : 0;
+      if (bTime !== aTime) return bTime - aTime;
+      return (b.matchNumber ?? 0) - (a.matchNumber ?? 0);
+    });
+
   const standings = buildLeagueStandings({
     players: enrolledPlayers,
     matches: completedMatches,
   });
+
+  const displayNameMap = buildDisplayNameMap(enrolledPlayers);
 
   return {
     season: activeSeason,
@@ -64,5 +81,6 @@ export async function getActiveSeasonProjection() {
     playerMap: new Map(
       enrolledPlayers.map((player) => [player.id, `${player.firstName} ${player.lastName}`])
     ),
+    displayNameMap,
   };
 }

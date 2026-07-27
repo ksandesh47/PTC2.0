@@ -5,58 +5,12 @@ export default function HomePage() {
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 space-y-16">
       {/* Hero */}
       <section className="text-center space-y-4">
-        <div className="flex justify-center gap-3">
-          <Link
-            href="/availability"
-            className="rounded-md border border-[--color-border] bg-[--color-surface] px-4 py-2 text-sm font-semibold text-[--color-text] hover:bg-[--color-clay-50]"
-          >
-            📋 Report Availability
-          </Link>
-          <Link
-            href="/admin"
-            className="rounded-md border border-[--color-border] bg-[--color-surface] px-4 py-2 text-sm font-semibold text-[--color-text] hover:bg-[--color-clay-50]"
-          >
-            ⚙ Admin
-          </Link>
-        </div>
-
         <h1 className="font-display text-6xl sm:text-8xl text-[--color-clay-500] tracking-widest">
           PALOMINO TENNIS CLUB
         </h1>
         <p className="text-lg text-[--color-text-muted] max-w-xl mx-auto">
           Weekly rotating doubles, best-eight standings, live results, and availability built around Palomino's actual league logic.
         </p>
-        <div className="flex justify-center gap-4 pt-2">
-          <Link
-            href="/standings"
-            className="rounded-md bg-[--color-accent] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[--color-accent-hover] transition-colors"
-          >
-            View Standings
-          </Link>
-          <Link
-            href="/schedule"
-            className="rounded-md border border-[--color-border] px-5 py-2.5 text-sm font-semibold text-[--color-text] hover:bg-[--color-clay-50] transition-colors"
-          >
-            This Week's Schedule
-          </Link>
-        </div>
-
-        <div className="mx-auto flex w-full max-w-3xl flex-wrap justify-center gap-2 pt-2">
-          {[
-            { href: "/schedule", label: "📅 Schedule" },
-            { href: "/standings", label: "🏆 Standings" },
-            { href: "/results", label: "📋 Results" },
-            { href: "/stats", label: "📊 Stats" },
-          ].map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="rounded-full border border-[--color-border] bg-[--color-surface] px-4 py-1.5 text-sm font-semibold text-[--color-text-muted] hover:border-[--color-clay-300] hover:text-[--color-text]"
-            >
-              {item.label}
-            </Link>
-          ))}
-        </div>
       </section>
 
       {/* Quick-links grid */}

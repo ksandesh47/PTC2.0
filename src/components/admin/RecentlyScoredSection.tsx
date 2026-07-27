@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { EditScoreForm } from './EditScoreForm';
 import { formatDate } from '@/lib/utils';
+import { buildMatchSetRows } from '@/lib/league/display';
 
 interface MatchSet {
   setNumber: number;
@@ -76,83 +77,44 @@ function buildSetCards(match: Match): SetCard[] {
     };
   }
 
-  if (match.pairings.length === 1) {
-    const pairing = match.pairings[0];
-    const p1 = pairing.team1Player1;
-    const p2 = pairing.team1Player2;
-    const p3 = pairing.team2Player1;
-    const p4 = pairing.team2Player2;
-    if (!p1 || !p2 || !p3 || !p4) return [];
+  const playerById = new Map(
+    match.pairings.flatMap((pairing) => [
+      pairing.team1Player1 ? [[pairing.team1Player1.id, pairing.team1Player1] as const] : [],
+      pairing.team1Player2 ? [[pairing.team1Player2.id, pairing.team1Player2] as const] : [],
+      pairing.team2Player1 ? [[pairing.team2Player1.id, pairing.team2Player1] as const] : [],
+      pairing.team2Player2 ? [[pairing.team2Player2.id, pairing.team2Player2] as const] : [],
+    ]).flat()
+  );
 
-    const newestVersion = pairing.sets[0]?.version;
-    const latestSets = newestVersion
-      ? pairing.sets.filter((set) => set.version === newestVersion).sort((a, b) => a.setNumber - b.setNumber)
-      : [];
+  const pairingsForRows = match.pairings.map((pairing) => ({
+    id: pairing.id,
+    team1Player1Id: pairing.team1Player1?.id ?? null,
+    team1Player2Id: pairing.team1Player2?.id ?? null,
+    team2Player1Id: pairing.team2Player1?.id ?? null,
+    team2Player2Id: pairing.team2Player2?.id ?? null,
+    sets: pairing.sets,
+  }));
 
-    const score1 = latestSets[0] ?? { team1Games: 0, team2Games: 0 };
-    const score2 = latestSets[1] ?? { team1Games: 0, team2Games: 0 };
-    const score3 = latestSets[2] ?? { team1Games: 0, team2Games: 0 };
+  return buildMatchSetRows(pairingsForRows)
+    .map((set) => {
+      const p1 = set.team1Player1Id ? playerById.get(set.team1Player1Id) : undefined;
+      const p2 = set.team1Player2Id ? playerById.get(set.team1Player2Id) : undefined;
+      const p3 = set.team2Player1Id ? playerById.get(set.team2Player1Id) : undefined;
+      const p4 = set.team2Player2Id ? playerById.get(set.team2Player2Id) : undefined;
+      if (!p1 || !p2 || !p3 || !p4) return null;
 
-    return [
-      cardFromPairing({
-        setNumber: 1,
-        team1Player1: p1,
-        team1Player2: p2,
-        team2Player1: p3,
-        team2Player2: p4,
-        team1Games: score1.team1Games,
-        team2Games: score1.team2Games,
-      }),
-      cardFromPairing({
-        setNumber: 2,
-        team1Player1: p1,
-        team1Player2: p3,
-        team2Player1: p2,
-        team2Player2: p4,
-        team1Games: score2.team1Games,
-        team2Games: score2.team2Games,
-      }),
-      cardFromPairing({
-        setNumber: 3,
-        team1Player1: p1,
-        team1Player2: p4,
-        team2Player1: p2,
-        team2Player2: p3,
-        team1Games: score3.team1Games,
-        team2Games: score3.team2Games,
-      }),
-    ];
-  }
-
-  const cards = match.pairings.flatMap((pairing, pairingIndex) => {
-    const newestVersion = pairing.sets[0]?.version;
-    if (!newestVersion) return [];
-
-    const p1 = pairing.team1Player1;
-    const p2 = pairing.team1Player2;
-    const p3 = pairing.team2Player1;
-    const p4 = pairing.team2Player2;
-    if (!p1 || !p2 || !p3 || !p4) return [];
-
-    const currentSets = pairing.sets
-      .filter((set) => set.version === newestVersion)
-      .sort((a, b) => a.setNumber - b.setNumber);
-
-    return currentSets.map((set) =>
-      cardFromPairing({
-        pairingId: pairing.id,
-        setNumber: currentSets.length === 1 && match.pairings.length > 1 ? pairingIndex + 1 : set.setNumber,
+      return cardFromPairing({
+        pairingId: set.pairingId,
+        setNumber: set.setNumber,
         team1Player1: p1,
         team1Player2: p2,
         team2Player1: p3,
         team2Player2: p4,
         team1Games: set.team1Games,
         team2Games: set.team2Games,
-      })
-    );
-  });
-
-  return cards.sort((a, b) => a.setNumber - b.setNumber);
+      });
+    })
+    .filter((card): card is SetCard => !!card);
 }
 
 export function RecentlyScoredSection({ matches, setCountByMatch }: Readonly<RecentlyScoredSectionProps>) {

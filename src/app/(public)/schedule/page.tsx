@@ -1,10 +1,30 @@
 import { db } from "@/db";
-import { matches, players, seasons } from "@/db/schema";
-import { eq, and, inArray } from "drizzle-orm";
-import { formatDate } from "@/lib/utils";
-import { getLatestVersionSets } from "@/lib/league/display";
-import { getMatchFormatLabel, palominoLeagueRules } from "@/lib/league/rules";
+import {
+  availabilitySlots,
+  matches,
+  players,
+  seasonPlayers,
+  seasons,
+} from "@/db/schema";
+import { and, asc, eq } from "drizzle-orm";
 import Link from "next/link";
+import { formatDate } from "@/lib/utils";
+import { buildMatchSetRows, buildDisplayNameMap } from "@/lib/league/display";
+import { getMatchFormatLabel, palominoLeagueRules } from "@/lib/league/rules";
+import {
+  buildMatchScorecards,
+  type LeagueMatch,
+} from "@/lib/league/scorecards";
+import {
+  buildSeasonWeekRanges,
+  buildWeekSlotLayout,
+  isBetweenInclusive,
+  parseDateInput,
+  resolveRunningWeek,
+  toMidnight,
+  type WeekSlot,
+} from "@/lib/league/week-slots";
+import { createClient } from "@/lib/supabase/server";
 
 export const revalidate = 60;
 
@@ -17,72 +37,85 @@ function asSingle(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] : value;
 }
 
-async function getSchedule() {
+function playerName(displayNameMap: Map<string, string>, id: string | null | undefined) {
+  if (!id) return "TBD";
+  return displayNameMap.get(id) ?? "Unknown player";
+}
+
+async function getScheduleData() {
   const activeSeason = await db.query.seasons.findFirst({
     where: eq(seasons.isActive, true),
   });
-  if (!activeSeason) return { season: null, weeks: [] };
+  if (!activeSeason) {
+    return {
+      season: null,
+      allMatches: [] as LeagueMatch[],
+      allSlots: [] as Array<{ id: string; label: string; slotDate: string | Date }>,
+      displayNameMap: new Map<string, string>(),
+    };
+  }
 
-  const matchRows = await db.query.matches.findMany({
-    where: and(eq(matches.seasonId, activeSeason.id)),
-    with: {
-      slot: true,
-      pairings: {
-        with: {
-          sets: true,
+  const [matchRows, slotRows, roster] = await Promise.all([
+    db.query.matches.findMany({
+      where: eq(matches.seasonId, activeSeason.id),
+      with: {
+        slot: true,
+        pairings: {
+          with: { sets: true },
         },
       },
-    },
-    orderBy: (t, { asc }) => [asc(t.weekNumber), asc(t.createdAt)],
-  });
+      orderBy: (t, { asc }) => [asc(t.weekNumber), asc(t.createdAt)],
+    }),
+    db.query.availabilitySlots.findMany({
+      where: eq(availabilitySlots.seasonId, activeSeason.id),
+      orderBy: (t, { asc }) => [asc(t.slotDate), asc(t.createdAt)],
+    }),
+    db
+      .select({
+        id: players.id,
+        firstName: players.firstName,
+        lastName: players.lastName,
+      })
+      .from(seasonPlayers)
+      .innerJoin(players, eq(players.id, seasonPlayers.playerId))
+      .where(and(eq(seasonPlayers.seasonId, activeSeason.id)))
+      .orderBy(asc(players.firstName), asc(players.lastName)),
+  ]);
 
-  const playerIds = [...new Set(
-    matchRows.flatMap((match) =>
-      match.pairings.flatMap((pairing) => [
-        pairing.team1Player1Id,
-        pairing.team1Player2Id,
-        pairing.team2Player1Id,
-        pairing.team2Player2Id,
-      ])
-    ).filter(Boolean)
-  )] as string[];
-
-  const playerRows =
-    playerIds.length > 0
-      ? await db
-          .select({ id: players.id, firstName: players.firstName, lastName: players.lastName })
-          .from(players)
-          .where(inArray(players.id, playerIds))
-      : [];
-
-  const playerMap = new Map(
-    playerRows.map((player) => [player.id, `${player.firstName} ${player.lastName}`])
-  );
-
-  // Group by week
-  const weekMap = new Map<number, typeof matchRows>();
-  for (const m of matchRows) {
-    const list = weekMap.get(m.weekNumber) ?? [];
-    list.push(m);
-    weekMap.set(m.weekNumber, list);
-  }
+  const displayNameMap = buildDisplayNameMap(roster);
 
   return {
     season: activeSeason,
-    weeks: [...weekMap.entries()].sort(([a], [b]) => a - b),
-    playerMap,
+    allMatches: matchRows as LeagueMatch[],
+    allSlots: slotRows,
+    displayNameMap,
   };
 }
 
-type ScheduleData = Awaited<ReturnType<typeof getSchedule>>;
-type ScheduleMatch = ScheduleData["weeks"][number][1][number];
-
-function playerName(playerMap: Map<string, string>, id: string | null | undefined) {
-  if (!id) return "TBD";
-  return playerMap.get(id) ?? "Unknown player";
+async function getViewerPlayerId(): Promise<string | null> {
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return null;
+    const linked = await db.query.players.findFirst({
+      where: eq(players.userId, user.id),
+      columns: { id: true },
+    });
+    return linked?.id ?? null;
+  } catch {
+    return null;
+  }
 }
 
-function lineupIds(match: ScheduleMatch): string[] {
+function slotTimeFromLabel(label: string | undefined): string | null {
+  if (!label) return null;
+  const timeMatch = /(\d{1,2}:\d{2}\s?(?:AM|PM))/i.exec(label);
+  return timeMatch?.[1] ?? null;
+}
+
+function lineupIds(match: LeagueMatch): string[] {
   const ids = new Set<string>();
   for (const pairing of match.pairings) {
     if (pairing.team1Player1Id) ids.add(pairing.team1Player1Id);
@@ -93,93 +126,46 @@ function lineupIds(match: ScheduleMatch): string[] {
   return Array.from(ids);
 }
 
-function getWeekDateRange(weekMatches: ScheduleMatch[]): { range: string; isThisWeek: boolean } {
-  if (weekMatches.length === 0) return { range: "Date pending", isThisWeek: false };
-  
-  // Get all dates from matches in this week
-  const dates = weekMatches
-    .map((m) => m.slot?.slotDate)
-    .filter((d): d is string => d !== null && d !== undefined)
-    .map((d) => new Date(d));
-  
-  if (dates.length === 0) return { range: "Date pending", isThisWeek: false };
-  
-  // Find first and last dates in the week
-  const sortedDates = [...dates].sort((a, b) => a.getTime() - b.getTime());
-  const firstDate = new Date(sortedDates[0]);
-  const lastDate = new Date(sortedDates[sortedDates.length - 1]);
-  
-  // Find Monday of the week (go back to nearest Monday)
-  const monday = new Date(firstDate);
-  const dayOfWeek = monday.getDay(); // 0 = Sunday, 1 = Monday
-  const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
-  monday.setDate(monday.getDate() - daysToMonday);
-  
-  // Find Sunday of the week (go forward to nearest Sunday)
-  const sunday = new Date(lastDate);
-  const daysToSunday = 7 - (sunday.getDay() || 7) % 7;
-  sunday.setDate(sunday.getDate() + daysToSunday);
-  
-  const monthFormatter = new Intl.DateTimeFormat('en-US', { month: 'short' });
-  const dayFormatter = new Intl.DateTimeFormat('en-US', { day: 'numeric' });
-  
-  const mondayMonth = monthFormatter.format(monday);
-  const mondayDay = dayFormatter.format(monday);
-  const sundayMonth = monthFormatter.format(sunday);
-  const sundayDay = dayFormatter.format(sunday);
-  
-  // Format: "Jul 20 – Jul 26" or "Jul 20 – Aug 2"
-  const range = mondayMonth === sundayMonth 
-    ? `${mondayMonth} ${mondayDay} – ${sundayDay}`
-    : `${mondayMonth} ${mondayDay} – ${sundayMonth} ${sundayDay}`;
-  
-  // Check if this week is the current week (contains today)
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  monday.setHours(0, 0, 0, 0);
-  sunday.setHours(0, 0, 0, 0);
-  const isThisWeek = today >= monday && today <= sunday;
-  
-  return { range, isThisWeek };
+function completedSetRows(
+  match: LeagueMatch,
+  displayNameMap: Map<string, string>
+) {
+  return buildMatchSetRows(match.pairings).map((set) => ({
+    key: set.key,
+    setNumber: set.setNumber,
+    team1Games: set.team1Games,
+    team2Games: set.team2Games,
+    team1Label: `${playerName(displayNameMap, set.team1Player1Id)}${
+      set.team1Player2Id ? ` & ${playerName(displayNameMap, set.team1Player2Id)}` : ""
+    }`,
+    team2Label: `${playerName(displayNameMap, set.team2Player1Id)}${
+      set.team2Player2Id ? ` & ${playerName(displayNameMap, set.team2Player2Id)}` : ""
+    }`,
+  }));
 }
 
-function completedSetRows(match: ScheduleMatch, playerMap: Map<string, string>) {
-  const rows: Array<{
-    key: string;
-    setNumber: number;
-    team1Games: number;
-    team2Games: number;
-    team1Label: string;
-    team2Label: string;
-  }> = [];
-
-  for (const pairing of match.pairings) {
-    const team1Label = `${playerName(playerMap, pairing.team1Player1Id)}${
-      pairing.team1Player2Id ? ` & ${playerName(playerMap, pairing.team1Player2Id)}` : ""
-    }`;
-    const team2Label = `${playerName(playerMap, pairing.team2Player1Id)}${
-      pairing.team2Player2Id ? ` & ${playerName(playerMap, pairing.team2Player2Id)}` : ""
-    }`;
-
-    for (const set of getLatestVersionSets(pairing.sets)) {
-      rows.push({
-        key: `${pairing.id}-${set.setNumber}`,
-        setNumber: set.setNumber,
-        team1Games: set.team1Games,
-        team2Games: set.team2Games,
-        team1Label,
-        team2Label,
-      });
-    }
+function defaultTimeForSlot(date: Date, slotNumber: number): string {
+  const weekday = date.getDay();
+  if (weekday === 0 || weekday === 6) {
+    return slotNumber === 1 ? "8:30 AM" : "11:00 AM";
   }
+  return "5:30 PM";
+}
 
-  return rows;
+function formatWeekRangeShort(start: Date, end: Date) {
+  const monthFmt = new Intl.DateTimeFormat("en-US", { month: "short" });
+  const dayFmt = new Intl.DateTimeFormat("en-US", { day: "numeric" });
+  const sameMonth = monthFmt.format(start) === monthFmt.format(end);
+  if (sameMonth) {
+    return `${monthFmt.format(start)} ${dayFmt.format(start)} – ${dayFmt.format(end)}`;
+  }
+  return `${monthFmt.format(start)} ${dayFmt.format(start)} – ${monthFmt.format(end)} ${dayFmt.format(end)}`;
 }
 
 export default async function SchedulePage({ searchParams }: Readonly<PageProps>) {
-  let scheduleData: Awaited<ReturnType<typeof getSchedule>>;
+  let data: Awaited<ReturnType<typeof getScheduleData>>;
   try {
-    scheduleData = await getSchedule();
+    data = await getScheduleData();
   } catch {
     return (
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 text-center space-y-4">
@@ -188,9 +174,8 @@ export default async function SchedulePage({ searchParams }: Readonly<PageProps>
       </div>
     );
   }
-  const { season, weeks, playerMap } = scheduleData;
-  const params = (await searchParams) ?? {};
-  const requestedWeek = Number.parseInt(asSingle(params.week) ?? "", 10);
+
+  const { season, allMatches, allSlots, displayNameMap } = data;
 
   if (!season) {
     return (
@@ -200,118 +185,221 @@ export default async function SchedulePage({ searchParams }: Readonly<PageProps>
     );
   }
 
-  const weekNumbers = weeks.map(([week]) => week);
-  const minWeek = weekNumbers.length > 0 ? Math.min(...weekNumbers) : 1;
-  const maxWeek = weekNumbers.length > 0 ? Math.max(...weekNumbers) : 1;
+  const params = (await searchParams) ?? {};
+  const requestedWeek = Number.parseInt(asSingle(params.week) ?? "", 10);
+  const personalMode = asSingle(params.me) === "1";
+  const viewerPlayerId = personalMode ? await getViewerPlayerId() : null;
+
+  const weekRanges = buildSeasonWeekRanges(season.startDate, season.endDate);
+  const minWeek = 1;
+  const maxWeek = Math.max(1, weekRanges.length);
+  const defaultWeek = resolveRunningWeek(weekRanges, minWeek);
   const selectedWeek = Number.isFinite(requestedWeek)
     ? Math.max(minWeek, Math.min(maxWeek, requestedWeek))
-    : minWeek;
-  const activeWeekEntry = weeks.find(([week]) => week === selectedWeek) ?? weeks[0];
+    : defaultWeek;
+  const selectedRange = weekRanges.find((r) => r.week === selectedWeek) ?? weekRanges[0];
+
+  const weekMatches = selectedRange
+    ? allMatches.filter((m) => {
+        if (!m.slot?.slotDate) return m.weekNumber === selectedWeek;
+        const date = toMidnight(parseDateInput(m.slot.slotDate));
+        return isBetweenInclusive(date, selectedRange.start, selectedRange.end);
+      })
+    : [];
+
+  const weekSlots = selectedRange
+    ? allSlots.filter((slot) => {
+        const date = toMidnight(parseDateInput(slot.slotDate));
+        return isBetweenInclusive(date, selectedRange.start, selectedRange.end);
+      })
+    : [];
+
+  const { slots } = selectedRange
+    ? buildWeekSlotLayout(selectedRange.start, weekMatches, weekSlots)
+    : { slots: [] as Array<WeekSlot<LeagueMatch>> };
+
+  const visibleSlots = viewerPlayerId
+    ? slots.filter((slot) =>
+        slot.match ? lineupIds(slot.match).includes(viewerPlayerId) : false
+      )
+    : slots;
+
   const canGoPrev = selectedWeek > minWeek;
   const canGoNext = selectedWeek < maxWeek;
 
+  const rangeLabel = selectedRange
+    ? formatWeekRangeShort(selectedRange.start, selectedRange.end)
+    : "Date pending";
+  const isThisWeek = selectedRange
+    ? isBetweenInclusive(toMidnight(new Date()), selectedRange.start, selectedRange.end)
+    : false;
+
+  const linkBase = personalMode ? "/schedule?me=1&week=" : "/schedule?week=";
+
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 space-y-8">
-      <div>
-        <h1 className="font-display text-5xl tracking-widest text-[--color-clay-500]">
-          SCHEDULE
-        </h1>
-        <p className="text-sm text-[--color-text-muted] mt-1">
-          {season.name} &middot; {getMatchFormatLabel()} &middot; availability window {palominoLeagueRules.availabilityWindowDays} days
-        </p>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h1 className="font-display text-5xl tracking-widest text-[--color-clay-500]">
+            SCHEDULE
+          </h1>
+          <p className="text-sm text-[--color-text-muted] mt-1">
+            {season.name} &middot; {getMatchFormatLabel()} &middot; availability window {palominoLeagueRules.availabilityWindowDays} days
+          </p>
+        </div>
+        <PersonalToggle personalMode={personalMode} selectedWeek={selectedWeek} />
       </div>
 
-      {activeWeekEntry && (
-        <div className="rounded-xl border border-[--color-border] bg-[--color-surface] px-4 py-3">
-          <div className="flex items-center justify-between gap-3">
-            {canGoPrev ? (
-              <Link
-                href={`/schedule?week=${selectedWeek - 1}`}
-                className="rounded-md border border-[--color-border] px-3 py-1.5 text-sm font-semibold hover:bg-[--color-clay-50]"
-              >
-                ← Prev
-              </Link>
-            ) : (
-              <span className="rounded-md border border-[--color-border] px-3 py-1.5 text-sm font-semibold text-[--color-text-muted] opacity-60">
-                ← Prev
-              </span>
-            )}
+      <div className="rounded-xl border border-[--color-border] bg-[--color-surface] px-4 py-3">
+        <div className="flex items-center justify-between gap-3">
+          {canGoPrev ? (
+            <Link
+              href={`${linkBase}${selectedWeek - 1}`}
+              className="rounded-md border border-[--color-border] px-3 py-1.5 text-sm font-semibold hover:bg-[--color-clay-50]"
+            >
+              ← Prev
+            </Link>
+          ) : (
+            <span className="rounded-md border border-[--color-border] px-3 py-1.5 text-sm font-semibold text-[--color-text-muted] opacity-60">
+              ← Prev
+            </span>
+          )}
 
-            <div className="text-center">
-              {(() => {
-                const { range, isThisWeek } = activeWeekEntry[1].length > 0 
-                  ? getWeekDateRange(activeWeekEntry[1]) 
-                  : { range: "Date pending", isThisWeek: false };
-                return (
-                  <>
-                    <p className="font-display text-xl tracking-wider">{range}</p>
-                    {isThisWeek && <p className="text-xs text-[--color-text-muted] uppercase tracking-wide">This Week</p>}
-                  </>
-                );
-              })()}
-            </div>
-
-            {canGoNext ? (
-              <Link
-                href={`/schedule?week=${selectedWeek + 1}`}
-                className="rounded-md border border-[--color-border] px-3 py-1.5 text-sm font-semibold hover:bg-[--color-clay-50]"
-              >
-                Next →
-              </Link>
-            ) : (
-              <span className="rounded-md border border-[--color-border] px-3 py-1.5 text-sm font-semibold text-[--color-text-muted] opacity-60">
-                Next →
-              </span>
+          <div className="text-center">
+            <p className="font-display text-xl tracking-wider">{rangeLabel}</p>
+            {isThisWeek && (
+              <p className="text-xs text-[--color-text-muted] uppercase tracking-wide">
+                This Week
+              </p>
             )}
           </div>
+
+          {canGoNext ? (
+            <Link
+              href={`${linkBase}${selectedWeek + 1}`}
+              className="rounded-md border border-[--color-border] px-3 py-1.5 text-sm font-semibold hover:bg-[--color-clay-50]"
+            >
+              Next →
+            </Link>
+          ) : (
+            <span className="rounded-md border border-[--color-border] px-3 py-1.5 text-sm font-semibold text-[--color-text-muted] opacity-60">
+              Next →
+            </span>
+          )}
         </div>
+      </div>
+
+      {personalMode && viewerPlayerId === null && (
+        <p className="rounded-lg border border-[--color-border] bg-[--color-clay-50] px-4 py-3 text-sm text-[--color-text-muted]">
+          Sign in with a linked player account to filter to your matches.
+        </p>
       )}
 
-      {weeks.length === 0 && (
-        <p className="text-[--color-text-muted]">No matches scheduled yet.</p>
-      )}
-
-      <div className="space-y-6 animate-stagger">
-        {(activeWeekEntry ? [activeWeekEntry] : []).map(([week, weekMatches]) => {
-          const { range, isThisWeek } = getWeekDateRange(weekMatches);
-          return (
-            <section key={week}>
-              <h2 className="font-display text-2xl tracking-wider text-[--color-text] mb-3">
-                {range}
-                {isThisWeek && <span className="ml-3 text-base font-body font-normal text-[--color-text-muted] uppercase tracking-wide">This Week</span>}
-              </h2>
-              <div className="grid gap-4 lg:grid-cols-2">
-                {weekMatches.map((m) => (
-                  <ScheduleMatchCard key={m.id} match={m} playerMap={playerMap} />
-                ))}
-              </div>
-            </section>
-          );
-        })}
+      <div className="grid gap-4 lg:grid-cols-2 animate-stagger">
+        {visibleSlots.length === 0 && (
+          <p className="text-[--color-text-muted]">
+            {personalMode ? "No personal matches this week." : "No slots configured for this week."}
+          </p>
+        )}
+        {visibleSlots.map((slot) => (
+          <ScheduleSlotCard key={slot.key} slot={slot} displayNameMap={displayNameMap} />
+        ))}
       </div>
     </div>
   );
 }
 
+function PersonalToggle({
+  personalMode,
+  selectedWeek,
+}: Readonly<{ personalMode: boolean; selectedWeek: number }>) {
+  if (personalMode) {
+    return (
+      <Link
+        href={`/schedule?week=${selectedWeek}`}
+        className="self-start rounded-md border border-[--color-clay-500] bg-[--color-clay-500] px-3 py-1.5 text-sm font-semibold text-white hover:opacity-90"
+      >
+        All matches
+      </Link>
+    );
+  }
+  return (
+    <Link
+      href={`/schedule?me=1&week=${selectedWeek}`}
+      className="self-start rounded-md border border-[--color-border] px-3 py-1.5 text-sm font-semibold hover:bg-[--color-clay-50]"
+    >
+      Personal schedule
+    </Link>
+  );
+}
+
+function ScheduleSlotCard({
+  slot,
+  displayNameMap,
+}: Readonly<{
+  slot: WeekSlot<LeagueMatch>;
+  displayNameMap: Map<string, string>;
+}>) {
+  const time = slotTimeFromLabel(slot.slotLabel) ?? defaultTimeForSlot(slot.date, slot.slotNumber);
+  const dayLabel = new Intl.DateTimeFormat("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+  }).format(slot.date);
+
+  const match = slot.match;
+
+  if (!match) {
+    return (
+      <div className="rounded-xl border border-dashed border-[--color-border] bg-[--color-surface] p-4 space-y-2 shadow-sm">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wider text-[--color-text-muted]">
+              {dayLabel}
+            </p>
+            <p className="text-sm text-[--color-text-muted]">{time}</p>
+          </div>
+          <span className="inline-block rounded-full bg-gray-100 px-2 py-0.5 text-xs font-semibold text-gray-600">
+            No match
+          </span>
+        </div>
+        <p className="text-sm text-[--color-text-muted]">No match scheduled</p>
+      </div>
+    );
+  }
+
+  return <ScheduleMatchCard match={match} time={time} dayLabel={dayLabel} displayNameMap={displayNameMap} />;
+}
+
 function ScheduleMatchCard({
   match,
-  playerMap,
-}: Readonly<{ match: ScheduleMatch; playerMap: Map<string, string> }>) {
+  time,
+  dayLabel,
+  displayNameMap,
+}: Readonly<{
+  match: LeagueMatch;
+  time: string | null;
+  dayLabel: string;
+  displayNameMap: Map<string, string>;
+}>) {
   const lineup = lineupIds(match);
-  const setRows = completedSetRows(match, playerMap);
+  const setRows = completedSetRows(match, displayNameMap);
+  const scoreByPlayer = new Map<string, number>(
+    match.status === "completed"
+      ? buildMatchScorecards(match).map((sc) => [sc.playerId, sc.score])
+      : []
+  );
 
   return (
     <div className="rounded-xl border border-[--color-border] bg-[--color-surface] p-4 space-y-4 shadow-sm">
-      <div className="flex items-center justify-between">
+      <div className="flex items-start justify-between gap-3">
         <div>
           <p className="text-xs font-semibold uppercase tracking-wider text-[--color-text-muted]">
-            {match.slot?.slotDate ? formatDate(match.slot.slotDate) : `Week ${match.weekNumber}`}
+            {match.slot?.slotDate ? formatDate(match.slot.slotDate) : dayLabel}
           </p>
-          <p className="text-sm text-[--color-text-muted]">
-            {match.slot?.label ?? match.court ?? "Court TBD"}
-          </p>
+          {time && <p className="text-sm text-[--color-text-muted]">{time}</p>}
         </div>
-        <StatusBadge status={match.status} />
+        <StatusBadge match={match} />
       </div>
 
       {match.pairings.length > 0 ? (
@@ -319,10 +407,17 @@ function ScheduleMatchCard({
           {lineup.map((id, index) => (
             <div
               key={id}
-              className="rounded-lg bg-[--color-clay-50] px-3 py-2 text-sm font-semibold"
+              className="flex items-center justify-between rounded-lg bg-[--color-clay-50] px-3 py-2 text-sm font-semibold"
             >
-              <span className="mr-2 text-[--color-text-muted]">{index + 1}</span>
-              {playerName(playerMap, id)}
+              <span>
+                <span className="mr-2 text-[--color-text-muted]">{index + 1}</span>
+                {playerName(displayNameMap, id)}
+              </span>
+              {match.status === "completed" && (
+                <span className="font-display text-lg tracking-wider text-[--color-clay-700]">
+                  {scoreByPlayer.get(id) ?? 0}
+                </span>
+              )}
             </div>
           ))}
         </div>
@@ -330,10 +425,22 @@ function ScheduleMatchCard({
         <p className="text-sm text-[--color-text-muted]">Lineup not assigned yet.</p>
       )}
 
-      {match.status === "completed" && (
+      {(match.status === "cancelled" || match.status === "abandoned") && match.abandonReason && (
+        <p
+          className={`rounded-lg border px-3 py-2 text-sm italic ${
+            match.status === "abandoned"
+              ? "border-red-200 bg-red-50 text-red-700"
+              : "border-[--color-border] bg-gray-50 text-gray-600"
+          }`}
+        >
+          {match.abandonReason}
+        </p>
+      )}
+
+      {match.status === "completed" && setRows.length > 0 && (
         <div className="space-y-2">
           <p className="text-xs font-semibold uppercase tracking-widest text-[--color-text-muted]">
-            Set Results
+            Match Results
           </p>
           {setRows.map((set) => (
             <div
@@ -353,7 +460,8 @@ function ScheduleMatchCard({
   );
 }
 
-function StatusBadge({ status }: Readonly<{ status: string }>) {
+function StatusBadge({ match }: Readonly<{ match: LeagueMatch }>) {
+  const status = match.status;
   const styles: Record<string, string> = {
     scheduled: "bg-[--color-clay-100] text-[--color-clay-700]",
     in_progress: "bg-yellow-100 text-yellow-700",
@@ -361,11 +469,26 @@ function StatusBadge({ status }: Readonly<{ status: string }>) {
     abandoned: "bg-red-100 text-red-700",
     cancelled: "bg-gray-100 text-gray-600",
   };
+
+  const matchNumberSuffix = match.matchNumber ? ` · Match #${match.matchNumber}` : "";
+  let label: string;
+  if (status === "completed") {
+    label = `✓ Completed${matchNumberSuffix}`;
+  } else if (status === "cancelled") {
+    label = "Cancelled";
+  } else if (status === "abandoned") {
+    label = "Abandoned";
+  } else if (status === "in_progress") {
+    label = "In progress";
+  } else {
+    label = match.matchNumber ? `Scheduled · Match #${match.matchNumber}` : "Scheduled";
+  }
+
   return (
     <span
-      className={`inline-block rounded-full px-2 py-0.5 text-xs font-semibold capitalize ${styles[status] ?? styles.scheduled}`}
+      className={`inline-block whitespace-nowrap rounded-full px-2 py-0.5 text-xs font-semibold ${styles[status] ?? styles.scheduled}`}
     >
-      {status.replace("_", " ")}
+      {label}
     </span>
   );
 }

@@ -165,33 +165,50 @@ export default async function AvailabilityPage({ searchParams }: Readonly<PagePr
           </div>
         </div>
 
-        <div className="space-y-2 animate-stagger">
-          {roster.map((player) => {
-            const stats = statMap.get(player.id) ?? { played: 0, scheduled: 0 };
-            const name = displayName(player.firstName, player.lastName);
-            return (
-              <Link
-                key={player.id}
-                href={`/availability?player=${player.id}`}
-                className="group flex items-center justify-between rounded-xl border border-[--color-border] bg-[--color-surface] px-4 py-3 shadow-sm transition-all hover:-translate-y-0.5 hover:border-[--color-clay-300] hover:shadow-md"
-              >
-                <div className="flex items-center gap-3">
-                  <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[--color-clay-100] text-sm font-bold text-[--color-clay-700]">
-                    {initials(name)}
-                  </span>
-                  <div>
-                    <p className="font-semibold leading-tight">{name}</p>
-                    <p className="text-xs text-[--color-text-muted]">
-                      {stats.played}M played · {stats.scheduled} scheduled
-                    </p>
-                  </div>
-                </div>
-                <span className="text-sm font-bold text-[--color-text-muted] transition-transform group-hover:translate-x-0.5">
-                  →
-                </span>
-              </Link>
-            );
-          })}
+        <div className="space-y-4 animate-stagger">
+          {(() => {
+            const groups = new Map<string, typeof roster>();
+            for (const player of roster) {
+              const letter = (player.firstName[0] ?? "?").toUpperCase();
+              const list = groups.get(letter) ?? [];
+              list.push(player);
+              groups.set(letter, list);
+            }
+            const letters = [...groups.keys()].sort((a, b) => a.localeCompare(b));
+            return letters.map((letter) => (
+              <section key={letter} className="space-y-2">
+                <h2 className="font-display text-2xl tracking-widest text-[--color-clay-500]">
+                  {letter}
+                </h2>
+                {(groups.get(letter) ?? []).map((player) => {
+                  const stats = statMap.get(player.id) ?? { played: 0, scheduled: 0 };
+                  const name = displayName(player.firstName, player.lastName);
+                  return (
+                    <Link
+                      key={player.id}
+                      href={`/availability?player=${player.id}`}
+                      className="group flex items-center justify-between rounded-xl border border-[--color-border] bg-[--color-surface] px-4 py-3 shadow-sm transition-all hover:-translate-y-0.5 hover:border-[--color-clay-300] hover:shadow-md"
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[--color-clay-100] text-sm font-bold text-[--color-clay-700]">
+                          {initials(name)}
+                        </span>
+                        <div>
+                          <p className="font-semibold leading-tight">{name}</p>
+                          <p className="text-xs text-[--color-text-muted]">
+                            {stats.played}M played · {stats.scheduled} scheduled
+                          </p>
+                        </div>
+                      </div>
+                      <span className="text-sm font-bold text-[--color-text-muted] transition-transform group-hover:translate-x-0.5">
+                        →
+                      </span>
+                    </Link>
+                  );
+                })}
+              </section>
+            ));
+          })()}
         </div>
       </div>
     );

@@ -107,6 +107,31 @@ export const scoreCorrectionSchema = matchSetsSchema.extend({
   correctionReason: z.string().min(1, "Correction reason is required"),
 });
 
+export const matchStatusUpdateSchema = z.object({
+  status: z.enum(["scheduled", "in_progress", "completed", "abandoned", "cancelled"]),
+  abandonReason: z.string().max(250).optional().nullable(),
+});
+
+export const slotMatchAssignmentSchema = z
+  .object({
+    team1Player1Id: z.string().uuid(),
+    team1Player2Id: z.string().uuid(),
+    team2Player1Id: z.string().uuid(),
+    team2Player2Id: z.string().uuid(),
+  })
+  .refine(
+    (input) => {
+      const ids = [
+        input.team1Player1Id,
+        input.team1Player2Id,
+        input.team2Player1Id,
+        input.team2Player2Id,
+      ];
+      return new Set(ids).size === ids.length;
+    },
+    { message: "All four assigned players must be unique" }
+  );
+
 // ─── Types ───────────────────────────────────────────────────────────────────
 
 export type LoginInput = z.infer<typeof loginSchema>;
@@ -117,3 +142,5 @@ export type SeasonInput = z.infer<typeof seasonSchema>;
 export type MatchAssignInput = z.infer<typeof matchAssignSchema>;
 export type MatchSetsInput = z.infer<typeof matchSetsSchema>;
 export type ScoreCorrectionInput = z.infer<typeof scoreCorrectionSchema>;
+export type MatchStatusUpdateInput = z.infer<typeof matchStatusUpdateSchema>;
+export type SlotMatchAssignmentInput = z.infer<typeof slotMatchAssignmentSchema>;

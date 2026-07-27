@@ -1,25 +1,29 @@
 import { db } from "@/db";
-import { players } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { PlayersRoster } from "@/components/admin/PlayersRoster";
 
 export default async function AdminPlayersPage() {
   const roster = await db.query.players.findMany({
-    where: eq(players.isActive, true),
     orderBy: (t, { asc }) => [asc(t.firstName), asc(t.lastName)],
+    with: { user: true },
   });
+
+  const rows = roster.map((p) => ({
+    id: p.id,
+    firstName: p.firstName,
+    lastName: p.lastName,
+    phone: p.phone,
+    email: p.user?.email ?? null,
+    ntrpRating: p.ntrpRating,
+    isActive: p.isActive,
+  }));
 
   return (
     <div className="p-6 lg:p-8 max-w-5xl space-y-4">
       <h1 className="font-display text-4xl tracking-widest text-[--color-clay-500]">PLAYERS</h1>
-      <p className="text-sm text-[--color-text-muted]">Active roster ({roster.length})</p>
-      <div className="rounded-lg border border-[--color-border] bg-[--color-surface] divide-y divide-[--color-border]">
-        {roster.map((p) => (
-          <div key={p.id} className="px-4 py-3 flex items-center justify-between gap-3">
-            <span className="font-semibold">{p.firstName} {p.lastName}</span>
-            <span className="text-xs text-[--color-text-muted]">{p.ntrpRating ?? "—"}</span>
-          </div>
-        ))}
-      </div>
+      <p className="text-sm text-[--color-text-muted]">
+        Full roster ({rows.length} total)
+      </p>
+      <PlayersRoster roster={rows} />
     </div>
   );
 }
