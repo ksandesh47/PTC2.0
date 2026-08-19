@@ -160,6 +160,17 @@ export async function POST(
     return NextResponse.json({ error: "Failed to create match" }, { status: 500 });
   }
 
+  if (existing?.matchNumber === null) {
+    const nextMatchNumberRow = await db
+      .select({ next: sql<number>`coalesce(max(${matches.matchNumber}), 0) + 1` })
+      .from(matches)
+      .where(eq(matches.seasonId, slotRow.seasonId));
+    await db
+      .update(matches)
+      .set({ matchNumber: Number(nextMatchNumberRow[0]?.next ?? 1), updatedAt: new Date() })
+      .where(eq(matches.id, matchId));
+  }
+
   await db.insert(matchPairings).values({
     matchId,
     team1Player1Id: ranked[0],

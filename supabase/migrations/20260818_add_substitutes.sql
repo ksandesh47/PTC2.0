@@ -40,6 +40,10 @@ CREATE INDEX IF NOT EXISTS substitute_offers_request_status_idx
 ALTER TABLE public.substitute_requests ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.substitute_offers ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "public_read_substitute_requests" ON public.substitute_requests;
+DROP POLICY IF EXISTS "admins_manage_substitute_requests" ON public.substitute_requests;
+DROP POLICY IF EXISTS "public_read_substitute_offers" ON public.substitute_offers;
+DROP POLICY IF EXISTS "admins_manage_substitute_offers" ON public.substitute_offers;
 CREATE POLICY "public_read_substitute_requests" ON public.substitute_requests
   FOR SELECT USING (true);
 CREATE POLICY "admins_manage_substitute_requests" ON public.substitute_requests

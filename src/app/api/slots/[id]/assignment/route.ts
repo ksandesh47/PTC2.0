@@ -75,6 +75,17 @@ export async function POST(
       : undefined;
   }
 
+  if (existingMatch?.matchNumber === null) {
+    const nextMatchNumberRow = await db
+      .select({ next: sql<number>`coalesce(max(${matches.matchNumber}), 0) + 1` })
+      .from(matches)
+      .where(eq(matches.seasonId, slotRow.seasonId));
+    await db
+      .update(matches)
+      .set({ matchNumber: Number(nextMatchNumberRow[0]?.next ?? 1), updatedAt: new Date() })
+      .where(eq(matches.id, matchId));
+  }
+
   if (!matchId) {
     return NextResponse.json({ error: "Could not create match" }, { status: 500 });
   }

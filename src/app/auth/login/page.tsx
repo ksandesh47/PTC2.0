@@ -111,13 +111,11 @@ function LoginPageContent() {
           >
             {isSubmitting ? "Signing in…" : "Sign in"}
           </button>
+
         </form>
 
         <p className="text-center text-sm text-(--color-text-muted)">
-          New to the league?{" "}
-          <Link href="/auth/signup" className="font-semibold text-(--color-clay-600) hover:underline">
-            Create account
-          </Link>
+          Use the email and temporary password provided by your league administrator.
         </p>
       </div>
     </div>

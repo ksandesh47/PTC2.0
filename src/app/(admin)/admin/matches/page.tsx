@@ -9,6 +9,25 @@ function playerName(playerMap: Map<string, string>, id: string | null | undefine
   return playerMap.get(id) ?? "Unknown";
 }
 
+function rotatingSets(pairing: {
+  team1Player1Id: string;
+  team1Player2Id: string | null;
+  team2Player1Id: string;
+  team2Player2Id: string | null;
+}) {
+  const [p1, p2, p3, p4] = [
+    pairing.team1Player1Id,
+    pairing.team1Player2Id,
+    pairing.team2Player1Id,
+    pairing.team2Player2Id,
+  ];
+  return [
+    { label: "Set 1", team1: [p1, p2], team2: [p3, p4] },
+    { label: "Set 2", team1: [p1, p3], team2: [p2, p4] },
+    { label: "Set 3", team1: [p1, p4], team2: [p2, p3] },
+  ];
+}
+
 export default async function AdminMatchesPage() {
   const activeSeason = await db.query.seasons.findFirst({
     where: eq(seasons.isActive, true),
@@ -92,15 +111,18 @@ export default async function AdminMatchesPage() {
               ) : (
                 m.pairings.map((pairing) => (
                   <div key={pairing.id} className="rounded-lg border border-(--color-border) bg-(--color-navy-50) px-3 py-2 text-sm space-y-1">
-                    <p className="font-semibold">
-                      {playerName(playerMap, pairing.team1Player1Id)}
-                      {pairing.team1Player2Id ? ` & ${playerName(playerMap, pairing.team1Player2Id)}` : ""}
-                    </p>
-                    <p className="text-(--color-text-muted)">vs</p>
-                    <p className="font-semibold">
-                      {playerName(playerMap, pairing.team2Player1Id)}
-                      {pairing.team2Player2Id ? ` & ${playerName(playerMap, pairing.team2Player2Id)}` : ""}
-                    </p>
+                    {rotatingSets(pairing).map((set) => (
+                      <div key={set.label} className="grid grid-cols-[3rem_1fr_auto_1fr] items-center gap-2 border-b border-(--color-border) py-1 last:border-b-0">
+                        <span className="text-xs font-semibold uppercase tracking-wider text-(--color-text-muted)">{set.label}</span>
+                        <p className="font-semibold">
+                          {set.team1.filter(Boolean).map((id) => playerName(playerMap, id)).join(" & ")}
+                        </p>
+                        <span className="text-xs text-(--color-text-muted)">vs</span>
+                        <p className="font-semibold">
+                          {set.team2.filter(Boolean).map((id) => playerName(playerMap, id)).join(" & ")}
+                        </p>
+                      </div>
+                    ))}
                   </div>
                 ))
               )}

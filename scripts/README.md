@@ -81,6 +81,28 @@ The report contains source row counts, imported counts, warnings, and errors. An
 
 The current successful import was run on 2026-08-19. It imported the active live season data and reported 14 skipped undated placeholder seasons (`PTC-2027` through `PTC-2040`).
 
+## Provision Player Login Accounts
+
+Player accounts are provisioned from the v1 `Players` sheet; players do not sign up in the app. The sheet must contain an email column (`Email`, `Email Address`, or equivalent) and a phone column. Each initial password is the last four phone digits followed by `@73PTC`.
+
+Required PTC2.0 environment variable for applying accounts:
+
+```text
+SUPABASE_SERVICE_ROLE_KEY
+```
+
+This is a server-only secret. Never expose it as `NEXT_PUBLIC_*`, commit it, or put it in browser code.
+
+```powershell
+# Validate email/phone coverage without creating or changing accounts.
+npm run auth:provision-players
+
+# Create/update confirmed Auth users and link public.players.user_id.
+npm run auth:provision-players -- --apply
+```
+
+The apply command is idempotent. It creates or updates Supabase Auth users, creates/updates `public.users` with role `player`, and links the matching `public.players` record. Because this password pattern is predictable, rotate it after first login when a password-change flow is available.
+
 ## Supabase Schema Migrations
 
 Apply the explicit PTC2.0 migrations with:

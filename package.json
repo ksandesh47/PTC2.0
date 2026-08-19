@@ -13,6 +13,7 @@
     "db:push": "drizzle-kit push",
     "db:apply-supabase": "node scripts/apply-supabase-migrations.mjs",
     "db:import-google": "node scripts/import-google-sheets.mjs",
+    "auth:provision-players": "node scripts/provision-player-accounts.mjs",
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {

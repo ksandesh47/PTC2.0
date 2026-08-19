@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { createClient } from "@/lib/supabase/server";
 import { db } from "@/db";
 import { auditEvents, matches, matchPairings, users } from "@/db/schema";
@@ -75,10 +75,20 @@ export async function PATCH(
     }
   }
 
+  let matchNumber = existingMatch.matchNumber;
+  if (status === "completed" && matchNumber === null) {
+    const nextNumber = await db
+      .select({ next: sql<number>`coalesce(max(${matches.matchNumber}), 0) + 1` })
+      .from(matches)
+      .where(eq(matches.seasonId, existingMatch.seasonId));
+    matchNumber = Number(nextNumber[0]?.next ?? 1);
+  }
+
   await db
     .update(matches)
     .set({
       status,
+      matchNumber,
       abandonReason:
         status === "cancelled" || status === "abandoned"
           ? reason
