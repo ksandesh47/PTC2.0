@@ -64,7 +64,12 @@ export function SubstituteAdminPanel({
                 <button
                   type="button"
                   disabled={busyId === request.id}
-                  onClick={() => void run("cancel", request.id)}
+                  onClick={() => {
+                    const confirmed = window.confirm(
+                      `Cancel the substitute request for ${request.requesterName}? This cannot be undone.`
+                    );
+                    if (confirmed) void run("cancel", request.id);
+                  }}
                   className="rounded-md border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-50 disabled:opacity-50"
                 >
                   Cancel request

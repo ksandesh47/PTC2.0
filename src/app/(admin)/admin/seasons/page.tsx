@@ -20,9 +20,9 @@ export default async function AdminSeasonsPage() {
 
       <CreateSeasonForm />
 
-      <div className="rounded-lg border border-(--color-border) bg-(--color-surface) divide-y divide-(--color-border)">
+      <div className="space-y-4">
         {list.map((s) => (
-          <div key={s.id} className="px-4 py-3 space-y-3">
+          <section key={s.id} className="rounded-lg border border-(--color-border) bg-(--color-surface) p-4 shadow-sm space-y-3">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <p className="font-semibold">{s.name}</p>
@@ -40,10 +40,10 @@ export default async function AdminSeasonsPage() {
               startDate={String(s.availabilityWindowStart ?? s.startDate)}
               endDate={String(s.availabilityWindowEnd ?? s.endDate)}
             />
-          </div>
+          </section>
         ))}
         {list.length === 0 && (
-          <div className="px-4 py-6 text-center text-sm text-(--color-text-muted)">
+          <div className="rounded-lg border border-(--color-border) bg-(--color-surface) px-4 py-6 text-center text-sm text-(--color-text-muted)">
             No seasons yet. Create the first one above.
           </div>
         )}

@@ -99,14 +99,14 @@ export default async function ResultsPage() {
 
               <div className="p-4 space-y-4">
 
-              <div className="grid gap-2 sm:grid-cols-2">
+              <div className="grid grid-cols-2 gap-2">
                 {lineup.map((id, index) => (
                   <div
                     key={id}
-                    className="flex items-center justify-between rounded-lg bg-(--color-clay-50) px-3 py-2 text-sm font-semibold"
+                    className="flex min-w-0 items-center justify-between rounded-lg bg-(--color-clay-50) px-2 py-2 text-xs font-semibold sm:px-3 sm:text-sm"
                   >
-                    <span>
-                      <span className="mr-2 text-(--color-text-muted)">{index + 1}</span>
+                    <span className="min-w-0 truncate">
+                      <span className="mr-1.5 text-(--color-text-muted) sm:mr-2">{index + 1}</span>
                       {playerName(displayNameMap, id)}
                     </span>
                     <span className="font-display text-lg tracking-wider text-(--color-clay-700)">
