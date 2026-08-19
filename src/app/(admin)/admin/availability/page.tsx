@@ -85,7 +85,7 @@ export default async function AdminAvailabilityPage() {
           <table className="min-w-full border-collapse text-xs">
             <thead>
               <tr className="border-b border-(--color-border) bg-(--color-navy-50)">
-                <th className="sticky left-0 z-10 bg-(--color-navy-50) px-3 py-2 text-left font-semibold">Player</th>
+                <th className="sticky left-0 z-10 w-40 min-w-40 max-w-40 bg-(--color-navy-50) px-3 py-2 text-left font-semibold">Player</th>
                 {slots.map((slot) => (
                   <th key={slot.id} className="min-w-36 border-l border-(--color-border) px-2 py-2 text-center font-semibold">
                     <div>{slot.label}</div>
@@ -97,7 +97,7 @@ export default async function AdminAvailabilityPage() {
             <tbody>
               {roster.map((player) => (
                 <tr key={player.id} className="border-b border-(--color-border) last:border-b-0">
-                  <td className="sticky left-0 z-10 bg-(--color-surface) px-3 py-2 font-semibold whitespace-nowrap">
+                  <td className="sticky left-0 z-10 w-40 min-w-40 max-w-40 bg-(--color-surface) px-3 py-2 font-semibold whitespace-nowrap">
                     {player.firstName} {player.lastName}
                   </td>
                   {slots.map((slot) => {

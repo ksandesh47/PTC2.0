@@ -70,7 +70,7 @@ export function StatsTable({ rows, displayNames, standingsLabel, minMatches }: R
                   column.key === "rank"
                     ? "sticky left-0 z-20 w-10 min-w-10 bg-(--color-clay-50)"
                     : column.key === "player"
-                      ? "sticky left-10 z-20 min-w-36 bg-(--color-clay-50)"
+                      ? "sticky left-10 z-20 w-40 min-w-40 max-w-40 bg-(--color-clay-50)"
                       : ""
                 }`}
               >
@@ -90,7 +90,7 @@ export function StatsTable({ rows, displayNames, standingsLabel, minMatches }: R
             return (
               <tr key={row.playerId} className="hover:bg-(--color-clay-50) transition-colors">
                 <td className="sticky left-0 z-10 w-10 min-w-10 bg-(--color-surface) px-3 py-3 text-right text-(--color-text-muted) font-mono">{index < 3 ? ["🥇", "🥈", "🥉"][index] : index + 1}</td>
-                <td className="sticky left-10 z-10 min-w-36 bg-(--color-surface) px-3 py-3 font-semibold" title={tooltip}>
+                <td className="sticky left-10 z-10 w-40 min-w-40 max-w-40 bg-(--color-surface) px-3 py-3 font-semibold" title={tooltip}>
                   <span className="inline-flex max-w-full items-baseline gap-1 truncate">
                     <span>{name}</span>
                     <span className="text-[0.65em] font-mono font-normal text-(--color-text-muted)">{row.matchesPlayed}</span>
