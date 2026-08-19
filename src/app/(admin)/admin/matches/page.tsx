@@ -3,6 +3,7 @@ import { db } from "@/db";
 import { matches, players, seasons } from "@/db/schema";
 import { and, eq, inArray } from "drizzle-orm";
 import { formatDate } from "@/lib/utils";
+import { buildMatchSetRows } from "@/lib/league/display";
 
 type PageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
@@ -76,7 +77,7 @@ export default async function AdminMatchesPage({ searchParams }: Readonly<PagePr
     where: and(eq(matches.seasonId, activeSeason.id)),
     with: {
       slot: true,
-      pairings: true,
+      pairings: { with: { sets: true } },
     },
     orderBy: (t, { asc }) => [asc(t.weekNumber), asc(t.createdAt)],
   });
@@ -175,18 +176,22 @@ export default async function AdminMatchesPage({ searchParams }: Readonly<PagePr
               ) : (
                 m.pairings.map((pairing) => (
                   <div key={pairing.id} className="rounded-lg border border-(--color-border) bg-(--color-navy-50) px-3 py-2 text-sm space-y-1">
-                    {rotatingSets(pairing).map((set) => (
-                      <div key={set.label} className="grid grid-cols-[3rem_1fr_auto_1fr] items-center gap-2 border-b border-(--color-border) py-1 last:border-b-0">
+                    {rotatingSets(pairing).map((set, index) => {
+                      const scoreRow = buildMatchSetRows([pairing]).find((row) => row.setNumber === index + 1);
+                      return (
+                      <div key={set.label} className="grid grid-cols-[3rem_1fr_auto_auto_auto_1fr] items-center gap-2 border-b border-(--color-border) py-1 last:border-b-0">
                         <span className="text-xs font-semibold uppercase tracking-wider text-(--color-text-muted)">{set.label}</span>
                         <p className="font-semibold">
                           {set.team1.filter(Boolean).map((id) => playerName(playerMap, id)).join(" & ")}
                         </p>
                         <span className="text-xs text-(--color-text-muted)">vs</span>
+                        {scoreRow ? <span className="font-bold text-(--color-navy-600)">{scoreRow.team1Games} - {scoreRow.team2Games}</span> : <span />}
                         <p className="font-semibold">
                           {set.team2.filter(Boolean).map((id) => playerName(playerMap, id)).join(" & ")}
                         </p>
                       </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 ))
               )}
