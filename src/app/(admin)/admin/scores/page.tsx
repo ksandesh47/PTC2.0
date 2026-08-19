@@ -192,14 +192,12 @@ function resolveRunningWeek(
   return weekRanges.at(-1)!.week;
 }
 
-function buildSetCountByMatch<T extends { id: string; pairings: Array<{ sets: Array<{ version: number }> }> }>(rows: T[]) {
+function buildSetCountByMatch<T extends { id: string; pairings: Array<{ sets: Array<{ setNumber: number }> }> }>(rows: T[]) {
   const setCountByMatch = new Map<string, number>();
   for (const match of rows) {
     let count = 0;
     for (const pairing of match.pairings) {
-      const newestVersion = pairing.sets[0]?.version;
-      if (!newestVersion) continue;
-      count += pairing.sets.filter((s) => s.version === newestVersion).length;
+      count += new Set(pairing.sets.map((set) => set.setNumber)).size;
     }
     setCountByMatch.set(match.id, count);
   }

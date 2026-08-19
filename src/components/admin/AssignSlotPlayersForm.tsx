@@ -95,7 +95,7 @@ export function AssignSlotPlayersForm({
   const toggleSelection = (playerId: string) => {
     setSelected((prev) => {
       if (prev.includes(playerId)) return prev.filter((id) => id !== playerId);
-      if (prev.length >= 4) return prev;
+      if (prev.length >= 4) return [...prev.slice(0, 3), playerId];
       return [...prev, playerId];
     });
   };
@@ -180,42 +180,47 @@ export function AssignSlotPlayersForm({
               {selected.length === 0 ? (
                 <p className="text-(--color-text-muted)">No players selected yet</p>
               ) : (
-                <div className="flex flex-wrap gap-1">
-                  {selected.map((id, index) => {
-                    const player = players.find((p) => p.id === id);
-                    return (
-                      <span
-                        key={id}
-                        className="inline-flex items-center gap-1 rounded-full bg-(--color-navy-600) px-2 py-0.5 text-white"
-                      >
-                        <span className="font-mono">{index + 1}</span>
-                        <span>{player?.name ?? '?'}</span>
-                        <button
-                          type="button"
-                          onClick={() => toggleSelection(id)}
-                          className="ml-1 rounded hover:opacity-80"
-                          aria-label={`Remove ${player?.name ?? 'player'}`}
+                <>
+                  <div className="flex flex-wrap gap-1">
+                    {selected.map((id, index) => {
+                      const player = players.find((p) => p.id === id);
+                      return (
+                        <span
+                          key={id}
+                          className="inline-flex items-center gap-1 rounded-full bg-(--color-navy-600) px-2 py-0.5 text-white"
                         >
-                          ✕
-                        </button>
-                      </span>
-                    );
-                  })}
-                </div>
+                          <span className="font-mono">{index + 1}</span>
+                          <span>{player?.name ?? '?'}</span>
+                          <button
+                            type="button"
+                            onClick={() => toggleSelection(id)}
+                            className="ml-1 rounded hover:opacity-80"
+                            aria-label={`Remove ${player?.name ?? 'player'}`}
+                          >
+                            ✕
+                          </button>
+                        </span>
+                      );
+                    })}
+                  </div>
+                  {selected.length === 4 && (
+                    <p className="mt-1 text-(--color-text-muted)">
+                      Choose another player to replace player 4, including unavailable players.
+                    </p>
+                  )}
+                </>
               )}
             </div>
 
             <div className="flex-1 overflow-y-auto">
               {sortedPlayers.map((player) => {
                 const isSelected = selected.includes(player.id);
-                const disableBtn = !isSelected && selected.length >= 4;
                 return (
                   <button
                     key={player.id}
                     type="button"
-                    disabled={disableBtn}
                     onClick={() => toggleSelection(player.id)}
-                    className={`flex w-full items-center justify-between gap-3 border-b border-(--color-border) px-4 py-2.5 text-left text-sm transition-colors last:border-b-0 disabled:cursor-not-allowed disabled:opacity-40 ${
+                    className={`flex w-full items-center justify-between gap-3 border-b border-(--color-border) px-4 py-2.5 text-left text-sm transition-colors last:border-b-0 ${
                       isSelected ? 'bg-(--color-navy-50)' : 'hover:bg-(--color-navy-50)'
                     }`}
                   >

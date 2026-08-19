@@ -152,16 +152,16 @@ export function PlayersRoster({ roster }: Readonly<{ roster: PlayerRow[] }>) {
 
       <div className="rounded-lg border border-(--color-border) bg-(--color-surface) overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-sm min-w-max">
+          <table className="w-full min-w-[840px] table-fixed text-sm">
           <thead className="bg-(--color-navy-50) text-xs uppercase tracking-wider text-(--color-text-muted)">
             <tr>
               <th className="sticky left-0 z-20 w-10 min-w-10 bg-(--color-navy-50) px-2 py-2 text-left">#</th>
               <th className="sticky left-10 z-20 w-40 min-w-40 max-w-40 bg-(--color-navy-50) px-2 py-2 text-left">Name</th>
-              <th className="px-2 py-2 text-left min-w-[90px]">Phone</th>
-              <th className="px-2 py-2 text-left min-w-[110px]">Email</th>
-              <th className="px-2 py-2 text-left min-w-[45px]">NTRP</th>
-              <th className="px-2 py-2 text-left min-w-[65px]">Status</th>
-              <th className="sticky right-0 z-20 min-w-[90px] bg-(--color-navy-50) px-2 py-2 text-center">Actions</th>
+              <th className="w-32 min-w-32 px-2 py-2 text-left">Phone</th>
+              <th className="w-56 min-w-56 px-2 py-2 text-left">Email</th>
+              <th className="w-20 min-w-20 px-2 py-2 text-left">NTRP</th>
+              <th className="w-28 min-w-28 px-2 py-2 text-left">Status</th>
+              <th className="sticky right-0 z-20 w-28 min-w-28 bg-(--color-navy-50) px-2 py-2 text-center">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-(--color-border)">

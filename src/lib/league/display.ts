@@ -37,10 +37,14 @@ export function projectStandings(rows: StandingsSnapshotRow[]) {
 export function getLatestVersionSets<T extends { version: number; setNumber: number }>(
   sets: T[]
 ) {
-  const latestVersion = Math.max(...sets.map((set) => set.version), 0);
-  return sets
-    .filter((set) => set.version === latestVersion)
-    .sort((a, b) => a.setNumber - b.setNumber);
+  const latestBySetNumber = new Map<number, T>();
+  for (const set of sets) {
+    const current = latestBySetNumber.get(set.setNumber);
+    if (!current || set.version > current.version) {
+      latestBySetNumber.set(set.setNumber, set);
+    }
+  }
+  return [...latestBySetNumber.values()].sort((a, b) => a.setNumber - b.setNumber);
 }
 
 type MatchSetLike = {

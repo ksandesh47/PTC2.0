@@ -101,7 +101,7 @@ export default async function StandingsPage() {
               <thead className="bg-(--color-clay-50) text-(--color-text-muted) text-xs uppercase tracking-widest">
                 <tr>
                   <th scope="col" className="sticky left-0 z-20 w-10 min-w-10 bg-(--color-clay-50) px-3 py-3 text-right">#</th>
-                  <th scope="col" className="sticky left-10 z-20 w-40 min-w-40 max-w-40 bg-(--color-clay-50) px-3 py-3 text-left">Player</th>
+                  <th scope="col" className="sticky left-10 z-20 w-28 min-w-28 max-w-28 bg-(--color-clay-50) px-3 py-3 text-left lg:w-40 lg:min-w-40 lg:max-w-40">Player</th>
                   <th scope="col" className="px-3 py-3 text-right">Top {MIN_MATCHES}</th>
                   {Array.from({ length: MIN_MATCHES }).map((_, i) => (
                     <th key={i} scope="col" className="px-2 py-3 text-right">
@@ -124,7 +124,7 @@ export default async function StandingsPage() {
                       <td className="sticky left-0 z-10 bg-(--color-surface) px-3 py-2 text-right text-(--color-text-muted) font-mono">
                         {medalFor(row.rank)}
                       </td>
-                      <td className="sticky left-10 z-10 w-40 min-w-40 max-w-40 bg-(--color-surface) px-3 py-2 font-semibold">
+                      <td className="sticky left-10 z-10 w-28 min-w-28 max-w-28 bg-(--color-surface) px-3 py-2 font-semibold lg:w-40 lg:min-w-40 lg:max-w-40">
                         <PlayerNameBadge
                           name={displayNameMap.get(row.playerId) ?? row.playerName}
                           matchesPlayed={row.matchesPlayed}

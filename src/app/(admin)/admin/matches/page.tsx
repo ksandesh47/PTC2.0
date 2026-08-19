@@ -188,19 +188,21 @@ export default async function AdminMatchesPage({ searchParams }: Readonly<PagePr
               {m.pairings.length === 0 ? (
                 <p className="text-sm text-(--color-text-muted)">No lineup assigned yet.</p>
               ) : (
-                m.pairings.map((pairing) => (
+                m.pairings.map((pairing) => {
+                  const scoreRows = buildMatchSetRows([pairing]);
+                  return (
                   <div key={pairing.id} className="rounded-lg border border-(--color-border) bg-(--color-navy-50) px-3 py-2 text-sm space-y-1">
                     {rotatingSets(pairing).map((set, index) => {
-                      const scoreRow = buildMatchSetRows([pairing]).find((row) => row.setNumber === index + 1);
+                      const scoreRow = scoreRows.find((row) => row.setNumber === index + 1) ?? scoreRows[index];
                       return (
                       <div key={set.label} className="grid grid-cols-[3rem_1fr_auto_2rem_auto_1fr] items-center gap-2 border-b border-(--color-border) py-1 last:border-b-0">
                         <span className="text-xs font-semibold uppercase tracking-wider text-(--color-text-muted)">{set.label}</span>
                         <p className="font-semibold">
                           {set.team1.filter(Boolean).map((id) => playerName(playerMap, id)).join(" & ")}
                         </p>
-                        {scoreRow ? <span className="font-bold text-(--color-navy-600)">{scoreRow.team1Games}</span> : <span />}
+                        {scoreRow ? <span className="font-bold text-(--color-navy-600)">{scoreRow.team1Games}</span> : <span className="text-(--color-text-muted)">{m.status === "completed" ? "–" : ""}</span>}
                         <span className="text-center text-xs text-(--color-text-muted)">{scoreRow ? `S${scoreRow.setNumber}` : "vs"}</span>
-                        {scoreRow ? <span className="font-bold text-(--color-navy-600)">{scoreRow.team2Games}</span> : <span />}
+                        {scoreRow ? <span className="font-bold text-(--color-navy-600)">{scoreRow.team2Games}</span> : <span className="text-(--color-text-muted)">{m.status === "completed" ? "–" : ""}</span>}
                         <p className="font-semibold">
                           {set.team2.filter(Boolean).map((id) => playerName(playerMap, id)).join(" & ")}
                         </p>
@@ -208,7 +210,8 @@ export default async function AdminMatchesPage({ searchParams }: Readonly<PagePr
                       );
                     })}
                   </div>
-                ))
+                  );
+                })
               )}
             </article>
           ))}
