@@ -171,5 +171,17 @@ export async function POST(req: NextRequest) {
     else results.skipped.push({ requestId: request.id, reason: "request changed or requester is no longer assigned" });
   }
 
-  return NextResponse.json({ ok: true, ...results });
+  await db.insert(auditEvents).values({
+    action: "update",
+    resourceType: "cron:substitute-autofill",
+    metadata: {
+      status: "ok",
+      ranAt: now.toISOString(),
+      filled: results.filled.length,
+      expired: results.expired.length,
+      skipped: results.skipped.length,
+    },
+  });
+
+  return NextResponse.json({ ok: true, ...results, ranAt: now.toISOString() });
 }

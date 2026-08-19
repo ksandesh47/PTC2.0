@@ -86,6 +86,11 @@ export default function AvailabilityWeeklyForm({
     [statusBySlot]
   );
 
+  const selectedSlots = useMemo(
+    () => slots.filter((slot) => statusBySlot[slot.id] === "available"),
+    [slots, statusBySlot]
+  );
+
   function toggleSlot(slotId: string) {
     setStatusBySlot((prev) => ({
       ...prev,
@@ -113,6 +118,31 @@ export default function AvailabilityWeeklyForm({
         <p className="text-sm font-semibold text-(--color-text-muted)">Tap slots to toggle your availability</p>
         <p className="text-sm font-semibold text-(--color-clay-600)">{selectedCount} selected</p>
       </div>
+
+      <section className="rounded-xl border border-(--color-border) bg-(--color-surface) p-3 shadow-sm">
+        <div className="mb-2 flex items-center justify-between gap-3">
+          <h2 className="text-xs font-bold uppercase tracking-widest text-(--color-clay-600)">
+            Reported availability
+          </h2>
+          <span className="text-xs text-(--color-text-muted)">{selectedCount} slots</span>
+        </div>
+        {selectedSlots.length === 0 ? (
+          <p className="text-sm text-(--color-text-muted)">No available slots selected.</p>
+        ) : (
+          <div className="grid gap-1.5 sm:grid-cols-2 lg:grid-cols-3">
+            {selectedSlots.map((slot) => {
+              const date = fmtDay.format(new Date(`${slot.slotDate}T00:00:00`));
+              const time = slot.label.split(" - ")[1] ?? slot.label;
+              return (
+                <div key={slot.id} className="flex items-center justify-between rounded-md bg-(--color-clay-50) px-2.5 py-1.5 text-xs">
+                  <span className="font-semibold">{date}</span>
+                  <span className="text-(--color-text-muted)">{time}</span>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </section>
 
       <div className="space-y-6">
         {groupedWeeks.map((week) => (

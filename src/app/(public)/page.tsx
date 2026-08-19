@@ -4,8 +4,8 @@ export default function HomePage() {
   return (
     <>
       {/* Hero banner */}
-      <section className="bg-(--color-clay-800) py-16 text-center space-y-4">
-        <h1 className="font-display text-6xl sm:text-8xl text-(--color-clay-100) tracking-widest">
+      <section className="mx-4 mt-4 max-w-7xl overflow-hidden rounded-xl bg-(--color-clay-800) py-12 text-center space-y-4 sm:mx-6 sm:py-16 lg:mx-auto">
+        <h1 className="break-words px-4 font-display text-4xl text-(--color-clay-100) tracking-widest sm:text-6xl lg:text-8xl">
           PALOMINO TENNIS CLUB
         </h1>
         <p className="text-lg text-(--color-clay-300) max-w-xl mx-auto">

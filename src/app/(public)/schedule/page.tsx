@@ -219,7 +219,7 @@ export default async function SchedulePage({ searchParams }: Readonly<PageProps>
     ? buildWeekSlotLayout(selectedRange.start, weekMatches, weekSlots)
     : { slots: [] as Array<WeekSlot<LeagueMatch>> };
 
-  const visibleSlots = viewerPlayerId
+  const visibleSlots = personalMode && viewerPlayerId
     ? slots.filter((slot) =>
         slot.match ? lineupIds(slot.match).includes(viewerPlayerId) : false
       )

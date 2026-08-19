@@ -1,7 +1,8 @@
 "use server";
 
 import { db } from "@/db";
-import { seasons, availabilitySlots } from "@/db/schema";
+import { auditEvents, seasons, availabilitySlots } from "@/db/schema";
+import { createClient } from "@/lib/supabase/server";
 import { eq, gte, lte, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
@@ -41,7 +42,13 @@ export async function updateAvailabilityWindow(seasonId: string, startDate: stri
 
   const season = await db.query.seasons.findFirst({
     where: eq(seasons.id, seasonId),
-    columns: { startDate: true, endDate: true },
+    columns: {
+      startDate: true,
+      endDate: true,
+      availabilityWindowStart: true,
+      availabilityWindowEnd: true,
+      name: true,
+    },
   });
   if (!season) throw new Error("Season not found");
   if (startDate < season.startDate || endDate > season.endDate) {
@@ -109,6 +116,23 @@ export async function updateAvailabilityWindow(seasonId: string, startDate: stri
       updatedAt: new Date(),
     })
     .where(eq(seasons.id, seasonId));
+
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  await db.insert(auditEvents).values({
+    actorId: user?.id ?? null,
+    action: "update",
+    resourceType: "availability_window",
+    resourceId: seasonId,
+    diff: {
+      before: {
+        startDate: season.availabilityWindowStart,
+        endDate: season.availabilityWindowEnd,
+      },
+      after: { startDate, endDate },
+    },
+    metadata: { seasonName: season.name },
+  });
 
   revalidatePath("/admin");
   revalidatePath("/admin/availability");

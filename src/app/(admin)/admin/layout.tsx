@@ -53,6 +53,19 @@ export default async function AdminLayout({ children }: Readonly<{ children: Rea
 
       {/* Command area */}
       <div className="flex-1 overflow-y-auto bg-(--color-navy-50)">
+        <nav aria-label="Mobile admin navigation" className="lg:hidden sticky top-14 z-20 overflow-x-auto border-b border-(--color-navy-800) bg-(--color-navy-900) px-3 py-2">
+          <div className="flex min-w-max gap-1">
+            {adminNav.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="rounded-md px-3 py-2 text-xs font-semibold whitespace-nowrap text-(--color-navy-200) hover:bg-(--color-navy-800) hover:text-white"
+              >
+                {item.label}
+              </Link>
+            ))}
+          </div>
+        </nav>
         {children}
       </div>
     </div>

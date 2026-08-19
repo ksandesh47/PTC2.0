@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { db } from "@/db";
-import { seasons, users, matches } from "@/db/schema";
+import { auditEvents, seasons, users, matches } from "@/db/schema";
 import { eq, ne, count } from "drizzle-orm";
 
 function normalizeDateInput(value: unknown): string | null {
@@ -64,6 +64,8 @@ export async function PATCH(
   }
 
   try {
+    const before = await db.query.seasons.findFirst({ where: eq(seasons.id, seasonId) });
+    if (!before) return NextResponse.json({ error: "Season not found" }, { status: 404 });
     await db
       .update(seasons)
       .set({
@@ -72,6 +74,18 @@ export async function PATCH(
         updatedAt: new Date(),
       })
       .where(eq(seasons.id, seasonId));
+
+    await db.insert(auditEvents).values({
+      actorId: user.id,
+      action: "update",
+      resourceType: "season",
+      resourceId: seasonId,
+      diff: {
+        before: { startDate: before.startDate, endDate: before.endDate },
+        after: { startDate, endDate },
+      },
+      metadata: { seasonName: before.name },
+    });
 
     return NextResponse.json({ success: true });
   } catch (error) {

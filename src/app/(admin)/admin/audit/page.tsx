@@ -12,6 +12,42 @@ function jsonDetail(value: unknown) {
   }
 }
 
+function actorLabel(actor: { email: string; role: string } | null) {
+  return actor ? `${actor.email} (${actor.role})` : "System / imported data";
+}
+
+function eventDescription(event: {
+  action: string;
+  resourceType: string;
+  diff: unknown;
+  metadata: unknown;
+  actor: { email: string; role: string } | null;
+}) {
+  const actor = actorLabel(event.actor);
+  const diff = event.diff && typeof event.diff === "object" ? event.diff as Record<string, unknown> : {};
+  const before = diff.before && typeof diff.before === "object" ? diff.before as Record<string, unknown> : null;
+  const after = diff.after && typeof diff.after === "object" ? diff.after as Record<string, unknown> : null;
+  if (event.resourceType === "availability_window" && before && after) {
+    return `Availability window was changed by ${actor} from ${before.startDate ?? "unset"} - ${before.endDate ?? "unset"} to ${after.startDate} - ${after.endDate}`;
+  }
+  if (event.resourceType === "season" && before && after) {
+    return `Season dates were changed by ${actor} from ${before.startDate} - ${before.endDate} to ${after.startDate} - ${after.endDate}`;
+  }
+  if (event.resourceType === "match" && (event.action === "score_entry" || event.action === "score_correction")) {
+    return `Score for the match was ${event.action === "score_correction" ? "corrected" : "updated"} by ${actor}`;
+  }
+  if (event.resourceType === "match" && event.action === "match_abandon") {
+    return `Match was canceled by ${actor}`;
+  }
+  if (event.resourceType === "player" && event.action === "update") {
+    return `Player information was updated by ${actor}`;
+  }
+  if (event.resourceType === "match" && event.action === "match_assign") {
+    return `Match players were assigned by ${actor}`;
+  }
+  return `${event.action.replaceAll("_", " ")} on ${event.resourceType} by ${actor}`;
+}
+
 export default async function AdminAuditPage() {
   const events = await db.query.auditEvents.findMany({
     orderBy: [desc(auditEvents.createdAt)],
@@ -39,10 +75,7 @@ export default async function AdminAuditPage() {
                             <p className="text-xs font-semibold uppercase tracking-wider text-(--color-navy-600)">{event.action.replaceAll("_", " ")}</p>
                             <span className="text-xs text-(--color-text-muted)">{event.resourceType}</span>
                           </div>
-                          <p className="mt-1 text-sm font-semibold">
-                            {event.actor?.email ?? "System / imported data"}
-                            {event.actor?.role ? ` · ${event.actor.role}` : ""}
-                          </p>
+                          <p className="mt-1 text-sm font-semibold">{eventDescription(event)}</p>
                           <p className="text-xs text-(--color-text-muted)">{event.resourceId ?? "No resource ID"}</p>
                         </div>
                         <span className="shrink-0 text-xs text-(--color-text-muted)">{formatDate(event.createdAt)}</span>

@@ -21,7 +21,7 @@ export async function GET(request: Request) {
     // Record successful keepalive runs so the admin dashboard can show last run time.
     await db.insert(auditEvents).values({
       action: "update",
-      resourceType: "keepalive",
+      resourceType: "cron:keepalive",
       metadata: { status: "ok", ts },
     });
 

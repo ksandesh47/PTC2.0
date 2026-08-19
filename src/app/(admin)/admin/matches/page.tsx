@@ -28,6 +28,25 @@ function rotatingSets(pairing: {
   ];
 }
 
+function weekStart(dateValue: string | Date) {
+  const date = new Date(`${String(dateValue).slice(0, 10)}T00:00:00`);
+  const day = date.getDay();
+  date.setDate(date.getDate() + (day === 0 ? -6 : 1 - day));
+  date.setHours(0, 0, 0, 0);
+  return date;
+}
+
+function weekKey(dateValue: string | Date) {
+  return weekStart(dateValue).toISOString().slice(0, 10);
+}
+
+function weekTitle(start: Date) {
+  const end = new Date(start);
+  end.setDate(start.getDate() + 6);
+  const formatter = new Intl.DateTimeFormat("en-US", { weekday: "short", month: "short", day: "numeric" });
+  return `${formatter.format(start)} - ${formatter.format(end)}`;
+}
+
 export default async function AdminMatchesPage() {
   const activeSeason = await db.query.seasons.findFirst({
     where: eq(seasons.isActive, true),
@@ -66,6 +85,15 @@ export default async function AdminMatchesPage() {
       : [];
 
   const playerMap = new Map(playerRows.map((p) => [p.id, `${p.firstName} ${p.lastName}`]));
+  const weekGroups = Array.from(
+    matchRows.reduce((groups, match) => {
+      const key = match.slot?.slotDate ? weekKey(match.slot.slotDate) : "pending";
+      const current = groups.get(key);
+      if (current) current.push(match);
+      else groups.set(key, [match]);
+      return groups;
+    }, new Map<string, typeof matchRows>())
+  );
 
   const scheduledCount = matchRows.filter((m) => m.status === "scheduled").length;
   const completedCount = matchRows.filter((m) => m.status === "completed").length;
@@ -91,12 +119,17 @@ export default async function AdminMatchesPage() {
       {matchRows.length === 0 ? (
         <p className="text-sm text-(--color-text-muted)">No matches created for the active season.</p>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2">
-          {matchRows.map((m) => (
+        <div className="space-y-8">
+          {weekGroups.map(([key, group]) => (
+            <section key={key} className="space-y-3">
+              <h2 className="font-display text-2xl tracking-wider text-(--color-navy-600)">
+                {key === "pending" ? "DATE PENDING" : weekTitle(weekStart(group[0].slot!.slotDate))}
+              </h2>
+              <div className="grid gap-4 md:grid-cols-2">
+              {group.map((m) => (
             <article key={m.id} className="rounded-xl border border-(--color-border) bg-(--color-surface) p-4 shadow-sm space-y-3">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-wider text-(--color-text-muted)">Week {m.weekNumber}</p>
                   <p className="text-sm text-(--color-text-muted)">
                     {m.slot?.slotDate ? formatDate(m.slot.slotDate) : "Date pending"} · {m.slot?.label ?? m.court ?? "Court TBD"}
                   </p>
@@ -127,6 +160,9 @@ export default async function AdminMatchesPage() {
                 ))
               )}
             </article>
+          ))}
+              </div>
+            </section>
           ))}
         </div>
       )}

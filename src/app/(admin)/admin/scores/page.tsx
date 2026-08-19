@@ -545,6 +545,9 @@ export default async function AdminScoresPage({ searchParams }: Readonly<PagePro
   const today = toMidnight(new Date());
   const pastMissingScores = matchRows.filter((m) => {
     if (m.status !== "scheduled" && m.status !== "in_progress") return false;
+    // A washout may retain a scheduled status during legacy imports; its reason
+    // is still authoritative and it should never appear as missing score entry.
+    if (m.abandonReason?.trim()) return false;
     if (!m.slot?.slotDate) return false;
     const slotDate = toMidnight(parseDateInput(m.slot.slotDate));
     if (slotDate.getTime() >= today.getTime()) return false;
@@ -669,11 +672,19 @@ export default async function AdminScoresPage({ searchParams }: Readonly<PagePro
             }
             const anchorId = match ? `match-${match.id}` : `slot-${slot.key}`;
             const slotTimeLabel = slot.slotLabel?.split(" - ")[1];
+            const isScored = scoredSetCount > 0;
+            const isCanceled = match?.status === "cancelled" || match?.status === "abandoned";
             return (
               <article
                 key={slot.key}
                 id={anchorId}
-                className="rounded-lg border border-(--color-border) bg-(--color-surface) p-3 space-y-2 scroll-mt-24"
+                className={`rounded-lg border p-3 space-y-2 scroll-mt-24 ${
+                  isScored
+                    ? "border-(--color-forest-300) bg-(--color-forest-50)"
+                    : isCanceled
+                      ? "border-red-200 bg-red-50"
+                      : "border-(--color-border) bg-(--color-surface)"
+                }`}
               >
                 <div className="flex items-start justify-between gap-2">
                   <div>
@@ -772,13 +783,13 @@ export default async function AdminScoresPage({ searchParams }: Readonly<PagePro
       </section>
 
       {canceledMatches.length > 0 && (
-        <section className="space-y-3">
-          <div className="flex items-center justify-between">
+        <details className="group space-y-3">
+          <summary className="flex cursor-pointer list-none items-center justify-between rounded-lg border border-(--color-border) bg-(--color-surface) px-4 py-3">
             <h2 className="font-display text-2xl tracking-wider">CANCELED MATCHES</h2>
             <span className="text-xs font-semibold text-(--color-text-muted)">
-              {canceledMatches.length} canceled
+              {canceledMatches.length} canceled <span className="ml-1 transition-transform group-open:inline-block">▾</span>
             </span>
-          </div>
+          </summary>
           <div className="rounded-lg border border-(--color-border) bg-(--color-surface) divide-y divide-(--color-border)">
             {canceledMatches.map((m) => {
               const lineup = m.pairings.flatMap((p) => [p.team1Player1, p.team1Player2, p.team2Player1, p.team2Player2])
@@ -807,7 +818,7 @@ export default async function AdminScoresPage({ searchParams }: Readonly<PagePro
               );
             })}
           </div>
-        </section>
+        </details>
       )}
     </div>
   );
