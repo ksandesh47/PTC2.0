@@ -96,11 +96,11 @@ export default async function StandingsPage() {
         <section className="space-y-3">
           <h2 className="font-display text-2xl tracking-wider">🏅 Top {MIN_MATCHES} Match Score Breakdown</h2>
           <div className="overflow-x-auto rounded-lg border border-(--color-border)">
-            <table className="w-full text-sm" aria-label="Top match breakdown">
+            <table className="min-w-max w-full text-sm" aria-label="Top match breakdown">
               <thead className="bg-(--color-clay-50) text-(--color-text-muted) text-xs uppercase tracking-widest">
                 <tr>
-                  <th scope="col" className="px-3 py-3 text-right w-10">#</th>
-                  <th scope="col" className="px-3 py-3 text-left">Player</th>
+                  <th scope="col" className="sticky left-0 z-20 w-10 min-w-10 bg-(--color-clay-50) px-3 py-3 text-right">#</th>
+                  <th scope="col" className="sticky left-10 z-20 min-w-36 bg-(--color-clay-50) px-3 py-3 text-left">Player</th>
                   <th scope="col" className="px-3 py-3 text-right">Top {MIN_MATCHES}</th>
                   {Array.from({ length: MIN_MATCHES }).map((_, i) => (
                     <th key={i} scope="col" className="px-2 py-3 text-right">
@@ -120,10 +120,10 @@ export default async function StandingsPage() {
                     : undefined;
                   return (
                     <tr key={row.playerId} className="hover:bg-(--color-clay-50)">
-                      <td className="px-3 py-2 text-right text-(--color-text-muted) font-mono">
+                      <td className="sticky left-0 z-10 bg-(--color-surface) px-3 py-2 text-right text-(--color-text-muted) font-mono">
                         {medalFor(row.rank)}
                       </td>
-                      <td className="px-3 py-2 font-semibold">
+                      <td className="sticky left-10 z-10 min-w-36 bg-(--color-surface) px-3 py-2 font-semibold">
                         <PlayerNameBadge
                           name={displayNameMap.get(row.playerId) ?? row.playerName}
                           matchesPlayed={row.matchesPlayed}
@@ -167,26 +167,26 @@ function PodiumCard({
     : undefined;
   return (
     <article className="rounded-xl border border-(--color-border) bg-(--color-surface) overflow-hidden shadow-sm">
-      <div className="bg-(--color-clay-100) px-5 pt-4 pb-3 flex items-center justify-between">
+      <div className="bg-(--color-clay-100) px-4 pt-3 pb-2 flex items-center justify-between lg:px-5 lg:pt-4 lg:pb-3">
         <span className="text-3xl leading-none">{medalFor(entry.rank)}</span>
         <span className="text-xs uppercase tracking-widest text-(--color-clay-600)">
           Rank {entry.rank}
         </span>
       </div>
-      <div className="p-5">
-      <h2 className="mt-3 font-display text-3xl tracking-wider text-(--color-text)">
+      <div className="p-3 lg:p-5">
+      <h2 className="mt-1 font-display text-2xl tracking-wider text-(--color-text) lg:mt-3 lg:text-3xl">
         <PlayerNameBadge
           name={displayName}
           matchesPlayed={entry.matchesPlayed}
           tooltip={tooltip}
         />
       </h2>
-      <div className="mt-4 flex items-end justify-between">
+      <div className="mt-2 flex items-end justify-between lg:mt-4">
         <div>
           <p className="text-xs uppercase tracking-widest text-(--color-text-muted)">
             {getStandingsLabel()}
           </p>
-          <p className="font-display text-4xl tracking-wider text-(--color-clay-600)">
+          <p className="font-display text-3xl tracking-wider text-(--color-clay-600) lg:text-4xl">
             {entry.standingsTotal}
           </p>
         </div>

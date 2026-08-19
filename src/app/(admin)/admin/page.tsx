@@ -3,6 +3,7 @@ import { matches, players, seasons, auditEvents } from "@/db/schema";
 import { eq, desc, count, sql } from "drizzle-orm";
 import Link from "next/link";
 import { formatDate } from "@/lib/utils";
+import { parseDateInput, toMidnight } from "@/lib/league/week-slots";
 import { AvailabilityWindowControl } from "@/components/admin/AvailabilityWindowControl";
 import { DashboardRetryControl } from "@/components/admin/DashboardRetryControl";
 
@@ -45,6 +46,7 @@ async function computeDataHealth(seasonId: string) {
     const seasonMatches = await db.query.matches.findMany({
       where: eq(matches.seasonId, seasonId),
       with: {
+        slot: true,
         pairings: { with: { sets: true } },
       },
     });
@@ -54,6 +56,7 @@ async function computeDataHealth(seasonId: string) {
     let cancelledWithSets = 0;
     let scheduledPastNoScores = 0;
     let completedWithoutSets = 0;
+    const today = toMidnight(new Date());
 
     for (const match of seasonMatches) {
       if (!match.slotId) matchesWithoutSlot += 1;
@@ -64,7 +67,16 @@ async function computeDataHealth(seasonId: string) {
       if (match.status === "completed" && setCount === 0) {
         completedWithoutSets += 1;
       }
-      if ((match.status === "scheduled" || match.status === "in_progress") && setCount === 0) {
+      const slotDate = match.slot?.slotDate
+        ? toMidnight(parseDateInput(match.slot.slotDate))
+        : null;
+      if (
+        (match.status === "scheduled" || match.status === "in_progress") &&
+        setCount === 0 &&
+        !match.abandonReason?.trim() &&
+        slotDate &&
+        slotDate.getTime() < today.getTime()
+      ) {
         scheduledPastNoScores += 1;
       }
     }
@@ -126,7 +138,7 @@ export default async function AdminDashboardPage() {
       ? dbHealthResult.value
       : { ok: false, latencyMs: -1 };
   const lastDailyCronResult = await db.query.auditEvents.findFirst({
-    where: eq(auditEvents.resourceType, "cron:substitute-autofill"),
+    where: eq(auditEvents.resourceType, "cron:keepalive"),
     orderBy: [desc(auditEvents.createdAt)],
   });
   const lastDailyCron = lastDailyCronResult;
@@ -225,7 +237,7 @@ export default async function AdminDashboardPage() {
           )}
         </div>
         <span className="text-xs opacity-70">
-          Daily auto-fill: 11:00 AM EST via cron · Last run: {formatCronRun(lastDailyCron)}
+          Weekly DB keepalive: Mondays at 10:00 AM UTC via cron · Last run: {formatCronRun(lastDailyCron)}
         </span>
       </div>
 

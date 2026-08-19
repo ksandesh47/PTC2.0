@@ -146,7 +146,7 @@ export function PlayersRoster({ roster }: Readonly<{ roster: PlayerRow[] }>) {
               : "border border-(--color-border) bg-(--color-surface) hover:bg-(--color-navy-50)"
           }`}
         >
-          {editMode ? "✓ Done" : "✏ Edit"}
+          {editMode ? "Done editing" : "Edit players"}
         </button>
       </div>
 
@@ -155,13 +155,13 @@ export function PlayersRoster({ roster }: Readonly<{ roster: PlayerRow[] }>) {
           <table className="w-full text-sm min-w-max">
           <thead className="bg-(--color-navy-50) text-xs uppercase tracking-wider text-(--color-text-muted)">
             <tr>
-              <th className="px-2 py-2 text-left w-10 min-w-max">#</th>
-              <th className="px-2 py-2 text-left min-w-[100px]">Name</th>
+              <th className="sticky left-0 z-20 w-10 min-w-10 bg-(--color-navy-50) px-2 py-2 text-left">#</th>
+              <th className="sticky left-10 z-20 min-w-[140px] bg-(--color-navy-50) px-2 py-2 text-left">Name</th>
               <th className="px-2 py-2 text-left min-w-[90px]">Phone</th>
               <th className="px-2 py-2 text-left min-w-[110px]">Email</th>
               <th className="px-2 py-2 text-left min-w-[45px]">NTRP</th>
               <th className="px-2 py-2 text-left min-w-[65px]">Status</th>
-              <th className="px-2 py-2 text-center min-w-[90px]">Actions</th>
+              <th className="sticky right-0 z-20 min-w-[90px] bg-(--color-navy-50) px-2 py-2 text-center">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-(--color-border)">
@@ -173,8 +173,8 @@ export function PlayersRoster({ roster }: Readonly<{ roster: PlayerRow[] }>) {
 
               return (
                 <tr key={p.id} className={isEditing ? "bg-(--color-navy-50)" : p.isActive ? "" : "opacity-60"}>
-                  <td className="px-2 py-2 text-(--color-text-muted)">{idx + 1}</td>
-                  <td className="px-2 py-2">
+                  <td className="sticky left-0 z-10 w-10 min-w-10 bg-(--color-surface) px-2 py-2 text-(--color-text-muted)">{idx + 1}</td>
+                  <td className={`sticky left-10 z-10 min-w-[140px] px-2 py-2 ${isEditing ? "bg-(--color-navy-50)" : "bg-(--color-surface)"}`}>
                     {isEditing && edit ? (
                       <div className="space-y-0.5">
                         <input
@@ -273,7 +273,7 @@ export function PlayersRoster({ roster }: Readonly<{ roster: PlayerRow[] }>) {
                       </span>
                     )}
                   </td>
-                  <td className="px-2 py-2 min-w-[90px]">
+                  <td className={`sticky right-0 z-10 min-w-[90px] px-2 py-2 ${isEditing ? "bg-(--color-navy-50)" : "bg-(--color-surface)"}`}>
                     {isEditing ? (
                       <div className="flex flex-wrap gap-0.5 justify-center">
                         <button

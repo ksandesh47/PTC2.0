@@ -32,7 +32,7 @@ export async function SiteHeader() {
 
   return (
     <header className="bg-(--color-clay-900) shadow-md">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between gap-6">
+      <div className="mx-auto flex min-h-14 flex-wrap items-center justify-between gap-x-6 gap-y-2 px-4 py-2 sm:h-14 sm:flex-nowrap sm:py-0 sm:px-6 lg:px-8">
         {/* Logo */}
         <Link
           href="/"
@@ -42,7 +42,7 @@ export async function SiteHeader() {
         </Link>
 
         {/* Primary nav */}
-        <nav aria-label="Main navigation" className="hidden sm:flex gap-6">
+        <nav aria-label="Main navigation" className="order-3 -mx-1 flex basis-full gap-5 overflow-x-auto px-1 pb-1 sm:order-none sm:basis-auto sm:overflow-visible sm:px-0 sm:pb-0">
           {navLinks.map((link) => (
             <Link
               key={link.href}

@@ -59,6 +59,13 @@ function singleParam(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] : value;
 }
 
+function slotTimeMinutes(label: string | null | undefined) {
+  const match = label?.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
+  if (!match) return Number.MAX_SAFE_INTEGER;
+  const hour = Number(match[1]) % 12 + (match[3].toUpperCase() === "PM" ? 12 : 0);
+  return hour * 60 + Number(match[2]);
+}
+
 export default async function AdminMatchesPage({ searchParams }: Readonly<PageProps>) {
   const activeSeason = await db.query.seasons.findFirst({
     where: eq(seasons.isActive, true),
@@ -81,9 +88,16 @@ export default async function AdminMatchesPage({ searchParams }: Readonly<PagePr
     },
     orderBy: (t, { asc }) => [asc(t.weekNumber), asc(t.createdAt)],
   });
+  const orderedMatchRows = [...matchRows].sort((left, right) => {
+    const leftDate = left.slot?.slotDate ?? "9999-12-31";
+    const rightDate = right.slot?.slotDate ?? "9999-12-31";
+    return leftDate.localeCompare(rightDate)
+      || slotTimeMinutes(left.slot?.label) - slotTimeMinutes(right.slot?.label)
+      || left.createdAt.getTime() - right.createdAt.getTime();
+  });
 
   const playerIds = [...new Set(
-    matchRows.flatMap((m) =>
+    orderedMatchRows.flatMap((m) =>
       m.pairings.flatMap((p) => [p.team1Player1Id, p.team1Player2Id, p.team2Player1Id, p.team2Player2Id])
     ).filter(Boolean)
   )] as string[];
@@ -98,7 +112,7 @@ export default async function AdminMatchesPage({ searchParams }: Readonly<PagePr
 
   const playerMap = new Map(playerRows.map((p) => [p.id, `${p.firstName} ${p.lastName}`]));
   const weekGroups = Array.from(
-    matchRows.reduce((groups, match) => {
+    orderedMatchRows.reduce((groups, match) => {
       const key = match.slot?.slotDate ? weekKey(match.slot.slotDate) : "pending";
       const current = groups.get(key);
       if (current) current.push(match);

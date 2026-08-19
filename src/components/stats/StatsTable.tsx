@@ -59,11 +59,20 @@ export function StatsTable({ rows, displayNames, standingsLabel, minMatches }: R
 
   return (
     <div className="overflow-x-auto rounded-lg border border-(--color-border) bg-(--color-surface)">
-      <table className="w-full text-sm" aria-label="League stats table">
+      <table className="min-w-max w-full text-sm" aria-label="League stats table">
         <thead className="bg-(--color-clay-50) text-xs uppercase tracking-widest text-(--color-text-muted)">
           <tr>
             {columns.map((column) => (
-              <th key={column.key} className={`px-3 py-3 ${column.align === "right" ? "text-right" : "text-left"}`}>
+              <th
+                key={column.key}
+                className={`px-3 py-3 ${column.align === "right" ? "text-right" : "text-left"} ${
+                  column.key === "rank"
+                    ? "sticky left-0 z-20 w-10 min-w-10 bg-(--color-clay-50)"
+                    : column.key === "player"
+                      ? "sticky left-10 z-20 min-w-36 bg-(--color-clay-50)"
+                      : ""
+                }`}
+              >
                 <button type="button" onClick={() => changeSort(column.key)} className="inline-flex items-center gap-1 font-semibold hover:text-(--color-clay-600)">
                   {column.key === "standingsTotal" ? standingsLabel : column.label}
                   <span aria-hidden="true" className={column.key === sortKey ? "text-(--color-clay-600)" : "opacity-40"}>{indicator(column.key)}</span>
@@ -79,9 +88,9 @@ export function StatsTable({ rows, displayNames, standingsLabel, minMatches }: R
             const tooltip = remaining > 0 ? `${name} needs ${remaining} more match${remaining === 1 ? "" : "es"}` : undefined;
             return (
               <tr key={row.playerId} className="hover:bg-(--color-clay-50) transition-colors">
-                <td className="px-3 py-3 text-right text-(--color-text-muted) font-mono">{index < 3 ? ["🥇", "🥈", "🥉"][index] : index + 1}</td>
-                <td className="px-3 py-3 font-semibold" title={tooltip}>
-                  <span className="inline-flex items-baseline gap-1">
+                <td className="sticky left-0 z-10 w-10 min-w-10 bg-(--color-surface) px-3 py-3 text-right text-(--color-text-muted) font-mono">{index < 3 ? ["🥇", "🥈", "🥉"][index] : index + 1}</td>
+                <td className="sticky left-10 z-10 min-w-36 bg-(--color-surface) px-3 py-3 font-semibold" title={tooltip}>
+                  <span className="inline-flex max-w-full items-baseline gap-1 truncate">
                     <span>{name}</span>
                     <span className="text-[0.65em] font-mono font-normal text-(--color-text-muted)">{row.matchesPlayed}</span>
                   </span>

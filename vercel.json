@@ -1,6 +1,10 @@
 {
   "crons": [
     {
+      "path": "/api/keepalive",
+      "schedule": "0 10 * * 1"
+    },
+    {
       "path": "/api/substitutes/auto-fill",
       "schedule": "0 16 * * *"
     }
