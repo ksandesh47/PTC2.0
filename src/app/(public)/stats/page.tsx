@@ -6,6 +6,7 @@ import type {
   LeagueStandingsEntry,
   PlayerMatchScorecard,
 } from "@/lib/league/scorecards";
+import { StatsTable } from "@/components/stats/StatsTable";
 
 export const revalidate = 60;
 
@@ -20,17 +21,6 @@ function DataUnavailable() {
   );
 }
 
-function medalFor(rank: number): string {
-  if (rank === 1) return "🥇";
-  if (rank === 2) return "🥈";
-  if (rank === 3) return "🥉";
-  return String(rank);
-}
-
-function pluralMatches(n: number) {
-  return n === 1 ? "match" : "matches";
-}
-
 type HighlightMatchInfo = { name: string; date: string };
 
 export default async function StatsPage() {
@@ -39,7 +29,6 @@ export default async function StatsPage() {
   let completedMatches: Awaited<ReturnType<typeof getActiveSeasonProjection>>["completedMatches"] = [];
   let scorecardsByMatch: Map<string, PlayerMatchScorecard[]> = new Map();
   let displayNameMap = new Map<string, string>();
-  let rosterMap = new Map<string, { firstName: string; lastName: string }>();
   try {
     const projection = await getActiveSeasonProjection();
     season = projection.season;
@@ -47,9 +36,6 @@ export default async function StatsPage() {
     completedMatches = projection.completedMatches;
     scorecardsByMatch = projection.scorecardsByMatch;
     displayNameMap = projection.displayNameMap;
-    rosterMap = new Map(
-      projection.players.map((p) => [p.id, { firstName: p.firstName, lastName: p.lastName }])
-    );
   } catch {
     return <DataUnavailable />;
   }
@@ -62,14 +48,10 @@ export default async function StatsPage() {
     );
   }
 
-  // Default sort by Avg (descending), then Top-8 total, then matches played.
-  const sortedByAvg = [...standings].sort((a, b) => {
-    if (b.averageScore !== a.averageScore) return b.averageScore - a.averageScore;
-    if (b.standingsTotal !== a.standingsTotal) return b.standingsTotal - a.standingsTotal;
-    return b.matchesPlayed - a.matchesPlayed;
-  });
-
   const highlights = buildSeasonHighlights(completedMatches, scorecardsByMatch, standings, displayNameMap);
+  const displayNames = Object.fromEntries(
+    standings.map((row) => [row.playerId, displayNameMap.get(row.playerId) ?? row.playerName])
+  );
 
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 space-y-8">
@@ -82,57 +64,12 @@ export default async function StatsPage() {
         </p>
       </div>
 
-      <div className="overflow-x-auto rounded-lg border border-(--color-border) bg-(--color-surface)">
-        <table className="w-full text-sm" aria-label="League stats table">
-          <thead className="bg-(--color-clay-50) text-xs uppercase tracking-widest text-(--color-text-muted)">
-            <tr>
-              <th className="px-3 py-3 text-right">#</th>
-              <th className="px-3 py-3 text-left">Player</th>
-              <th className="px-3 py-3 text-right">Avg ▼</th>
-              <th className="px-3 py-3 text-right">Total</th>
-              <th className="px-3 py-3 text-right">{getStandingsLabel()}</th>
-              <th className="px-3 py-3 text-right">High</th>
-              <th className="px-3 py-3 text-right">Low</th>
-              <th className="px-3 py-3 text-right">M</th>
-              <th className="px-3 py-3 text-right">SW</th>
-              <th className="px-3 py-3 text-right">SL</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-(--color-border)">
-            {sortedByAvg.map((row, index) => {
-              const rosterEntry = rosterMap.get(row.playerId);
-              const tooltip = rosterEntry && row.matchesPlayed < MIN_MATCHES
-                ? `${rosterEntry.firstName} needs ${MIN_MATCHES - row.matchesPlayed} more ${pluralMatches(MIN_MATCHES - row.matchesPlayed)}`
-                : undefined;
-              return (
-                <tr key={row.playerId} className="hover:bg-(--color-clay-50) transition-colors">
-                  <td className="px-3 py-3 text-right text-(--color-text-muted) font-mono">
-                    {medalFor(index + 1)}
-                  </td>
-                  <td className="px-3 py-3 font-semibold">
-                    <span className="inline-flex items-baseline gap-1" title={tooltip}>
-                      <span>{displayNameMap.get(row.playerId) ?? row.playerName}</span>
-                      <span className="text-[0.65em] font-mono font-normal text-(--color-text-muted)">
-                        {row.matchesPlayed}
-                      </span>
-                    </span>
-                  </td>
-                  <td className="px-3 py-3 text-right font-bold text-(--color-clay-600)">
-                    {row.averageScore.toFixed(1)}
-                  </td>
-                  <td className="px-3 py-3 text-right">{row.total}</td>
-                  <td className="px-3 py-3 text-right">{row.standingsTotal}</td>
-                  <td className="px-3 py-3 text-right">{row.highScore}</td>
-                  <td className="px-3 py-3 text-right">{row.lowScore}</td>
-                  <td className="px-3 py-3 text-right">{row.matchesPlayed}</td>
-                  <td className="px-3 py-3 text-right">{row.setsWon}</td>
-                  <td className="px-3 py-3 text-right">{row.setsLost}</td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+      <StatsTable
+        rows={standings}
+        displayNames={displayNames}
+        standingsLabel={getStandingsLabel()}
+        minMatches={MIN_MATCHES}
+      />
 
       <section className="space-y-3">
         <h2 className="font-display text-2xl tracking-wider">⚡ Season Highlights</h2>

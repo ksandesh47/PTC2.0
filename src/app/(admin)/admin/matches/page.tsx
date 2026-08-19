@@ -33,7 +33,10 @@ function rotatingSets(pairing: {
 }
 
 function weekStart(dateValue: string | Date) {
-  const date = new Date(`${String(dateValue).slice(0, 10)}T00:00:00`);
+  const date = dateValue instanceof Date
+    ? new Date(dateValue)
+    : new Date(`${dateValue.slice(0, 10)}T00:00:00`);
+  if (Number.isNaN(date.getTime())) return new Date(0);
   const day = date.getDay();
   date.setDate(date.getDate() + (day === 0 ? -6 : 1 - day));
   date.setHours(0, 0, 0, 0);

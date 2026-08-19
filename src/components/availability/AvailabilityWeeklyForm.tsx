@@ -87,7 +87,13 @@ export default function AvailabilityWeeklyForm({
   );
 
   const selectedSlots = useMemo(
-    () => slots.filter((slot) => statusBySlot[slot.id] === "available"),
+    () => slots
+      .filter((slot) => statusBySlot[slot.id] === "available")
+      .toSorted((left, right) => {
+        const dateOrder = String(left.slotDate).localeCompare(String(right.slotDate));
+        if (dateOrder !== 0) return dateOrder;
+        return left.label.localeCompare(right.label);
+      }),
     [slots, statusBySlot]
   );
 
