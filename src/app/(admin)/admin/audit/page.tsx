@@ -69,6 +69,7 @@ function eventDescription(event: {
   resourceType: string;
   diff: unknown;
   metadata: unknown;
+  createdAt: Date;
   actor: { email: string; role: string } | null;
 }) {
   const actor = actorLabel(event.actor);
