@@ -66,6 +66,11 @@ function timeLabel(row) {
   if (/^\d+$/.test(slot)) return "";
   return slot;
 }
+function canonicalSlotLabel(date, time) {
+  const parsed = new Date(`${date}T12:00:00Z`);
+  const day = new Intl.DateTimeFormat("en-US", { weekday: "short", timeZone: "UTC" }).format(parsed);
+  return `${day} - ${time}`;
+}
 function parseMatchStart(date, label) {
   const time = /(\d{1,2}):(\d{2})\s*(AM|PM)/i.exec(label);
   if (!time) return `${date}T00:00:00Z`;
@@ -227,7 +232,7 @@ async function importModel(model) {
         let slotId = slotMap.get(slotKey);
         if (!slotId && time) slotId = slotMap.get(`${seasonId}|${date}|${time.toLowerCase()}`);
         if (!slotId) {
-          const label = time || `Slot ${slot || "1"}`;
+          const label = time ? canonicalSlotLabel(date, time) : `Slot ${slot || "1"}`;
           const insertedSlot = await transaction`INSERT INTO availability_slots (season_id, label, slot_date, week_number) VALUES (${seasonId}, ${label}, ${date}, ${weekNumberFor(sourceSeasonId, date)}) RETURNING id`;
           slotId = insertedSlot[0].id;
           slotMap.set(slotKey, slotId);

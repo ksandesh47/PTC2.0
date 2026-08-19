@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { db } from "@/db";
-import { players, users } from "@/db/schema";
+import { auditEvents, players, users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
 async function requireAdmin(userId: string) {
@@ -44,7 +44,28 @@ export async function PATCH(
   }
 
   try {
+    const before = await db.query.players.findFirst({
+      where: eq(players.id, playerId),
+      columns: {
+        firstName: true,
+        lastName: true,
+        phone: true,
+        ntrpRating: true,
+        isActive: true,
+      },
+    });
+    if (!before) return NextResponse.json({ error: "Player not found" }, { status: 404 });
+
     await db.update(players).set({ ...updates, updatedAt: new Date() }).where(eq(players.id, playerId));
+    const after = { ...before, ...updates };
+    await db.insert(auditEvents).values({
+      actorId: user.id,
+      action: "update",
+      resourceType: "player",
+      resourceId: playerId,
+      diff: { before, after },
+      metadata: { changedFields: Object.keys(updates) },
+    });
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error updating player:", error);

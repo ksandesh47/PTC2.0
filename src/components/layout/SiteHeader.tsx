@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { SignOutButton } from "./SignOutButton";
 
 const navLinks = [
   { href: "/schedule", label: "Schedule" },
@@ -63,14 +64,7 @@ export async function SiteHeader() {
               >
                 My Availability
               </Link>
-              <form action="/auth/signout" method="POST">
-                <button
-                  type="submit"
-                  className="text-sm font-semibold text-(--color-clay-400) hover:text-(--color-clay-200) transition-colors"
-                >
-                  Sign out
-                </button>
-              </form>
+              <SignOutButton />
             </>
           ) : (
             <Link

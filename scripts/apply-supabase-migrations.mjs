@@ -11,6 +11,7 @@ const migrationNames = [
   "20260818_add_pairing_override.sql",
   "20260818_add_legacy_points_override.sql",
   "20260818_backfill_completed_match_numbers.sql",
+  "20260818_dedupe_availability_slots.sql",
   "20260818_harden_rls.sql",
   "20260818_add_substitutes.sql",
 ];
