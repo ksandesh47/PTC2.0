@@ -93,10 +93,11 @@ export default async function StandingsPage() {
 
       {/* Top-8 match score breakdown */}
       {standings.some((row) => row.countedScorecards.length > 0) && (
-        <section className="space-y-3">
+        <section className="-mt-4 space-y-3">
           <h2 className="font-display text-2xl tracking-wider">🏅 Top {MIN_MATCHES} Match Score Breakdown</h2>
-          <div className="overflow-x-auto rounded-lg border border-(--color-border)">
-            <table className="min-w-max w-full text-sm" aria-label="Top match breakdown">
+          <div className="relative rounded-lg border border-(--color-border) after:pointer-events-none after:absolute after:inset-y-0 after:right-0 after:w-8 after:bg-gradient-to-l after:from-(--color-surface) after:to-transparent sm:after:hidden">
+            <div className="overflow-x-auto">
+              <table className="min-w-max w-full text-sm" aria-label="Top match breakdown">
               <thead className="bg-(--color-clay-50) text-(--color-text-muted) text-xs uppercase tracking-widest">
                 <tr>
                   <th scope="col" className="sticky left-0 z-20 w-10 min-w-10 bg-(--color-clay-50) px-3 py-3 text-right">#</th>
@@ -142,7 +143,8 @@ export default async function StandingsPage() {
                   );
                 })}
               </tbody>
-            </table>
+              </table>
+            </div>
           </div>
           <p className="text-xs text-(--color-text-muted)">
             M1–M{MIN_MATCHES} = top {MIN_MATCHES} match scores (sorted high→low).
@@ -167,21 +169,21 @@ function PodiumCard({
     : undefined;
   return (
     <article className="rounded-xl border border-(--color-border) bg-(--color-surface) overflow-hidden shadow-sm">
-      <div className="bg-(--color-clay-100) px-4 pt-3 pb-2 flex items-center justify-between lg:px-5 lg:pt-4 lg:pb-3">
+      <div className="bg-(--color-clay-100) px-4 py-3 flex items-center gap-3 lg:px-5 lg:py-4">
         <span className="text-3xl leading-none">{medalFor(entry.rank)}</span>
+        <h2 className="min-w-0 flex-1 truncate font-display text-2xl tracking-wider text-(--color-text) lg:text-3xl">
+          <PlayerNameBadge
+            name={displayName}
+            matchesPlayed={entry.matchesPlayed}
+            tooltip={tooltip}
+          />
+        </h2>
         <span className="text-xs uppercase tracking-widest text-(--color-clay-600)">
           Rank {entry.rank}
         </span>
       </div>
       <div className="p-3 lg:p-5">
-      <h2 className="mt-1 font-display text-2xl tracking-wider text-(--color-text) lg:mt-3 lg:text-3xl">
-        <PlayerNameBadge
-          name={displayName}
-          matchesPlayed={entry.matchesPlayed}
-          tooltip={tooltip}
-        />
-      </h2>
-      <div className="mt-2 flex items-end justify-between lg:mt-4">
+      <div className="mt-0 flex items-end justify-between">
         <div>
           <p className="text-xs uppercase tracking-widest text-(--color-text-muted)">
             {getStandingsLabel()}

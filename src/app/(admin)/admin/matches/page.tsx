@@ -193,13 +193,14 @@ export default async function AdminMatchesPage({ searchParams }: Readonly<PagePr
                     {rotatingSets(pairing).map((set, index) => {
                       const scoreRow = buildMatchSetRows([pairing]).find((row) => row.setNumber === index + 1);
                       return (
-                      <div key={set.label} className="grid grid-cols-[3rem_1fr_auto_auto_auto_1fr] items-center gap-2 border-b border-(--color-border) py-1 last:border-b-0">
+                      <div key={set.label} className="grid grid-cols-[3rem_1fr_auto_2rem_auto_1fr] items-center gap-2 border-b border-(--color-border) py-1 last:border-b-0">
                         <span className="text-xs font-semibold uppercase tracking-wider text-(--color-text-muted)">{set.label}</span>
                         <p className="font-semibold">
                           {set.team1.filter(Boolean).map((id) => playerName(playerMap, id)).join(" & ")}
                         </p>
-                        <span className="text-xs text-(--color-text-muted)">vs</span>
-                        {scoreRow ? <span className="font-bold text-(--color-navy-600)">{scoreRow.team1Games} - {scoreRow.team2Games}</span> : <span />}
+                        {scoreRow ? <span className="font-bold text-(--color-navy-600)">{scoreRow.team1Games}</span> : <span />}
+                        <span className="text-center text-xs text-(--color-text-muted)">{scoreRow ? `S${scoreRow.setNumber}` : "vs"}</span>
+                        {scoreRow ? <span className="font-bold text-(--color-navy-600)">{scoreRow.team2Games}</span> : <span />}
                         <p className="font-semibold">
                           {set.team2.filter(Boolean).map((id) => playerName(playerMap, id)).join(" & ")}
                         </p>

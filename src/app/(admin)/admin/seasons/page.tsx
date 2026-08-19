@@ -4,6 +4,7 @@ import { desc } from "drizzle-orm";
 import { formatDate } from "@/lib/utils";
 import { SeasonEditForm } from "@/components/admin/SeasonEditForm";
 import { SeasonActivateButton, CreateSeasonForm } from "@/components/admin/SeasonManagementControls";
+import { AvailabilityWindowControl } from "@/components/admin/AvailabilityWindowControl";
 
 export default async function AdminSeasonsPage() {
   const list = await db.query.seasons.findMany({
@@ -21,17 +22,24 @@ export default async function AdminSeasonsPage() {
 
       <div className="rounded-lg border border-(--color-border) bg-(--color-surface) divide-y divide-(--color-border)">
         {list.map((s) => (
-          <div key={s.id} className="px-4 py-3 flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <p className="font-semibold">{s.name}</p>
-              <p className="text-xs text-(--color-text-muted)">
-                {formatDate(s.startDate)} – {formatDate(s.endDate)}
-              </p>
+          <div key={s.id} className="px-4 py-3 space-y-3">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="font-semibold">{s.name}</p>
+                <p className="text-xs text-(--color-text-muted)">
+                  {formatDate(s.startDate)} – {formatDate(s.endDate)}
+                </p>
+              </div>
+              <div className="flex items-center gap-3">
+                <SeasonActivateButton seasonId={s.id} isActive={s.isActive} />
+                <SeasonEditForm seasonId={s.id} startDate={s.startDate} endDate={s.endDate} />
+              </div>
             </div>
-            <div className="flex items-center gap-3">
-              <SeasonActivateButton seasonId={s.id} isActive={s.isActive} />
-              <SeasonEditForm seasonId={s.id} startDate={s.startDate} endDate={s.endDate} />
-            </div>
+            <AvailabilityWindowControl
+              seasonId={s.id}
+              startDate={String(s.availabilityWindowStart ?? s.startDate)}
+              endDate={String(s.availabilityWindowEnd ?? s.endDate)}
+            />
           </div>
         ))}
         {list.length === 0 && (

@@ -4,7 +4,6 @@ import { eq, desc, count, sql } from "drizzle-orm";
 import Link from "next/link";
 import { formatDate } from "@/lib/utils";
 import { parseDateInput, toMidnight } from "@/lib/league/week-slots";
-import { AvailabilityWindowControl } from "@/components/admin/AvailabilityWindowControl";
 import { DashboardRetryControl } from "@/components/admin/DashboardRetryControl";
 
 type DashboardIssue = {
@@ -277,15 +276,6 @@ export default async function AdminDashboardPage() {
           </Link>
         </div>
       </div>
-
-      {/* Availability window control */}
-      {activeSeason && (
-        <AvailabilityWindowControl
-          seasonId={activeSeason.id}
-          startDate={String(activeSeason.availabilityWindowStart ?? activeSeason.startDate)}
-          endDate={String(activeSeason.availabilityWindowEnd ?? activeSeason.endDate)}
-        />
-      )}
 
       {/* Recent audit log */}
       <div>

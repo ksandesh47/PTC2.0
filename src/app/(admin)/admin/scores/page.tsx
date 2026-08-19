@@ -726,13 +726,22 @@ export default async function AdminScoresPage({ searchParams }: Readonly<PagePro
                     <p className="text-xs">{scoringSummary}</p>
                     {scoredSets.length > 0 && (
                       <div className="space-y-1 pt-1">
+                        <p className="text-xs font-semibold uppercase tracking-wider text-(--color-text-muted)">
+                          {isScored ? "Match Results" : "Assigned Players"}
+                        </p>
                         {scoredSets.map((set) => (
                           <div key={set.setNumber} className="rounded border border-(--color-border) px-2 py-1 text-xs">
                             <p className="font-semibold uppercase tracking-wider text-(--color-text-muted)">Set {set.setNumber}</p>
-                            <div className="grid grid-cols-[1fr_auto_auto_1fr] items-center gap-1">
+                            <div className={`grid items-center gap-1 ${isScored ? "grid-cols-[1fr_auto_auto_1fr]" : "grid-cols-[1fr_auto_1fr]"}`}>
                               <span className="font-semibold truncate">{set.team1Label}</span>
-                              <span className="font-semibold text-(--color-navy-600)">{set.team1Games}</span>
-                              <span className="font-semibold text-(--color-navy-600)">{set.team2Games}</span>
+                              {isScored ? (
+                                <>
+                                  <span className="font-semibold text-(--color-navy-600)">{set.team1Games}</span>
+                                  <span className="font-semibold text-(--color-navy-600)">{set.team2Games}</span>
+                                </>
+                              ) : (
+                                <span className="text-center text-(--color-text-muted)">vs</span>
+                              )}
                               <span className="font-semibold truncate text-right">{set.team2Label}</span>
                             </div>
                           </div>

@@ -58,8 +58,9 @@ export function StatsTable({ rows, displayNames, standingsLabel, minMatches }: R
   }
 
   return (
-    <div className="overflow-x-auto rounded-lg border border-(--color-border) bg-(--color-surface)">
-      <table className="min-w-max w-full text-sm" aria-label="League stats table">
+    <div className="relative rounded-lg border border-(--color-border) bg-(--color-surface) after:pointer-events-none after:absolute after:inset-y-0 after:right-0 after:w-8 after:bg-gradient-to-l after:from-(--color-surface) after:to-transparent sm:after:hidden">
+      <div className="overflow-x-auto">
+        <table className="min-w-max w-full text-sm" aria-label="League stats table">
         <thead className="bg-(--color-clay-50) text-xs uppercase tracking-widest text-(--color-text-muted)">
           <tr>
             {columns.map((column) => (
@@ -107,7 +108,8 @@ export function StatsTable({ rows, displayNames, standingsLabel, minMatches }: R
             );
           })}
         </tbody>
-      </table>
+        </table>
+      </div>
     </div>
   );
 }
