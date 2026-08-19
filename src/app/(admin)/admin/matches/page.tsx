@@ -4,6 +4,10 @@ import { matches, players, seasons } from "@/db/schema";
 import { and, eq, inArray } from "drizzle-orm";
 import { formatDate } from "@/lib/utils";
 
+type PageProps = {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+};
+
 function playerName(playerMap: Map<string, string>, id: string | null | undefined) {
   if (!id) return "TBD";
   return playerMap.get(id) ?? "Unknown";
@@ -47,7 +51,11 @@ function weekTitle(start: Date) {
   return `${formatter.format(start)} - ${formatter.format(end)}`;
 }
 
-export default async function AdminMatchesPage() {
+function singleParam(value: string | string[] | undefined) {
+  return Array.isArray(value) ? value[0] : value;
+}
+
+export default async function AdminMatchesPage({ searchParams }: Readonly<PageProps>) {
   const activeSeason = await db.query.seasons.findFirst({
     where: eq(seasons.isActive, true),
   });
@@ -97,6 +105,20 @@ export default async function AdminMatchesPage() {
 
   const scheduledCount = matchRows.filter((m) => m.status === "scheduled").length;
   const completedCount = matchRows.filter((m) => m.status === "completed").length;
+  const params = (await searchParams) ?? {};
+  const requestedWeek = singleParam(params.week);
+  const datedGroups = weekGroups.filter(([key]) => key !== "pending");
+  const currentWeekKey = weekKey(new Date());
+  const defaultGroupIndex = Math.max(
+    0,
+    datedGroups.findIndex(([key]) => key === currentWeekKey)
+  );
+  const selectedGroupIndex = requestedWeek
+    ? Math.max(0, datedGroups.findIndex(([key]) => key === requestedWeek))
+    : defaultGroupIndex;
+  const selectedGroup = datedGroups[selectedGroupIndex] ?? datedGroups[0];
+  const previousGroup = datedGroups[selectedGroupIndex - 1];
+  const nextGroup = datedGroups[selectedGroupIndex + 1];
 
   return (
     <div className="p-6 lg:p-8 max-w-6xl space-y-6">
@@ -119,14 +141,20 @@ export default async function AdminMatchesPage() {
       {matchRows.length === 0 ? (
         <p className="text-sm text-(--color-text-muted)">No matches created for the active season.</p>
       ) : (
-        <div className="space-y-8">
-          {weekGroups.map(([key, group]) => (
-            <section key={key} className="space-y-3">
-              <h2 className="font-display text-2xl tracking-wider text-(--color-navy-600)">
-                {key === "pending" ? "DATE PENDING" : weekTitle(weekStart(group[0].slot!.slotDate))}
-              </h2>
+        <div className="space-y-5">
+          {selectedGroup ? (
+            <>
+              <div className="flex items-center justify-between gap-3 rounded-lg border border-(--color-border) bg-(--color-surface) px-3 py-2">
+                {previousGroup ? (
+                  <Link href={`/admin/matches?week=${previousGroup[0]}`} className="rounded-md border border-(--color-border) px-3 py-1.5 text-sm font-semibold hover:bg-(--color-navy-50)">← Prev</Link>
+                ) : <span />}
+                <h2 className="font-display text-xl tracking-wider text-(--color-navy-600)">{weekTitle(weekStart(selectedGroup[1][0].slot!.slotDate))}</h2>
+                {nextGroup ? (
+                  <Link href={`/admin/matches?week=${nextGroup[0]}`} className="rounded-md border border-(--color-border) px-3 py-1.5 text-sm font-semibold hover:bg-(--color-navy-50)">Next →</Link>
+                ) : <span />}
+              </div>
               <div className="grid gap-4 md:grid-cols-2">
-              {group.map((m) => (
+              {selectedGroup[1].map((m) => (
             <article key={m.id} className="rounded-xl border border-(--color-border) bg-(--color-surface) p-4 shadow-sm space-y-3">
               <div className="flex items-start justify-between gap-3">
                 <div>
@@ -162,8 +190,10 @@ export default async function AdminMatchesPage() {
             </article>
           ))}
               </div>
-            </section>
-          ))}
+            </>
+          ) : (
+            <p className="text-sm text-(--color-text-muted)">No dated match weeks are available.</p>
+          )}
         </div>
       )}
     </div>

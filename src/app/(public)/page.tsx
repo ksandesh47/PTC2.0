@@ -4,13 +4,15 @@ export default function HomePage() {
   return (
     <>
       {/* Hero banner */}
-      <section className="mx-4 mt-4 max-w-7xl overflow-hidden rounded-xl bg-(--color-clay-800) py-12 text-center space-y-4 sm:mx-6 sm:py-16 lg:mx-auto">
-        <h1 className="break-words px-4 font-display text-4xl text-(--color-clay-100) tracking-widest sm:text-6xl lg:text-8xl">
-          PALOMINO TENNIS CLUB
-        </h1>
-        <p className="text-lg text-(--color-clay-300) max-w-xl mx-auto">
-          Weekly rotating doubles, best-eight standings, live results, and availability built around Palomino&apos;s actual league logic.
-        </p>
+      <section className="bg-(--color-clay-800) py-12 text-center space-y-4 sm:py-16">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <h1 className="break-words px-4 font-display text-4xl text-(--color-clay-100) tracking-widest sm:text-6xl lg:text-8xl">
+            PALOMINO TENNIS CLUB
+          </h1>
+          <p className="text-lg text-(--color-clay-300) max-w-xl mx-auto">
+            Weekly rotating doubles, best-eight standings, live results, and availability built around Palomino&apos;s actual league logic.
+          </p>
+        </div>
       </section>
 
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 space-y-12">

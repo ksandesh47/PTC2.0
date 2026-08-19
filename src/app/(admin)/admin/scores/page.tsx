@@ -74,6 +74,12 @@ function toMidnight(date: Date) {
   return d;
 }
 
+function isSameCalendarDate(left: Date, right: Date) {
+  return left.getFullYear() === right.getFullYear()
+    && left.getMonth() === right.getMonth()
+    && left.getDate() === right.getDate();
+}
+
 function slotDateKey(date: Date) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 }
@@ -632,10 +638,12 @@ export default async function AdminScoresPage({ searchParams }: Readonly<PagePro
           {slotLayout.slots.map((slot) => {
             const match = slot.match;
             const scored = match ? (setCountByMatch.get(match.id) ?? 0) > 0 : false;
+            const today = isSameCalendarDate(slot.date, new Date());
             const isCancelled = match?.status === "cancelled" || match?.status === "abandoned";
             let chipStyle: string;
             if (isCancelled) chipStyle = "bg-red-50 text-red-700 border-red-200";
-            else if (scored) chipStyle = "bg-(--color-forest-100) text-(--color-forest-700) border-(--color-forest-200)";
+            else if (today) chipStyle = "bg-(--color-forest-700) text-white border-(--color-forest-800)";
+            else if (scored) chipStyle = "bg-(--color-forest-200) text-(--color-forest-800) border-(--color-forest-400)";
             else chipStyle = "border-(--color-border) hover:bg-(--color-navy-50)";
             const monthDay = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric" }).format(slot.date);
             let suffix = "";
@@ -673,14 +681,17 @@ export default async function AdminScoresPage({ searchParams }: Readonly<PagePro
             const anchorId = match ? `match-${match.id}` : `slot-${slot.key}`;
             const slotTimeLabel = slot.slotLabel?.split(" - ")[1];
             const isScored = scoredSetCount > 0;
+            const isToday = isSameCalendarDate(slot.date, new Date());
             const isCanceled = match?.status === "cancelled" || match?.status === "abandoned";
             return (
               <article
                 key={slot.key}
                 id={anchorId}
                 className={`rounded-lg border p-3 space-y-2 scroll-mt-24 ${
-                  isScored
-                    ? "border-(--color-forest-300) bg-(--color-forest-50)"
+                  isToday
+                    ? "border-(--color-forest-600) bg-(--color-forest-300)"
+                  : isScored
+                    ? "border-(--color-forest-400) bg-(--color-forest-100)"
                     : isCanceled
                       ? "border-red-200 bg-red-50"
                       : "border-(--color-border) bg-(--color-surface)"

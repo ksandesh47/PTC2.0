@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { matches, players, seasons, auditEvents } from "@/db/schema";
-import { eq, desc, count, sql, inArray } from "drizzle-orm";
+import { eq, desc, count, sql } from "drizzle-orm";
 import Link from "next/link";
 import { formatDate } from "@/lib/utils";
 import { AvailabilityWindowControl } from "@/components/admin/AvailabilityWindowControl";
@@ -88,7 +88,6 @@ export default async function AdminDashboardPage() {
     totalPlayersResult,
     recentAuditResult,
     dbHealthResult,
-    lastCronResult,
   ] = await Promise.allSettled([
     db.query.seasons.findFirst({ where: eq(seasons.isActive, true) }),
     db.select({ count: count() }).from(players).where(eq(players.isActive, true)),
@@ -97,11 +96,6 @@ export default async function AdminDashboardPage() {
       limit: 10,
     }),
     checkDbHealth(),
-    db.query.auditEvents.findMany({
-      where: inArray(auditEvents.resourceType, ["cron:keepalive", "keepalive", "cron:substitute-autofill"]),
-      orderBy: [desc(auditEvents.createdAt)],
-      limit: 3,
-    }),
   ]);
 
   const queryFailures: DashboardIssue[] = [];
@@ -122,10 +116,6 @@ export default async function AdminDashboardPage() {
     console.error("Dashboard: failed to run DB health check", dbHealthResult.reason);
     queryFailures.push({ section: "database health", reason: formatErrorReason(dbHealthResult.reason) });
   }
-  if (lastCronResult.status === "rejected") {
-    console.error("Dashboard: failed to load cron history", lastCronResult.reason);
-    queryFailures.push({ section: "cron history", reason: formatErrorReason(lastCronResult.reason) });
-  }
 
   const activeSeason = activeSeasonResult.status === "fulfilled" ? activeSeasonResult.value : null;
   const totalPlayersCount =
@@ -135,9 +125,11 @@ export default async function AdminDashboardPage() {
     dbHealthResult.status === "fulfilled"
       ? dbHealthResult.value
       : { ok: false, latencyMs: -1 };
-  const cronRuns = lastCronResult.status === "fulfilled" ? lastCronResult.value : [];
-  const lastDailyCron = cronRuns.find((event) => event.resourceType === "cron:substitute-autofill");
-  const lastKeepalive = cronRuns.find((event) => event.resourceType === "cron:keepalive" || event.resourceType === "keepalive");
+  const lastDailyCronResult = await db.query.auditEvents.findFirst({
+    where: eq(auditEvents.resourceType, "cron:substitute-autofill"),
+    orderBy: [desc(auditEvents.createdAt)],
+  });
+  const lastDailyCron = lastDailyCronResult;
 
   let matchStats: Array<{ status: typeof matches.$inferSelect.status; count: number }> = [];
   if (activeSeason) {
@@ -166,16 +158,6 @@ export default async function AdminDashboardPage() {
         };
       })
     : { issues: [] as string[], scheduledPastNoScores: 0 };
-
-  const lastKeepaliveLabel = lastKeepalive
-    ? new Intl.DateTimeFormat("en-US", {
-        weekday: "short",
-        month: "short",
-        day: "numeric",
-        hour: "numeric",
-        minute: "2-digit",
-      }).format(new Date(lastKeepalive.createdAt))
-    : "Never recorded";
 
   return (
     <div className="p-6 lg:p-8 space-y-8 max-w-5xl">
@@ -243,9 +225,7 @@ export default async function AdminDashboardPage() {
           )}
         </div>
         <span className="text-xs opacity-70">
-          Daily auto-fill: 11:00 UTC via cron · Last run: {formatCronRun(lastDailyCron)}
-          <span className="mx-1">·</span>
-          Weekly keepalive: Mon 10:00 UTC · Last run: {lastKeepaliveLabel}
+          Daily auto-fill: 11:00 AM EST via cron · Last run: {formatCronRun(lastDailyCron)}
         </span>
       </div>
 
