@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { and, eq, sql, inArray } from "drizzle-orm";
 import { createClient } from "@/lib/supabase/server";
 import { db } from "@/db";
+import { pickFairCandidates } from "@/lib/league/fairness";
 import {
   auditEvents,
   availabilitySlots,
@@ -51,6 +52,8 @@ export async function POST(
     .select({
       playerId: playerAvailability.playerId,
       status: playerAvailability.status,
+      firstName: players.firstName,
+      lastName: players.lastName,
     })
     .from(playerAvailability)
     .innerJoin(seasonPlayers, and(
@@ -82,12 +85,27 @@ export async function POST(
       t2p1: matchPairings.team2Player1Id,
       t2p2: matchPairings.team2Player2Id,
       status: matches.status,
+      weekNumber: matches.weekNumber,
     })
     .from(matchPairings)
     .innerJoin(matches, eq(matches.id, matchPairings.matchId))
     .where(eq(matches.seasonId, slotRow.seasonId));
 
+  const weekAvailabilityRows = await db
+    .select({
+      playerId: playerAvailability.playerId,
+      status: playerAvailability.status,
+    })
+    .from(playerAvailability)
+    .innerJoin(availabilitySlots, eq(availabilitySlots.id, playerAvailability.slotId))
+    .where(and(
+      eq(availabilitySlots.seasonId, slotRow.seasonId),
+      eq(availabilitySlots.weekNumber, slotRow.weekNumber),
+      inArray(playerAvailability.status, ["available", "maybe"]),
+    ));
+
   const gamesByPlayer = new Map<string, number>();
+  const weeklyGamesByPlayer = new Map<string, number>();
   const seen = new Set<string>();
   for (const row of pairingRows) {
     if (row.status === "cancelled" || row.status === "abandoned") continue;
@@ -97,19 +115,26 @@ export async function POST(
       if (seen.has(key)) continue;
       seen.add(key);
       gamesByPlayer.set(pid, (gamesByPlayer.get(pid) ?? 0) + 1);
+      if (row.matchId !== existing?.id && row.weekNumber === slotRow.weekNumber) {
+        weeklyGamesByPlayer.set(pid, (weeklyGamesByPlayer.get(pid) ?? 0) + 1);
+      }
     }
   }
 
-  // Priority: available first, then maybe; within group ascending games played.
-  const statusRank = (s: string) => (s === "available" ? 0 : 1);
-  const ranked = [...availabilityRows]
-    .sort((a, b) => {
-      const rs = statusRank(a.status) - statusRank(b.status);
-      if (rs !== 0) return rs;
-      return (gamesByPlayer.get(a.playerId) ?? 0) - (gamesByPlayer.get(b.playerId) ?? 0);
-    })
-    .slice(0, 4)
-    .map((r) => r.playerId);
+  const availableByPlayer = new Map<string, number>();
+  for (const row of weekAvailabilityRows) {
+    availableByPlayer.set(row.playerId, (availableByPlayer.get(row.playerId) ?? 0) + 1);
+  }
+
+  const candidates = availabilityRows.map((row) => ({
+    playerId: row.playerId,
+    status: row.status,
+    name: `${row.firstName} ${row.lastName}`.trim(),
+    weeklyGames: weeklyGamesByPlayer.get(row.playerId) ?? 0,
+    seasonGames: gamesByPlayer.get(row.playerId) ?? 0,
+    weeklyAvailability: availableByPlayer.get(row.playerId) ?? 0,
+  }));
+  const ranked = pickFairCandidates(candidates).map((candidate) => candidate.playerId);
 
   // Create or reuse the match, then insert one doubles pairing.
   let matchId = existing?.id;

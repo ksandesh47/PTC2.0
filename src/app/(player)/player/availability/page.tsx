@@ -49,8 +49,14 @@ export default async function AvailabilityPage() {
       db.query.availabilitySlots.findMany({
         where: and(
           eq(availabilitySlots.seasonId, activeSeason.id),
-          gte(availabilitySlots.slotDate, activeSeason.startDate),
-          lte(availabilitySlots.slotDate, activeSeason.endDate)
+          gte(
+            availabilitySlots.slotDate,
+            activeSeason.availabilityWindowStart ?? activeSeason.startDate
+          ),
+          lte(
+            availabilitySlots.slotDate,
+            activeSeason.availabilityWindowEnd ?? activeSeason.endDate
+          )
         ),
         orderBy: (t, { asc }) => [asc(t.weekNumber), asc(t.slotDate)],
       }),

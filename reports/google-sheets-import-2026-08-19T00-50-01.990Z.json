@@ -1,0 +1,40 @@
+{
+  "mode": "apply",
+  "source": "v1 Google Sheets",
+  "sheets": {
+    "Players": 25,
+    "Matches": 123,
+    "Scores": 217,
+    "Availability": 1817,
+    "Seasons": 15,
+    "Settings": 3,
+    "SubRequests": 11,
+    "SubOffers": 7
+  },
+  "imported": {
+    "players": 25,
+    "seasons": 1,
+    "matches": 123,
+    "scores": 217,
+    "availability": 1817,
+    "requests": 11,
+    "offers": 7
+  },
+  "warnings": [
+    "Skipped season PTC-2027: no usable date range",
+    "Skipped season PTC-2028: no usable date range",
+    "Skipped season PTC-2029: no usable date range",
+    "Skipped season PTC-2030: no usable date range",
+    "Skipped season PTC-2031: no usable date range",
+    "Skipped season PTC-2032: no usable date range",
+    "Skipped season PTC-2033: no usable date range",
+    "Skipped season PTC-2034: no usable date range",
+    "Skipped season PTC-2035: no usable date range",
+    "Skipped season PTC-2036: no usable date range",
+    "Skipped season PTC-2037: no usable date range",
+    "Skipped season PTC-2038: no usable date range",
+    "Skipped season PTC-2039: no usable date range",
+    "Skipped season PTC-2040: no usable date range"
+  ],
+  "errors": []
+}

@@ -4,8 +4,11 @@ import { buildMatchSetRows } from "./display";
 export type LeagueSet = {
   version: number;
   setNumber: number;
+  pairingOverride?: number | null;
   team1Games: number;
   team2Games: number;
+  team1PointsOverride?: number | null;
+  team2PointsOverride?: number | null;
 };
 
 export type LeaguePairing = {
@@ -72,6 +75,7 @@ export function computeProjectedMatchScore(input: {
     teamGames: number;
     opponentGames: number;
     wonSet: boolean;
+    pointsOverride?: number;
   }>;
 }) {
   // Palomino 1.0 derived formula (set-level):
@@ -79,6 +83,7 @@ export function computeProjectedMatchScore(input: {
   // - Winning side receives their set games + margin bonus.
   //   Example: 6-2 => winners 10, losers 2. 7-6 => winners 8, losers 6.
   return input.setPointEntries.reduce((sum, set) => {
+    if (set.pointsOverride !== undefined) return sum + set.pointsOverride;
     if (!set.wonSet) return sum + set.teamGames;
 
     const marginBonus = set.teamGames - set.opponentGames;
@@ -94,6 +99,7 @@ export function buildMatchScorecards(match: LeagueMatch) {
         teamGames: number;
         opponentGames: number;
         wonSet: boolean;
+        pointsOverride?: number;
       }>;
     }
   >();
@@ -126,6 +132,7 @@ export function buildMatchScorecards(match: LeagueMatch) {
         teamGames: set.team1Games,
         opponentGames: set.team2Games,
         wonSet: team1Won,
+        pointsOverride: set.team1PointsOverride ?? undefined,
       });
       if (team1Won) stats.setsWon += 1;
       else stats.setsLost += 1;
@@ -139,6 +146,7 @@ export function buildMatchScorecards(match: LeagueMatch) {
         teamGames: set.team2Games,
         opponentGames: set.team1Games,
         wonSet: !team1Won,
+        pointsOverride: set.team2PointsOverride ?? undefined,
       });
       if (team1Won) stats.setsLost += 1;
       else stats.setsWon += 1;
@@ -219,11 +227,9 @@ export function buildLeagueStandings(input: {
       if (b.standingsTotal !== a.standingsTotal) {
         return b.standingsTotal - a.standingsTotal;
       }
-      if (b.setsWon !== a.setsWon) {
-        return b.setsWon - a.setsWon;
-      }
-      if (b.gamesWon !== a.gamesWon) {
-        return b.gamesWon - a.gamesWon;
+      // v1 breaks equal best-8 totals by all-match set points, then name.
+      if (b.total !== a.total) {
+        return b.total - a.total;
       }
       return a.playerName.localeCompare(b.playerName);
     })

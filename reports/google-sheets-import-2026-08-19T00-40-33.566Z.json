@@ -1,0 +1,40 @@
+{
+  "mode": "apply",
+  "source": "v1 Google Sheets",
+  "sheets": {
+    "Players": 25,
+    "Matches": 123,
+    "Scores": 217,
+    "Availability": 1817,
+    "Seasons": 15,
+    "Settings": 3,
+    "SubRequests": 11,
+    "SubOffers": 7
+  },
+  "imported": {
+    "players": 25,
+    "seasons": 1,
+    "matches": 123,
+    "scores": 217,
+    "availability": 1817,
+    "requests": 11,
+    "offers": 7
+  },
+  "warnings": [],
+  "errors": [
+    "Season PTC-2027 has no usable date range",
+    "Season PTC-2028 has no usable date range",
+    "Season PTC-2029 has no usable date range",
+    "Season PTC-2030 has no usable date range",
+    "Season PTC-2031 has no usable date range",
+    "Season PTC-2032 has no usable date range",
+    "Season PTC-2033 has no usable date range",
+    "Season PTC-2034 has no usable date range",
+    "Season PTC-2035 has no usable date range",
+    "Season PTC-2036 has no usable date range",
+    "Season PTC-2037 has no usable date range",
+    "Season PTC-2038 has no usable date range",
+    "Season PTC-2039 has no usable date range",
+    "Season PTC-2040 has no usable date range"
+  ]
+}

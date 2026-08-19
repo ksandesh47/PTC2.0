@@ -31,6 +31,23 @@ function buildSlotLabel(d: Date, timeStr: string): string {
 }
 
 export async function updateAvailabilityWindow(seasonId: string, startDate: string, endDate: string) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(startDate) || !/^\d{4}-\d{2}-\d{2}$/.test(endDate)) {
+    throw new Error("Availability dates must be valid dates");
+  }
+
+  if (startDate > endDate) {
+    throw new Error("Availability start date must be before the end date");
+  }
+
+  const season = await db.query.seasons.findFirst({
+    where: eq(seasons.id, seasonId),
+    columns: { startDate: true, endDate: true },
+  });
+  if (!season) throw new Error("Season not found");
+  if (startDate < season.startDate || endDate > season.endDate) {
+    throw new Error("Availability window must stay within the season dates");
+  }
+
   const allDays = eachDateInclusive(startDate, endDate);
   let desiredSlots: Array<{ seasonId: string; label: string; slotDate: string; weekNumber: number }> = [];
   const start = toDateOnly(startDate);
@@ -86,7 +103,11 @@ export async function updateAvailabilityWindow(seasonId: string, startDate: stri
 
   await db
     .update(seasons)
-    .set({ startDate, endDate, updatedAt: new Date() })
+    .set({
+      availabilityWindowStart: startDate,
+      availabilityWindowEnd: endDate,
+      updatedAt: new Date(),
+    })
     .where(eq(seasons.id, seasonId));
 
   revalidatePath("/admin");

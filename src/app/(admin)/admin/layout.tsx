@@ -12,6 +12,7 @@ const adminNav = [
   { href: "/admin/scores", label: "Score Entry" },
   { href: "/admin/players", label: "Players" },
   { href: "/admin/availability", label: "Availability" },
+  { href: "/admin/substitutes", label: "Substitutes" },
   { href: "/admin/seasons", label: "Seasons" },
   { href: "/admin/audit", label: "Audit Log" },
 ];

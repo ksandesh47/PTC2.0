@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { db } from "@/db";
-import { matchSets, matchPairings, auditEvents, users } from "@/db/schema";
+import { matchSets, matchPairings, auditEvents, users, matches } from "@/db/schema";
 import { matchSetsSchema, scoreCorrectionSchema } from "@/lib/validators";
 import { and, eq } from "drizzle-orm";
+import { recomputeSeasonStandings } from "@/lib/league/recompute-standings";
 
 async function requireAdmin(userId: string) {
   const profile = await db.query.users.findFirst({ where: eq(users.id, userId) });
@@ -81,6 +82,7 @@ export async function POST(
       matchId,
       pairingId,
       setNumber: s.setNumber,
+      pairingOverride: s.pairingOverride,
       team1Games: s.team1Games,
       team2Games: s.team2Games,
       isTiebreak: s.isTiebreak,
@@ -101,6 +103,14 @@ export async function POST(
     resourceId: matchId,
     diff: { sets, version: nextVersion },
   });
+
+  const match = await db.query.matches.findFirst({
+    where: eq(matches.id, matchId),
+    columns: { seasonId: true, status: true },
+  });
+  if (match?.status === "completed") {
+    await recomputeSeasonStandings(match.seasonId);
+  }
 
   return NextResponse.json({ ok: true, version: nextVersion });
 }

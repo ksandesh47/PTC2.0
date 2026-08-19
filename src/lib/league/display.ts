@@ -46,8 +46,11 @@ export function getLatestVersionSets<T extends { version: number; setNumber: num
 type MatchSetLike = {
   version: number;
   setNumber: number;
+  pairingOverride?: number | null;
   team1Games: number;
   team2Games: number;
+  team1PointsOverride?: number | null;
+  team2PointsOverride?: number | null;
 };
 
 type MatchPairingLike = {
@@ -65,6 +68,8 @@ export type MatchSetRow = {
   setNumber: number;
   team1Games: number;
   team2Games: number;
+  team1PointsOverride?: number | null;
+  team2PointsOverride?: number | null;
   team1Player1Id: string | null;
   team1Player2Id: string | null;
   team2Player1Id: string | null;
@@ -77,8 +82,10 @@ function buildRotatedRowForSet(input: {
   team1Games: number;
   team2Games: number;
   setIndex: number;
+  team1PointsOverride?: number | null;
+  team2PointsOverride?: number | null;
 }) {
-  const { pairing, setNumber, team1Games, team2Games, setIndex } = input;
+  const { pairing, setNumber, team1Games, team2Games, setIndex, team1PointsOverride, team2PointsOverride } = input;
   const p1 = pairing.team1Player1Id;
   const p2 = pairing.team1Player2Id;
   const p3 = pairing.team2Player1Id;
@@ -91,6 +98,8 @@ function buildRotatedRowForSet(input: {
       setNumber,
       team1Games,
       team2Games,
+      team1PointsOverride,
+      team2PointsOverride,
       team1Player1Id: p1,
       team1Player2Id: p2,
       team2Player1Id: p3,
@@ -128,7 +137,9 @@ export function buildMatchSetRows(pairings: MatchPairingLike[]): MatchSetRow[] {
         setNumber: set.setNumber,
         team1Games: set.team1Games,
         team2Games: set.team2Games,
-        setIndex: index,
+        setIndex: set.pairingOverride ?? index,
+        team1PointsOverride: set.team1PointsOverride,
+        team2PointsOverride: set.team2PointsOverride,
       })
     );
   }
@@ -141,6 +152,8 @@ export function buildMatchSetRows(pairings: MatchPairingLike[]): MatchSetRow[] {
       setNumber: latestSets.length === 1 && pairings.length > 1 ? pairingIndex + 1 : set.setNumber,
       team1Games: set.team1Games,
       team2Games: set.team2Games,
+      team1PointsOverride: set.team1PointsOverride,
+      team2PointsOverride: set.team2PointsOverride,
       team1Player1Id: pairing.team1Player1Id,
       team1Player2Id: pairing.team1Player2Id,
       team2Player1Id: pairing.team2Player1Id,

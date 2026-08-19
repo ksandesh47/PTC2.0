@@ -2,8 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { and, eq } from "drizzle-orm";
 import { createClient } from "@/lib/supabase/server";
 import { db } from "@/db";
-import { auditEvents, matches, users } from "@/db/schema";
+import { auditEvents, matches, matchPairings, users } from "@/db/schema";
 import { matchStatusUpdateSchema } from "@/lib/validators";
+import { recomputeSeasonStandings } from "@/lib/league/recompute-standings";
+import { canTransitionMatchStatus, type MatchStatus } from "@/lib/league/match-status";
 
 async function requireAdmin(userId: string) {
   const profile = await db.query.users.findFirst({ where: eq(users.id, userId) });
@@ -42,13 +44,44 @@ export async function PATCH(
   }
 
   const { status, abandonReason } = parsed.data;
+  const nextStatus = status as MatchStatus;
+  const currentStatus = existingMatch.status as MatchStatus;
+  if (!canTransitionMatchStatus(currentStatus, nextStatus)) {
+    return NextResponse.json(
+      { error: `Cannot change match status from ${currentStatus} to ${nextStatus}` },
+      { status: 409 }
+    );
+  }
+
+  const reason = abandonReason?.trim() || null;
+  if ((status === "abandoned" || status === "cancelled") && !reason) {
+    return NextResponse.json(
+      { error: "A reason is required when abandoning or cancelling a match" },
+      { status: 422 }
+    );
+  }
+
+  if (status === "completed") {
+    const pairings = await db.query.matchPairings.findMany({
+      where: eq(matchPairings.matchId, matchId),
+      with: { sets: true },
+    });
+    const setCount = pairings.reduce((total, pairing) => total + pairing.sets.length, 0);
+    if (setCount === 0) {
+      return NextResponse.json(
+        { error: "A match must have recorded sets before it can be completed" },
+        { status: 422 }
+      );
+    }
+  }
+
   await db
     .update(matches)
     .set({
       status,
       abandonReason:
         status === "cancelled" || status === "abandoned"
-          ? abandonReason?.trim() || null
+          ? reason
           : null,
       updatedAt: new Date(),
     })
@@ -62,9 +95,13 @@ export async function PATCH(
     diff: {
       fromStatus: existingMatch.status,
       toStatus: status,
-      abandonReason: status === "cancelled" || status === "abandoned" ? abandonReason ?? null : null,
+      abandonReason: status === "cancelled" || status === "abandoned" ? reason : null,
     },
   });
+
+  if (status === "completed" || existingMatch.status === "completed") {
+    await recomputeSeasonStandings(existingMatch.seasonId);
+  }
 
   return NextResponse.json({ ok: true });
 }

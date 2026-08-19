@@ -4,6 +4,18 @@ import { eq, desc, count, sql } from "drizzle-orm";
 import Link from "next/link";
 import { formatDate } from "@/lib/utils";
 import { AvailabilityWindowControl } from "@/components/admin/AvailabilityWindowControl";
+import { DashboardRetryControl } from "@/components/admin/DashboardRetryControl";
+
+type DashboardIssue = {
+  section: string;
+  reason: string;
+};
+
+function formatErrorReason(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  if (typeof error === "string") return error;
+  return "Unknown error";
+}
 
 async function checkDbHealth(): Promise<{ ok: boolean; latencyMs: number }> {
   const t0 = Date.now();
@@ -59,7 +71,13 @@ async function computeDataHealth(seasonId: string) {
 
 export default async function AdminDashboardPage() {
   try {
-  const [activeSeason, totalPlayers, recentAudit, dbHealth] = await Promise.all([
+  const [
+    activeSeasonResult,
+    totalPlayersResult,
+    recentAuditResult,
+    dbHealthResult,
+    lastKeepaliveResult,
+  ] = await Promise.allSettled([
     db.query.seasons.findFirst({ where: eq(seasons.isActive, true) }),
     db.select({ count: count() }).from(players).where(eq(players.isActive, true)),
     db.query.auditEvents.findMany({
@@ -67,25 +85,83 @@ export default async function AdminDashboardPage() {
       limit: 10,
     }),
     checkDbHealth(),
+    db.query.auditEvents.findFirst({
+      where: eq(auditEvents.resourceType, "keepalive"),
+      orderBy: [desc(auditEvents.createdAt)],
+    }),
   ]);
 
-  const matchStats = activeSeason
-    ? await db
+  const queryFailures: DashboardIssue[] = [];
+
+  if (activeSeasonResult.status === "rejected") {
+    console.error("Dashboard: failed to load active season", activeSeasonResult.reason);
+    queryFailures.push({ section: "active season", reason: formatErrorReason(activeSeasonResult.reason) });
+  }
+  if (totalPlayersResult.status === "rejected") {
+    console.error("Dashboard: failed to load players count", totalPlayersResult.reason);
+    queryFailures.push({ section: "player counts", reason: formatErrorReason(totalPlayersResult.reason) });
+  }
+  if (recentAuditResult.status === "rejected") {
+    console.error("Dashboard: failed to load recent activity", recentAuditResult.reason);
+    queryFailures.push({ section: "recent activity", reason: formatErrorReason(recentAuditResult.reason) });
+  }
+  if (dbHealthResult.status === "rejected") {
+    console.error("Dashboard: failed to run DB health check", dbHealthResult.reason);
+    queryFailures.push({ section: "database health", reason: formatErrorReason(dbHealthResult.reason) });
+  }
+  if (lastKeepaliveResult.status === "rejected") {
+    console.error("Dashboard: failed to load keepalive history", lastKeepaliveResult.reason);
+    queryFailures.push({ section: "keepalive history", reason: formatErrorReason(lastKeepaliveResult.reason) });
+  }
+
+  const activeSeason = activeSeasonResult.status === "fulfilled" ? activeSeasonResult.value : null;
+  const totalPlayersCount =
+    totalPlayersResult.status === "fulfilled" ? (totalPlayersResult.value[0]?.count ?? 0) : 0;
+  const recentAudit = recentAuditResult.status === "fulfilled" ? recentAuditResult.value : [];
+  const dbHealth =
+    dbHealthResult.status === "fulfilled"
+      ? dbHealthResult.value
+      : { ok: false, latencyMs: -1 };
+  const lastKeepalive =
+    lastKeepaliveResult.status === "fulfilled" ? lastKeepaliveResult.value : null;
+
+  let matchStats: Array<{ status: typeof matches.$inferSelect.status; count: number }> = [];
+  if (activeSeason) {
+    try {
+      matchStats = await db
         .select({ status: matches.status, count: count() })
         .from(matches)
         .where(eq(matches.seasonId, activeSeason.id))
-        .groupBy(matches.status)
-    : [];
+        .groupBy(matches.status);
+    } catch (error) {
+      console.error("Dashboard: failed to load match stats", error);
+      queryFailures.push({ section: "match stats", reason: formatErrorReason(error) });
+    }
+  }
 
   const scheduled = matchStats.find((r) => r.status === "scheduled")?.count ?? 0;
   const completed = matchStats.find((r) => r.status === "completed")?.count ?? 0;
 
   const dataHealth = activeSeason
-    ? await computeDataHealth(activeSeason.id).catch(() => ({
-        issues: ["Unable to compute data health"],
-        scheduledPastNoScores: 0,
-      }))
+    ? await computeDataHealth(activeSeason.id).catch((error) => {
+        console.error("Dashboard: failed to compute data health", error);
+        queryFailures.push({ section: "data health", reason: formatErrorReason(error) });
+        return {
+          issues: ["Unable to compute data health"],
+          scheduledPastNoScores: 0,
+        };
+      })
     : { issues: [] as string[], scheduledPastNoScores: 0 };
+
+  const lastKeepaliveLabel = lastKeepalive
+    ? new Intl.DateTimeFormat("en-US", {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+      }).format(new Date(lastKeepalive.createdAt))
+    : "Never recorded";
 
   return (
     <div className="p-6 lg:p-8 space-y-8 max-w-5xl">
@@ -101,10 +177,24 @@ export default async function AdminDashboardPage() {
         )}
       </div>
 
+      {queryFailures.length > 0 && (
+        <div className="rounded-lg border border-yellow-200 bg-yellow-50 px-4 py-3 text-sm text-yellow-800">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="font-semibold">Some dashboard data is temporarily unavailable</p>
+              <p className="text-xs opacity-80 mt-0.5">
+                Partial data shown. Affected sections: {queryFailures.map((x) => x.section).join(", ")}.
+              </p>
+            </div>
+            <DashboardRetryControl />
+          </div>
+        </div>
+      )}
+
       {/* Stat cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: "Active Players", value: totalPlayers[0].count },
+          { label: "Active Players", value: totalPlayersCount },
           { label: "Matches Scheduled", value: scheduled },
           { label: "Matches Completed", value: completed },
           { label: "Season", value: activeSeason?.name ?? "—" },
@@ -138,48 +228,10 @@ export default async function AdminDashboardPage() {
             <span className="text-xs opacity-70">{dbHealth.latencyMs} ms</span>
           )}
         </div>
-        <span className="text-xs opacity-70">Weekly keepalive: Mon 10:00 UTC via cron</span>
+        <span className="text-xs opacity-70">
+          Weekly keepalive: Mon 10:00 UTC via cron · Last run: {lastKeepaliveLabel}
+        </span>
       </div>
-
-      {/* Data integrity summary */}
-      {(() => {
-        const issueCount = dataHealth.issues.length;
-        const plural = issueCount === 1 ? "" : "s";
-        const heading = issueCount === 0 ? "Data Health" : `Data Health · ${issueCount} issue${plural}`;
-        return (
-          <div className={`rounded-lg border px-4 py-3 text-sm ${
-            issueCount === 0
-              ? "border-(--color-forest-200) bg-(--color-forest-50) text-(--color-forest-700)"
-              : "border-yellow-200 bg-yellow-50 text-yellow-800"
-          }`}>
-            <p className="font-semibold">{heading}</p>
-            {issueCount === 0 ? (
-              <p className="text-xs opacity-80 mt-0.5">
-                No data integrity issues detected in matches, pairings, and scores for the active season.
-              </p>
-            ) : (
-              <ul className="mt-1 space-y-0.5 text-xs">
-                {dataHealth.issues.map((issue) => (
-                  <li key={issue}>• {issue}</li>
-                ))}
-              </ul>
-            )}
-          </div>
-        );
-      })()}
-
-      {/* Past scheduled matches missing scores */}
-      {dataHealth.scheduledPastNoScores > 0 && (
-        <Link
-          href="/admin/scores"
-          className="block rounded-lg border border-yellow-200 bg-yellow-50 px-4 py-3 text-sm text-yellow-800 hover:bg-yellow-100"
-        >
-          <p className="font-semibold">
-            ⚠ Past Scheduled Matches Missing Scores: {dataHealth.scheduledPastNoScores}
-          </p>
-          <p className="text-xs opacity-80 mt-0.5">Open Score Entry to record scores →</p>
-        </Link>
-      )}
 
       {/* Quick actions */}
       <div>
@@ -222,8 +274,8 @@ export default async function AdminDashboardPage() {
       {activeSeason && (
         <AvailabilityWindowControl
           seasonId={activeSeason.id}
-          startDate={String(activeSeason.startDate)}
-          endDate={String(activeSeason.endDate)}
+          startDate={String(activeSeason.availabilityWindowStart ?? activeSeason.startDate)}
+          endDate={String(activeSeason.availabilityWindowEnd ?? activeSeason.endDate)}
         />
       )}
 
@@ -256,9 +308,64 @@ export default async function AdminDashboardPage() {
           ))}
         </div>
       </div>
+
+      {queryFailures.length > 0 && (
+        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+          <p className="font-semibold">Dashboard Load Diagnostics</p>
+          <p className="text-xs opacity-80 mt-0.5">
+            These are runtime errors for this page load. If they persist, check server logs.
+          </p>
+          <ul className="mt-2 space-y-1 text-xs">
+            {queryFailures.map((issue) => (
+              <li key={`${issue.section}:${issue.reason}`}>• {issue.section}: {issue.reason}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* Data integrity summary */}
+      {(() => {
+        const issueCount = dataHealth.issues.length;
+        const plural = issueCount === 1 ? "" : "s";
+        const heading = issueCount === 0 ? "Data Health" : `Data Health · ${issueCount} issue${plural}`;
+        return (
+          <div className={`rounded-lg border px-4 py-3 text-sm ${
+            issueCount === 0
+              ? "border-(--color-forest-200) bg-(--color-forest-50) text-(--color-forest-700)"
+              : "border-yellow-200 bg-yellow-50 text-yellow-800"
+          }`}>
+            <p className="font-semibold">{heading}</p>
+            {issueCount === 0 ? (
+              <p className="text-xs opacity-80 mt-0.5">
+                No data integrity issues detected in matches, pairings, and scores for the active season.
+              </p>
+            ) : (
+              <ul className="mt-1 space-y-0.5 text-xs">
+                {dataHealth.issues.map((issue) => (
+                  <li key={issue}>• {issue}</li>
+                ))}
+              </ul>
+            )}
+          </div>
+        );
+      })()}
+
+      {/* Past scheduled matches missing scores */}
+      {dataHealth.scheduledPastNoScores > 0 && (
+        <Link
+          href="/admin/scores"
+          className="block rounded-lg border border-yellow-200 bg-yellow-50 px-4 py-3 text-sm text-yellow-800 hover:bg-yellow-100"
+        >
+          <p className="font-semibold">
+            ⚠ Past Scheduled Matches Missing Scores: {dataHealth.scheduledPastNoScores}
+          </p>
+          <p className="text-xs opacity-80 mt-0.5">Open Score Entry to record scores →</p>
+        </Link>
+      )}
     </div>
   );
-  } catch {
+  } catch (error) {
+    console.error("Admin dashboard load failed:", error);
     return (
       <div className="p-6 lg:p-8 max-w-5xl space-y-3">
         <h1 className="font-display text-4xl tracking-widest text-(--color-navy-500)">DASHBOARD</h1>

@@ -1,0 +1,587 @@
+{
+  "match": false,
+  "differences": [
+    {
+      "v1": {
+        "name": "Todd",
+        "points": 239,
+        "sets": 405
+      },
+      "v2": {
+        "name": "Todd",
+        "legacyName": null,
+        "points": 239,
+        "sets": 35
+      }
+    },
+    {
+      "v1": {
+        "name": "Sandesh",
+        "points": 229,
+        "sets": 388
+      },
+      "v2": {
+        "name": "Sandesh",
+        "legacyName": null,
+        "points": 229,
+        "sets": 37
+      }
+    },
+    {
+      "v1": {
+        "name": "Eric",
+        "points": 206,
+        "sets": 304
+      },
+      "v2": {
+        "name": "Eric",
+        "legacyName": null,
+        "points": 206,
+        "sets": 26
+      }
+    },
+    {
+      "v1": {
+        "name": "Henry",
+        "points": 206,
+        "sets": 265
+      },
+      "v2": {
+        "name": "Henry",
+        "legacyName": null,
+        "points": 206,
+        "sets": 24
+      }
+    },
+    {
+      "v1": {
+        "name": "Kevin",
+        "points": 195,
+        "sets": 301
+      },
+      "v2": {
+        "name": "Kevin",
+        "legacyName": null,
+        "points": 195,
+        "sets": 25
+      }
+    },
+    {
+      "v1": {
+        "name": "Doug",
+        "points": 193,
+        "sets": 315
+      },
+      "v2": {
+        "name": "Doug",
+        "legacyName": null,
+        "points": 193,
+        "sets": 27
+      }
+    },
+    {
+      "v1": {
+        "name": "Greg",
+        "points": 193,
+        "sets": 265
+      },
+      "v2": {
+        "name": "Greg",
+        "legacyName": null,
+        "points": 193,
+        "sets": 23
+      }
+    },
+    {
+      "v1": {
+        "name": "Vijay",
+        "points": 189,
+        "sets": 321
+      },
+      "v2": {
+        "name": "Vijay",
+        "legacyName": null,
+        "points": 189,
+        "sets": 27
+      }
+    },
+    {
+      "v1": {
+        "name": "Brian",
+        "points": 185,
+        "sets": 265
+      },
+      "v2": {
+        "name": "Brian",
+        "legacyName": null,
+        "points": 185,
+        "sets": 22
+      }
+    },
+    {
+      "v1": {
+        "name": "Raj",
+        "points": 176,
+        "sets": 329
+      },
+      "v2": {
+        "name": "Raj",
+        "legacyName": null,
+        "points": 176,
+        "sets": 25
+      }
+    },
+    {
+      "v1": {
+        "name": "Jeremy",
+        "points": 169,
+        "sets": 296
+      },
+      "v2": {
+        "name": "Jeremy",
+        "legacyName": null,
+        "points": 169,
+        "sets": 24
+      }
+    },
+    {
+      "v1": {
+        "name": "Ahad",
+        "points": 152,
+        "sets": 194
+      },
+      "v2": {
+        "name": "Ahad",
+        "legacyName": null,
+        "points": 152,
+        "sets": 16
+      }
+    },
+    {
+      "v1": {
+        "name": "Cruz",
+        "points": 138,
+        "sets": 174
+      },
+      "v2": {
+        "name": "Cruz",
+        "legacyName": null,
+        "points": 138,
+        "sets": 13
+      }
+    },
+    {
+      "v1": {
+        "name": "Mike L",
+        "points": 137,
+        "sets": 172
+      },
+      "v2": {
+        "name": "Mike L",
+        "legacyName": null,
+        "points": 137,
+        "sets": 12
+      }
+    },
+    {
+      "v1": {
+        "name": "Marc",
+        "points": 135,
+        "sets": 157
+      },
+      "v2": {
+        "name": "Marc",
+        "legacyName": null,
+        "points": 135,
+        "sets": 11
+      }
+    },
+    {
+      "v1": {
+        "name": "Brownie",
+        "points": 130,
+        "sets": 185
+      },
+      "v2": {
+        "name": "Brownie",
+        "legacyName": null,
+        "points": 130,
+        "sets": 13
+      }
+    },
+    {
+      "v1": {
+        "name": "Denny",
+        "points": 123,
+        "sets": 165
+      },
+      "v2": {
+        "name": "Denny",
+        "legacyName": null,
+        "points": 123,
+        "sets": 13
+      }
+    },
+    {
+      "v1": {
+        "name": "Connors",
+        "points": 118,
+        "sets": 139
+      },
+      "v2": {
+        "name": "Connors",
+        "legacyName": null,
+        "points": 118,
+        "sets": 10
+      }
+    },
+    {
+      "v1": {
+        "name": "Jon",
+        "points": 115,
+        "sets": 115
+      },
+      "v2": {
+        "name": "Jon",
+        "legacyName": null,
+        "points": 115,
+        "sets": 9
+      }
+    },
+    {
+      "v1": {
+        "name": "Rob",
+        "points": 106,
+        "sets": 119
+      },
+      "v2": {
+        "name": "Rob",
+        "legacyName": null,
+        "points": 106,
+        "sets": 5
+      }
+    },
+    {
+      "v1": {
+        "name": "RI Jeff",
+        "points": 84,
+        "sets": 84
+      },
+      "v2": {
+        "name": "RI Jeff",
+        "legacyName": null,
+        "points": 84,
+        "sets": 9
+      }
+    },
+    {
+      "v1": {
+        "name": "Mike M",
+        "points": 83,
+        "sets": 83
+      },
+      "v2": {
+        "name": "Mike M",
+        "legacyName": null,
+        "points": 83,
+        "sets": 7
+      }
+    },
+    {
+      "v1": {
+        "name": "Ravi",
+        "points": 65,
+        "sets": 65
+      },
+      "v2": {
+        "name": "Ravi",
+        "legacyName": null,
+        "points": 65,
+        "sets": 5
+      }
+    },
+    {
+      "v1": {
+        "name": "Ankur",
+        "points": 24,
+        "sets": 24
+      },
+      "v2": {
+        "name": "Ankur",
+        "legacyName": null,
+        "points": 24,
+        "sets": 2
+      }
+    }
+  ],
+  "riJeffRows": [
+    {
+      "matchId": "2026-05-05-0-1780968600553",
+      "date": "2026-05-05",
+      "players": [
+        "Brownie",
+        "Denny",
+        "Doug",
+        "RI Jeff"
+      ],
+      "scores": [
+        {
+          "SeasonID": "PTC-2026",
+          "MatchID": "2026-05-05-0-1780968600553",
+          "Set": "1",
+          "Team1Score": "2",
+          "Team2Score": "10"
+        },
+        {
+          "SeasonID": "PTC-2026",
+          "MatchID": "2026-05-05-0-1780968600553",
+          "Set": "2",
+          "Team1Score": "11",
+          "Team2Score": "1"
+        },
+        {
+          "SeasonID": "PTC-2026",
+          "MatchID": "2026-05-05-0-1780968600553",
+          "Set": "3",
+          "Team1Score": "8",
+          "Team2Score": "4"
+        }
+      ]
+    },
+    {
+      "matchId": "2026-05-08-0-1780968717459",
+      "date": "2026-05-08",
+      "players": [
+        "Eric",
+        "RI Jeff",
+        "Sandesh",
+        "Todd"
+      ],
+      "scores": [
+        {
+          "SeasonID": "PTC-2026",
+          "MatchID": "2026-05-08-0-1780968717459",
+          "Set": "1",
+          "Team1Score": "1",
+          "Team2Score": "11"
+        },
+        {
+          "SeasonID": "PTC-2026",
+          "MatchID": "2026-05-08-0-1780968717459",
+          "Set": "2",
+          "Team1Score": "6",
+          "Team2Score": "7"
+        },
+        {
+          "SeasonID": "PTC-2026",
+          "MatchID": "2026-05-08-0-1780968717459",
+          "Set": "3",
+          "Team1Score": "5",
+          "Team2Score": "9"
+        }
+      ]
+    },
+    {
+      "matchId": "2026-06-25-0-1782253871096",
+      "date": "2026-06-25",
+      "players": [
+        "Brownie",
+        "Denny",
+        "Kevin",
+        "RI Jeff"
+      ],
+      "scores": [
+        {
+          "SeasonID": "PTC-2026",
+          "MatchID": "2026-06-25-0-1782253871096",
+          "Set": "1",
+          "Team1Score": "0",
+          "Team2Score": "12"
+        },
+        {
+          "SeasonID": "PTC-2026",
+          "MatchID": "2026-06-25-0-1782253871096",
+          "Set": "2",
+          "Team1Score": "4",
+          "Team2Score": "8"
+        },
+        {
+          "SeasonID": "PTC-2026",
+          "MatchID": "2026-06-25-0-1782253871096",
+          "Set": "3",
+          "Team1Score": "9",
+          "Team2Score": "5"
+        }
+      ]
+    },
+    {
+      "matchId": "2026-07-23-0-1784808131583",
+      "date": "2026-07-23",
+      "players": [
+        "Denny",
+        "Greg",
+        "Jeremy",
+        "RI Jeff"
+      ],
+      "scores": [
+        {
+          "SeasonID": "PTC-2026",
+          "MatchID": "2026-07-23-0-1784808131583",
+          "Set": "1",
+          "Team1Score": "4",
+          "Team2Score": "8"
+        },
+        {
+          "SeasonID": "PTC-2026",
+          "MatchID": "2026-07-23-0-1784808131583",
+          "Set": "2",
+          "Team1Score": "2",
+          "Team2Score": "10"
+        },
+        {
+          "SeasonID": "PTC-2026",
+          "MatchID": "2026-07-23-0-1784808131583",
+          "Set": "3",
+          "Team1Score": "1",
+          "Team2Score": "11"
+        }
+      ]
+    },
+    {
+      "matchId": "2026-09-04-0-1786583198419",
+      "date": "2026-09-04",
+      "players": [
+        "RI Jeff",
+        "Greg",
+        "Todd",
+        "Sandesh"
+      ],
+      "scores": []
+    },
+    {
+      "matchId": "2026-09-05-0-1786583199927",
+      "date": "2026-09-05",
+      "players": [
+        "RI Jeff",
+        "Ahad",
+        "Cruz",
+        "Vijay"
+      ],
+      "scores": []
+    },
+    {
+      "matchId": "2026-09-06-0-1786583201600",
+      "date": "2026-09-06",
+      "players": [
+        "Mike M",
+        "Doug",
+        "Todd",
+        "RI Jeff"
+      ],
+      "scores": []
+    },
+    {
+      "matchId": "2026-09-12-1-1786583534365",
+      "date": "2026-09-12",
+      "players": [
+        "Raj",
+        "RI Jeff",
+        "Eric",
+        "Todd"
+      ],
+      "scores": []
+    },
+    {
+      "matchId": "2026-09-20-0-1786583689130",
+      "date": "2026-09-20",
+      "players": [
+        "Mike M",
+        "Vijay",
+        "Raj",
+        "RI Jeff"
+      ],
+      "scores": []
+    },
+    {
+      "matchId": "2026-09-26-0-1786583804331",
+      "date": "2026-09-26",
+      "players": [
+        "RI Jeff",
+        "Greg",
+        "Brownie",
+        "Vijay"
+      ],
+      "scores": []
+    },
+    {
+      "matchId": "2026-09-27-0-1786583807546",
+      "date": "2026-09-27",
+      "players": [
+        "Mike M",
+        "Todd",
+        "Raj",
+        "RI Jeff"
+      ],
+      "scores": []
+    }
+  ],
+  "v1TopFive": [
+    {
+      "name": "Todd",
+      "points": 239,
+      "sets": 405
+    },
+    {
+      "name": "Sandesh",
+      "points": 229,
+      "sets": 388
+    },
+    {
+      "name": "Eric",
+      "points": 206,
+      "sets": 304
+    },
+    {
+      "name": "Henry",
+      "points": 206,
+      "sets": 265
+    },
+    {
+      "name": "Kevin",
+      "points": 195,
+      "sets": 301
+    }
+  ],
+  "v2TopFive": [
+    {
+      "name": "Todd",
+      "legacyName": null,
+      "points": 239,
+      "sets": 35
+    },
+    {
+      "name": "Sandesh",
+      "legacyName": null,
+      "points": 229,
+      "sets": 37
+    },
+    {
+      "name": "Eric",
+      "legacyName": null,
+      "points": 206,
+      "sets": 26
+    },
+    {
+      "name": "Henry",
+      "legacyName": null,
+      "points": 206,
+      "sets": 24
+    },
+    {
+      "name": "Kevin",
+      "legacyName": null,
+      "points": 195,
+      "sets": 25
+    }
+  ]
+}

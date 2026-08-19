@@ -1,0 +1,25 @@
+{
+  "mode": "apply",
+  "source": "v1 Google Sheets",
+  "sheets": {
+    "Players": 25,
+    "Matches": 123,
+    "Scores": 220,
+    "Availability": 1817,
+    "Seasons": 1,
+    "Settings": 3,
+    "SubRequests": 11,
+    "SubOffers": 7
+  },
+  "imported": {
+    "players": 25,
+    "seasons": 1,
+    "matches": 123,
+    "scores": 220,
+    "availability": 1817,
+    "requests": 11,
+    "offers": 7
+  },
+  "warnings": [],
+  "errors": []
+}

@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { seasons } from "@/db/schema";
+import { auditEvents, seasons } from "@/db/schema";
 import { sql } from "drizzle-orm";
 
 // Called by Vercel Cron every week to prevent the Supabase free-tier project
@@ -17,6 +17,14 @@ export async function GET(request: Request) {
     // Lightweight query — just checks connectivity and returns row count.
     const result = await db.select({ ping: sql<number>`1` }).from(seasons).limit(1);
     const ts = new Date().toISOString();
+
+    // Record successful keepalive runs so the admin dashboard can show last run time.
+    await db.insert(auditEvents).values({
+      action: "update",
+      resourceType: "keepalive",
+      metadata: { status: "ok", ts },
+    });
+
     console.log(`[keepalive] DB ping OK at ${ts}`);
     return Response.json({ ok: true, ts, rows: result.length });
   } catch (error) {

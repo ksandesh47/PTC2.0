@@ -29,6 +29,18 @@ export const availabilityEnum = pgEnum("availability_status", [
   "unavailable",
   "maybe",
 ]);
+export const substituteRequestStatusEnum = pgEnum("substitute_request_status", [
+  "open",
+  "filled",
+  "cancelled",
+  "expired",
+]);
+export const substituteOfferStatusEnum = pgEnum("substitute_offer_status", [
+  "pending",
+  "selected",
+  "not_needed",
+  "withdrawn",
+]);
 export const auditActionEnum = pgEnum("audit_action", [
   "create",
   "update",
@@ -81,6 +93,8 @@ export const seasons = pgTable("seasons", {
   name: text("name").notNull(), // e.g. "Summer 2026"
   startDate: date("start_date").notNull(),
   endDate: date("end_date").notNull(),
+  availabilityWindowStart: date("availability_window_start"),
+  availabilityWindowEnd: date("availability_window_end"),
   isActive: boolean("is_active").notNull().default(false),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
@@ -214,8 +228,11 @@ export const matchSets = pgTable(
       .notNull()
       .references(() => matchPairings.id),
     setNumber: smallint("set_number").notNull(),
+    pairingOverride: smallint("pairing_override"),
     team1Games: smallint("team1_games").notNull(),
     team2Games: smallint("team2_games").notNull(),
+    team1PointsOverride: smallint("team1_points_override"),
+    team2PointsOverride: smallint("team2_points_override"),
     isTiebreak: boolean("is_tiebreak").notNull().default(false),
     tiebreakTeam1: smallint("tiebreak_team1"),
     tiebreakTeam2: smallint("tiebreak_team2"),
@@ -230,6 +247,100 @@ export const matchSets = pgTable(
       .defaultNow(),
   },
   (t) => [index("match_sets_match_pairing_idx").on(t.matchId, t.pairingId)]
+);
+
+// ─── substitute_requests / substitute_offers ────────────────────────────────
+
+export const substituteRequests = pgTable(
+  "substitute_requests",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    seasonId: uuid("season_id")
+      .notNull()
+      .references(() => seasons.id, { onDelete: "cascade" }),
+    matchId: uuid("match_id")
+      .notNull()
+      .references(() => matches.id, { onDelete: "cascade" }),
+    requestedBy: uuid("requested_by")
+      .notNull()
+      .references(() => players.id),
+    reason: text("reason"),
+    status: substituteRequestStatusEnum("status").notNull().default("open"),
+    filledBy: uuid("filled_by").references(() => players.id),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    index("substitute_requests_match_idx").on(t.matchId),
+    index("substitute_requests_status_idx").on(t.status),
+  ]
+);
+
+export const substituteOffers = pgTable(
+  "substitute_offers",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    requestId: uuid("request_id")
+      .notNull()
+      .references(() => substituteRequests.id, { onDelete: "cascade" }),
+    playerId: uuid("player_id")
+      .notNull()
+      .references(() => players.id),
+    status: substituteOfferStatusEnum("status").notNull().default("pending"),
+    offeredAt: timestamp("offered_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    unique("substitute_offers_request_player_unique").on(t.requestId, t.playerId),
+    index("substitute_offers_request_status_idx").on(t.requestId, t.status),
+  ]
+);
+
+export const substituteRequestsRelations = relations(
+  substituteRequests,
+  ({ one, many }) => ({
+    season: one(seasons, {
+      fields: [substituteRequests.seasonId],
+      references: [seasons.id],
+    }),
+    match: one(matches, {
+      fields: [substituteRequests.matchId],
+      references: [matches.id],
+    }),
+    requester: one(players, {
+      fields: [substituteRequests.requestedBy],
+      references: [players.id],
+      relationName: "requestedBy",
+    }),
+    filler: one(players, {
+      fields: [substituteRequests.filledBy],
+      references: [players.id],
+      relationName: "filledBy",
+    }),
+    offers: many(substituteOffers),
+  })
+);
+
+export const substituteOffersRelations = relations(
+  substituteOffers,
+  ({ one }) => ({
+    request: one(substituteRequests, {
+      fields: [substituteOffers.requestId],
+      references: [substituteRequests.id],
+    }),
+    player: one(players, {
+      fields: [substituteOffers.playerId],
+      references: [players.id],
+    }),
+  })
 );
 
 // ─── standings_snapshots ──────────────────────────────────────────────────────
@@ -301,6 +412,9 @@ export const playersRelations = relations(players, ({ one, many }) => ({
   seasonPlayers: many(seasonPlayers),
   availability: many(playerAvailability),
   standings: many(standingsSnapshots),
+  substituteRequests: many(substituteRequests, { relationName: "requestedBy" }),
+  substituteFills: many(substituteRequests, { relationName: "filledBy" }),
+  substituteOffers: many(substituteOffers),
 }));
 
 export const seasonsRelations = relations(seasons, ({ many }) => ({
@@ -308,6 +422,7 @@ export const seasonsRelations = relations(seasons, ({ many }) => ({
   slots: many(availabilitySlots),
   matches: many(matches),
   standings: many(standingsSnapshots),
+  substituteRequests: many(substituteRequests),
 }));
 
 export const seasonPlayersRelations = relations(seasonPlayers, ({ one }) => ({
@@ -357,6 +472,7 @@ export const matchesRelations = relations(matches, ({ one, many }) => ({
     references: [availabilitySlots.id],
   }),
   pairings: many(matchPairings),
+  substituteRequests: many(substituteRequests),
 }));
 
 export const matchPairingsRelations = relations(

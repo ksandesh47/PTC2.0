@@ -1,0 +1,25 @@
+{
+  "mode": "dry-run",
+  "source": "v1 Google Sheets",
+  "sheets": {
+    "Players": 25,
+    "Matches": 123,
+    "Scores": 217,
+    "Availability": 1817,
+    "Seasons": 15,
+    "Settings": 3,
+    "SubRequests": 11,
+    "SubOffers": 7
+  },
+  "imported": {
+    "players": 25,
+    "seasons": 15,
+    "matches": 123,
+    "scores": 217,
+    "availability": 1817,
+    "requests": 11,
+    "offers": 7
+  },
+  "warnings": [],
+  "errors": []
+}

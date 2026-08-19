@@ -75,6 +75,7 @@ export const matchAssignSchema = z.object({
 export const setScoreSchema = z
   .object({
     setNumber: z.number().int().min(1).max(5),
+    pairingOverride: z.number().int().min(0).max(2).optional(),
     team1Games: z.number().int().min(0).max(7),
     team2Games: z.number().int().min(0).max(7),
     isTiebreak: z.boolean().default(false),

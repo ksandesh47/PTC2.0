@@ -1,0 +1,275 @@
+{
+  "match": true,
+  "differences": [],
+  "metricNote": "v1 'sets' is total set points; v2 'sets' is sets won. Compare points for standings parity.",
+  "riJeffRows": [
+    {
+      "matchId": "2026-05-05-0-1780968600553",
+      "date": "2026-05-05",
+      "players": [
+        "Brownie",
+        "Denny",
+        "Doug",
+        "RI Jeff"
+      ],
+      "scores": [
+        {
+          "SeasonID": "PTC-2026",
+          "MatchID": "2026-05-05-0-1780968600553",
+          "Set": "1",
+          "Team1Score": "2",
+          "Team2Score": "10"
+        },
+        {
+          "SeasonID": "PTC-2026",
+          "MatchID": "2026-05-05-0-1780968600553",
+          "Set": "2",
+          "Team1Score": "11",
+          "Team2Score": "1"
+        },
+        {
+          "SeasonID": "PTC-2026",
+          "MatchID": "2026-05-05-0-1780968600553",
+          "Set": "3",
+          "Team1Score": "8",
+          "Team2Score": "4"
+        }
+      ]
+    },
+    {
+      "matchId": "2026-05-08-0-1780968717459",
+      "date": "2026-05-08",
+      "players": [
+        "Eric",
+        "RI Jeff",
+        "Sandesh",
+        "Todd"
+      ],
+      "scores": [
+        {
+          "SeasonID": "PTC-2026",
+          "MatchID": "2026-05-08-0-1780968717459",
+          "Set": "1",
+          "Team1Score": "1",
+          "Team2Score": "11"
+        },
+        {
+          "SeasonID": "PTC-2026",
+          "MatchID": "2026-05-08-0-1780968717459",
+          "Set": "2",
+          "Team1Score": "6",
+          "Team2Score": "7"
+        },
+        {
+          "SeasonID": "PTC-2026",
+          "MatchID": "2026-05-08-0-1780968717459",
+          "Set": "3",
+          "Team1Score": "5",
+          "Team2Score": "9"
+        }
+      ]
+    },
+    {
+      "matchId": "2026-06-25-0-1782253871096",
+      "date": "2026-06-25",
+      "players": [
+        "Brownie",
+        "Denny",
+        "Kevin",
+        "RI Jeff"
+      ],
+      "scores": [
+        {
+          "SeasonID": "PTC-2026",
+          "MatchID": "2026-06-25-0-1782253871096",
+          "Set": "1",
+          "Team1Score": "0",
+          "Team2Score": "12"
+        },
+        {
+          "SeasonID": "PTC-2026",
+          "MatchID": "2026-06-25-0-1782253871096",
+          "Set": "2",
+          "Team1Score": "4",
+          "Team2Score": "8"
+        },
+        {
+          "SeasonID": "PTC-2026",
+          "MatchID": "2026-06-25-0-1782253871096",
+          "Set": "3",
+          "Team1Score": "9",
+          "Team2Score": "5"
+        }
+      ]
+    },
+    {
+      "matchId": "2026-07-23-0-1784808131583",
+      "date": "2026-07-23",
+      "players": [
+        "Denny",
+        "Greg",
+        "Jeremy",
+        "RI Jeff"
+      ],
+      "scores": [
+        {
+          "SeasonID": "PTC-2026",
+          "MatchID": "2026-07-23-0-1784808131583",
+          "Set": "1",
+          "Team1Score": "4",
+          "Team2Score": "8"
+        },
+        {
+          "SeasonID": "PTC-2026",
+          "MatchID": "2026-07-23-0-1784808131583",
+          "Set": "2",
+          "Team1Score": "2",
+          "Team2Score": "10"
+        },
+        {
+          "SeasonID": "PTC-2026",
+          "MatchID": "2026-07-23-0-1784808131583",
+          "Set": "3",
+          "Team1Score": "1",
+          "Team2Score": "11"
+        }
+      ]
+    },
+    {
+      "matchId": "2026-09-04-0-1786583198419",
+      "date": "2026-09-04",
+      "players": [
+        "RI Jeff",
+        "Greg",
+        "Todd",
+        "Sandesh"
+      ],
+      "scores": []
+    },
+    {
+      "matchId": "2026-09-05-0-1786583199927",
+      "date": "2026-09-05",
+      "players": [
+        "RI Jeff",
+        "Ahad",
+        "Cruz",
+        "Vijay"
+      ],
+      "scores": []
+    },
+    {
+      "matchId": "2026-09-06-0-1786583201600",
+      "date": "2026-09-06",
+      "players": [
+        "Mike M",
+        "Doug",
+        "Todd",
+        "RI Jeff"
+      ],
+      "scores": []
+    },
+    {
+      "matchId": "2026-09-12-1-1786583534365",
+      "date": "2026-09-12",
+      "players": [
+        "Raj",
+        "RI Jeff",
+        "Eric",
+        "Todd"
+      ],
+      "scores": []
+    },
+    {
+      "matchId": "2026-09-20-0-1786583689130",
+      "date": "2026-09-20",
+      "players": [
+        "Mike M",
+        "Vijay",
+        "Raj",
+        "RI Jeff"
+      ],
+      "scores": []
+    },
+    {
+      "matchId": "2026-09-26-0-1786583804331",
+      "date": "2026-09-26",
+      "players": [
+        "RI Jeff",
+        "Greg",
+        "Brownie",
+        "Vijay"
+      ],
+      "scores": []
+    },
+    {
+      "matchId": "2026-09-27-0-1786583807546",
+      "date": "2026-09-27",
+      "players": [
+        "Mike M",
+        "Todd",
+        "Raj",
+        "RI Jeff"
+      ],
+      "scores": []
+    }
+  ],
+  "v1TopFive": [
+    {
+      "name": "Todd",
+      "points": 239,
+      "sets": 405
+    },
+    {
+      "name": "Sandesh",
+      "points": 229,
+      "sets": 388
+    },
+    {
+      "name": "Eric",
+      "points": 206,
+      "sets": 304
+    },
+    {
+      "name": "Henry",
+      "points": 206,
+      "sets": 265
+    },
+    {
+      "name": "Kevin",
+      "points": 195,
+      "sets": 301
+    }
+  ],
+  "v2TopFive": [
+    {
+      "name": "Todd",
+      "legacyName": null,
+      "points": 239,
+      "sets": 35
+    },
+    {
+      "name": "Sandesh",
+      "legacyName": null,
+      "points": 229,
+      "sets": 37
+    },
+    {
+      "name": "Eric",
+      "legacyName": null,
+      "points": 206,
+      "sets": 26
+    },
+    {
+      "name": "Henry",
+      "legacyName": null,
+      "points": 206,
+      "sets": 24
+    },
+    {
+      "name": "Kevin",
+      "legacyName": null,
+      "points": 195,
+      "sets": 25
+    }
+  ]
+}

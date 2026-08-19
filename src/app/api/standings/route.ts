@@ -7,8 +7,7 @@ import { eq } from "drizzle-orm";
 export async function GET(req: NextRequest) {
   const seasonId = req.nextUrl.searchParams.get("seasonId");
 
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  await createClient();
   // Public endpoint — no auth required for reading standings
 
   let targetSeasonId = seasonId;
@@ -22,7 +21,14 @@ export async function GET(req: NextRequest) {
 
   const rows = await db.query.standingsSnapshots.findMany({
     where: eq(standingsSnapshots.seasonId, targetSeasonId),
-    with: { player: true },
+    with: {
+      player: {
+        columns: {
+          firstName: true,
+          lastName: true,
+        },
+      },
+    },
     orderBy: (t, { desc }) => [desc(t.points), desc(t.setsWon)],
   });
 

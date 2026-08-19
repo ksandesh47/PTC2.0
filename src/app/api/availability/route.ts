@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { db } from "@/db";
-import { playerAvailability, players, users } from "@/db/schema";
+import { availabilitySlots, playerAvailability, players, users } from "@/db/schema";
 import { bulkAvailabilitySchema } from "@/lib/validators";
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 
 async function requireAuthorizedPlayer(userId: string, playerId: string) {
   const player = await db.query.players.findFirst({
@@ -22,9 +22,9 @@ async function upsertAvailability(
   playerId: string,
   slots: Array<{ slotId: string; status: "available" | "maybe" | "unavailable"; note?: string }>
 ) {
-  await Promise.all(
-    slots.map((slot) =>
-      db
+  await db.transaction(async (tx) => {
+    for (const slot of slots) {
+      await tx
         .insert(playerAvailability)
         .values({
           slotId: slot.slotId,
@@ -39,9 +39,46 @@ async function upsertAvailability(
             note: slot.note,
             updatedAt: new Date(),
           },
-        })
-    )
+        });
+    }
+  });
+}
+
+async function validateSlotsInAvailabilityWindow(
+  slots: Array<{ slotId: string }>
+) {
+  const slotIds = [...new Set(slots.map((slot) => slot.slotId))];
+  const rows = await db.query.availabilitySlots.findMany({
+    where: inArray(availabilitySlots.id, slotIds),
+    with: {
+      season: {
+        columns: {
+          id: true,
+          isActive: true,
+          availabilityWindowStart: true,
+          availabilityWindowEnd: true,
+        },
+      },
+    },
+    columns: { id: true, slotDate: true, seasonId: true },
+  });
+
+  if (rows.length !== slotIds.length) return "One or more availability slots were not found";
+  const seasonIds = new Set(rows.map((row) => row.seasonId));
+  if (seasonIds.size !== 1) return "Availability slots must belong to one season";
+
+  const season = rows[0]?.season;
+  if (!season?.isActive) return "Availability can only be submitted for the active season";
+  if (!season.availabilityWindowStart || !season.availabilityWindowEnd) {
+    return "The availability window is not configured";
+  }
+
+  const outsideWindow = rows.some(
+    (row) =>
+      row.slotDate < season.availabilityWindowStart! ||
+      row.slotDate > season.availabilityWindowEnd!
   );
+  return outsideWindow ? "One or more slots are outside the availability window" : null;
 }
 
 export async function PUT(req: NextRequest) {
@@ -57,14 +94,19 @@ export async function PUT(req: NextRequest) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 422 });
   }
 
-  const { playerId, slots } = parsed.data;
+  const { playerId } = parsed.data;
 
   const player = await requireAuthorizedPlayer(user.id, playerId);
   if (!player) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  await upsertAvailability(playerId, slots);
+  const slotError = await validateSlotsInAvailabilityWindow(parsed.data.slots);
+  if (slotError) {
+    return NextResponse.json({ error: slotError }, { status: 422 });
+  }
+
+  await upsertAvailability(playerId, parsed.data.slots);
 
   return NextResponse.json({ ok: true });
 }
@@ -101,6 +143,13 @@ export async function POST(req: NextRequest) {
 
   if (slots.length === 0) {
     return NextResponse.redirect(new URL("/player/availability?error=no-slots", req.url));
+  }
+
+  const slotError = await validateSlotsInAvailabilityWindow(slots);
+  if (slotError) {
+    return NextResponse.redirect(
+      new URL(`/player/availability?error=${encodeURIComponent(slotError)}`, req.url)
+    );
   }
 
   await upsertAvailability(playerId, slots);

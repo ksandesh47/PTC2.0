@@ -25,6 +25,7 @@ import {
   type WeekSlot,
 } from "@/lib/league/week-slots";
 import { createClient } from "@/lib/supabase/server";
+import { PlayerSubstituteControls } from "@/components/substitutes/PlayerSubstituteControls";
 
 export const revalidate = 60;
 
@@ -188,7 +189,7 @@ export default async function SchedulePage({ searchParams }: Readonly<PageProps>
   const params = (await searchParams) ?? {};
   const requestedWeek = Number.parseInt(asSingle(params.week) ?? "", 10);
   const personalMode = asSingle(params.me) === "1";
-  const viewerPlayerId = personalMode ? await getViewerPlayerId() : null;
+  const viewerPlayerId = await getViewerPlayerId();
 
   const weekRanges = buildSeasonWeekRanges(season.startDate, season.endDate);
   const minWeek = 1;
@@ -302,7 +303,7 @@ export default async function SchedulePage({ searchParams }: Readonly<PageProps>
           </p>
         )}
         {visibleSlots.map((slot) => (
-          <ScheduleSlotCard key={slot.key} slot={slot} displayNameMap={displayNameMap} />
+          <ScheduleSlotCard key={slot.key} slot={slot} displayNameMap={displayNameMap} viewerPlayerId={viewerPlayerId} />
         ))}
       </div>
     </div>
@@ -336,9 +337,11 @@ function PersonalToggle({
 function ScheduleSlotCard({
   slot,
   displayNameMap,
+  viewerPlayerId,
 }: Readonly<{
   slot: WeekSlot<LeagueMatch>;
   displayNameMap: Map<string, string>;
+  viewerPlayerId: string | null;
 }>) {
   const time = slotTimeFromLabel(slot.slotLabel) ?? defaultTimeForSlot(slot.date, slot.slotNumber);
   const dayLabel = new Intl.DateTimeFormat("en-US", {
@@ -368,7 +371,7 @@ function ScheduleSlotCard({
     );
   }
 
-  return <ScheduleMatchCard match={match} time={time} dayLabel={dayLabel} displayNameMap={displayNameMap} />;
+  return <ScheduleMatchCard match={match} time={time} dayLabel={dayLabel} displayNameMap={displayNameMap} viewerPlayerId={viewerPlayerId} />;
 }
 
 function ScheduleMatchCard({
@@ -376,11 +379,13 @@ function ScheduleMatchCard({
   time,
   dayLabel,
   displayNameMap,
+  viewerPlayerId,
 }: Readonly<{
   match: LeagueMatch;
   time: string | null;
   dayLabel: string;
   displayNameMap: Map<string, string>;
+  viewerPlayerId: string | null;
 }>) {
   const lineup = lineupIds(match);
   const setRows = completedSetRows(match, displayNameMap);
@@ -458,6 +463,9 @@ function ScheduleMatchCard({
             </div>
           ))}
         </div>
+      )}
+      {viewerPlayerId && match.status !== "completed" && match.status !== "cancelled" && match.status !== "abandoned" && (
+        <PlayerSubstituteControls matchId={match.id} viewerPlayerId={viewerPlayerId} lineupIds={lineup} />
       )}
       </div>
     </div>
