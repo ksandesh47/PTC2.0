@@ -51,17 +51,25 @@ export async function POST(
     if (existingPairing) {
       pairingId = existingPairing.id;
     } else {
-      const inserted = await db
-        .insert(matchPairings)
-        .values({
-          matchId,
-          team1Player1Id: pairing.team1Player1Id,
-          team1Player2Id: pairing.team1Player2Id,
-          team2Player1Id: pairing.team2Player1Id,
-          team2Player2Id: pairing.team2Player2Id,
-        })
-        .returning({ id: matchPairings.id });
-      pairingId = inserted[0]?.id;
+      const matchPairingsForMatch = await db.query.matchPairings.findMany({
+        where: eq(matchPairings.matchId, matchId),
+        columns: { id: true },
+      });
+      if (matchPairingsForMatch.length === 1) {
+        pairingId = matchPairingsForMatch[0].id;
+      } else {
+        const inserted = await db
+          .insert(matchPairings)
+          .values({
+            matchId,
+            team1Player1Id: pairing.team1Player1Id,
+            team1Player2Id: pairing.team1Player2Id,
+            team2Player1Id: pairing.team2Player1Id,
+            team2Player2Id: pairing.team2Player2Id,
+          })
+          .returning({ id: matchPairings.id });
+        pairingId = inserted[0]?.id;
+      }
     }
   }
 

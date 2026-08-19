@@ -93,11 +93,11 @@ export default async function StandingsPage() {
 
       {/* Top-8 match score breakdown */}
       {standings.some((row) => row.countedScorecards.length > 0) && (
-        <section className="-mt-8 space-y-3">
+        <section className="space-y-3">
           <h2 className="font-display text-2xl tracking-wider">🏅 Top {MIN_MATCHES} Match Score Breakdown</h2>
           <div className="relative rounded-lg border border-(--color-border) after:pointer-events-none after:absolute after:inset-y-0 after:right-0 after:w-8 after:bg-gradient-to-l after:from-(--color-surface) after:to-transparent sm:after:hidden">
             <div className="overflow-x-auto">
-              <table className="min-w-max w-full text-sm" aria-label="Top match breakdown">
+              <table className="min-w-max w-full table-fixed text-sm" aria-label="Top match breakdown">
               <thead className="bg-(--color-clay-50) text-(--color-text-muted) text-xs uppercase tracking-widest">
                 <tr>
                   <th scope="col" className="sticky left-0 z-20 w-10 min-w-10 bg-(--color-clay-50) px-3 py-3 text-right">#</th>

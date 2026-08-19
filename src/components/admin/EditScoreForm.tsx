@@ -21,6 +21,19 @@ interface EditScoreFormProps {
   onSuccess?: () => void;
 }
 
+function apiErrorMessage(value: unknown): string | null {
+  if (!value || typeof value !== 'object') return null;
+  const error = (value as { error?: unknown }).error;
+  if (typeof error === 'string') return error;
+  if (!error || typeof error !== 'object') return null;
+  const details = error as { formErrors?: unknown; fieldErrors?: Record<string, unknown> };
+  const messages = [
+    ...(Array.isArray(details.formErrors) ? details.formErrors : []),
+    ...Object.values(details.fieldErrors ?? {}).flatMap((entry) => Array.isArray(entry) ? entry : []),
+  ].filter((message): message is string => typeof message === 'string');
+  return messages.join('; ') || null;
+}
+
 export function EditScoreForm({
   matchId,
   initialSetCards,
@@ -74,8 +87,8 @@ export function EditScoreForm({
         });
 
         if (!response.ok) {
-          const data = await response.json();
-          throw new Error(data.error?.message || `Failed to update score for set ${card.setNumber}`);
+          const data = await response.json().catch(() => null);
+          throw new Error(apiErrorMessage(data) || `Failed to update score for set ${card.setNumber} (HTTP ${response.status})`);
         }
       }
 
