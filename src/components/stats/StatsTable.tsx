@@ -60,9 +60,9 @@ export function StatsTable({ rows, displayNames, standingsLabel, minMatches }: R
   }
 
   return (
-    <div className="relative rounded-lg border border-(--color-border) bg-(--color-surface) after:pointer-events-none after:absolute after:inset-y-0 after:right-0 after:w-8 after:bg-gradient-to-l after:from-(--color-surface) after:to-transparent sm:after:hidden">
+    <div className="relative w-full max-w-[1100px] overflow-hidden rounded-lg border border-(--color-border) bg-(--color-surface) after:pointer-events-none after:absolute after:inset-y-0 after:right-0 after:w-8 after:bg-gradient-to-l after:from-(--color-surface) after:to-transparent sm:after:hidden">
       <div className="overflow-x-auto">
-        <table className="w-auto min-w-[760px] table-fixed text-sm" aria-label="League stats table">
+        <table className="min-w-max w-full table-auto text-sm" aria-label="League stats table">
         <thead className="bg-(--color-clay-50) text-xs uppercase tracking-widest text-(--color-text-muted)">
           <tr>
             {columns.map((column) => (
