@@ -106,9 +106,9 @@ export default async function StandingsPage() {
                 <tr>
                   <th scope="col" className="sticky left-0 z-20 w-10 min-w-10 bg-(--color-clay-50) px-3 py-3 text-right">#</th>
                   <th scope="col" className="sticky left-10 z-20 w-28 min-w-28 max-w-28 bg-(--color-clay-50) px-3 py-3 text-left lg:w-40 lg:min-w-40 lg:max-w-40">Player</th>
-                  <th scope="col" className="px-3 py-3 text-right">Top {MIN_MATCHES}</th>
+                  <th scope="col" className="px-3 py-3 text-center">Top {MIN_MATCHES}</th>
                   {Array.from({ length: MIN_MATCHES }).map((_, i) => (
-                    <th key={i} scope="col" className="px-2 py-3 text-right">
+                    <th key={i} scope="col" className="px-2 py-3 text-center">
                       M{i + 1}
                     </th>
                   ))}
@@ -135,11 +135,11 @@ export default async function StandingsPage() {
                           tooltip={tooltip}
                         />
                       </td>
-                      <td className="px-3 py-2 text-right font-bold text-(--color-clay-600)">
+                      <td className="px-3 py-2 text-center font-bold text-(--color-clay-600)">
                         {row.standingsTotal}
                       </td>
                       {scores.map((score, i) => (
-                        <td key={i} className="px-2 py-2 text-right font-mono">
+                        <td key={i} className="px-2 py-2 text-center font-mono">
                           {score ?? "–"}
                         </td>
                       ))}

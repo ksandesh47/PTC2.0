@@ -36,7 +36,7 @@ export default async function AdminLayout({ children }: Readonly<{ children: Rea
   return (
     <div className="flex min-h-[calc(100vh-3.5rem)]">
       {/* Sticky action rail */}
-      <aside className="hidden lg:flex flex-col w-56 border-r border-(--color-navy-800) bg-(--color-navy-900) py-6 px-4 gap-1 sticky top-14 h-[calc(100vh-3.5rem)] overflow-y-auto">
+      <aside className="hidden lg:flex flex-col w-56 border-r border-(--color-navy-800) bg-(--color-ink) py-6 px-4 gap-1 sticky top-14 h-[calc(100vh-3.5rem)] overflow-y-auto">
         <p className="text-xs font-bold uppercase tracking-widest text-(--color-navy-400) mb-3 px-2">
           Admin
         </p>
@@ -52,8 +52,8 @@ export default async function AdminLayout({ children }: Readonly<{ children: Rea
       </aside>
 
       {/* Command area */}
-      <div className="flex-1 overflow-y-auto bg-(--color-navy-50)">
-        <nav aria-label="Mobile admin navigation" className="lg:hidden sticky top-14 z-20 overflow-x-auto border-b border-(--color-navy-800) bg-(--color-navy-900) px-3 py-2">
+      <div className="flex-1 overflow-y-auto bg-(--color-background)">
+        <nav aria-label="Mobile admin navigation" className="lg:hidden sticky top-14 z-20 overflow-x-auto border-b border-(--color-navy-800) bg-(--color-ink) px-3 py-2">
           <div className="flex min-w-max gap-1">
             {adminNav.map((item) => (
               <Link

@@ -3,23 +3,31 @@ import Link from "next/link";
 export default function HomePage() {
   return (
     <>
-      {/* Hero banner */}
-      <section className="bg-(--color-clay-800) py-12 text-center space-y-4 sm:py-16">
-        <div className="mx-auto w-full max-w-7xl px-4 md:w-3/5">
-          <h1 className="break-words px-4 font-display text-4xl text-(--color-clay-100) tracking-widest sm:text-6xl lg:text-8xl">
-            PALOMINO TENNIS CLUB
-          </h1>
-          <p className="text-lg text-(--color-clay-300) max-w-xl mx-auto">
-            Weekly rotating doubles, best-eight standings, live results, and availability built around Palomino&apos;s actual league logic.
+      <section className="border-b border-(--color-ink-4) bg-(--color-ink) px-4 py-20 text-center text-white sm:py-28">
+        <div className="mx-auto max-w-3xl">
+          <p className="mb-5 text-xs font-semibold uppercase tracking-[0.3em] text-(--color-brand)">Palomino Tennis Club · Summer 2026</p>
+          <h1 className="text-5xl tracking-widest sm:text-7xl lg:text-8xl">PLAY THE WEEK</h1>
+          <p className="mx-auto mt-5 max-w-xl text-base leading-7 text-(--color-navy-200) sm:text-lg">
+            Every match, score, and opening on the court in one quiet place.
           </p>
+          <div className="mt-8 flex flex-wrap justify-center gap-3">
+            <Link href="/schedule" className="rounded-full bg-(--color-brand) px-5 py-2.5 text-sm font-semibold text-(--color-ink) transition-transform hover:-translate-y-0.5 hover:bg-(--color-brand-active)">
+              View schedule
+            </Link>
+            <Link href="/standings" className="rounded-full border border-(--color-navy-400) px-5 py-2.5 text-sm font-semibold text-white hover:border-white">
+              See standings
+            </Link>
+          </div>
         </div>
       </section>
 
-      <div className="mx-auto w-full max-w-7xl px-4 py-12 space-y-12 md:w-3/5">
-        {/* Quick-links grid */}
-        <section>
-          <h2 className="font-display text-3xl tracking-widest mb-6">QUICK ACCESS</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 animate-stagger">
+      <div className="mx-auto w-full max-w-7xl px-4 py-14 md:w-3/5">
+        <section className="space-y-6">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.25em] text-(--color-accent)">Everything in season</p>
+            <h2 className="mt-2 text-3xl tracking-widest">QUICK ACCESS</h2>
+          </div>
+          <div className="grid grid-cols-1 gap-px overflow-hidden rounded-2xl border border-(--color-border) bg-(--color-border) sm:grid-cols-2">
             {[
               { href: "/standings", title: "Live Standings", desc: "Current rankings for the active season.", icon: "🏆" },
               { href: "/schedule", title: "Season Schedule", desc: "Week-by-week match schedule and courts.", icon: "📅" },
@@ -31,7 +39,7 @@ export default function HomePage() {
               <Link
                 key={card.href}
                 href={card.href}
-                className="group block rounded-lg border-l-4 border-l-(--color-clay-400) border border-(--color-border) bg-(--color-surface) p-5 hover:border-l-(--color-clay-600) hover:shadow-md transition-all"
+                className="group block bg-(--color-surface) p-5 transition-colors hover:bg-(--color-clay-50)"
               >
                 <h3 className="font-display text-xl tracking-wider text-(--color-text) group-hover:text-(--color-accent) transition-colors">
                   <span className="mr-2">{card.icon}</span>

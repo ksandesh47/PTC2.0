@@ -83,12 +83,12 @@ export default async function ResultsPage() {
               key={match.id}
               className="rounded-xl border border-(--color-border) bg-(--color-surface) overflow-hidden shadow-sm"
             >
-              <div className="bg-(--color-clay-800) px-4 py-3 flex items-start justify-between gap-3">
+              <div className="border-b border-(--color-navy-100) border-t-2 border-t-(--color-navy-400) bg-white px-4 py-3 flex items-start justify-between gap-3">
                 <div>
-                  <p className="text-sm font-semibold uppercase tracking-wider text-(--color-clay-100)">
+                  <p className="text-sm font-semibold uppercase tracking-wider text-(--color-navy-900)">
                     {match.slot?.slotDate ? formatDate(match.slot.slotDate) : `Week ${match.weekNumber}`}
                   </p>
-                  <p className="text-xs text-(--color-clay-300)">
+                  <p className="text-xs text-(--color-navy-600)">
                     {match.slot?.label ?? match.court ?? "Court TBD"}
                   </p>
                 </div>
@@ -103,13 +103,13 @@ export default async function ResultsPage() {
                 {lineup.map((id, index) => (
                   <div
                     key={id}
-                    className="flex min-w-0 items-center justify-between rounded-lg bg-(--color-clay-50) px-2 py-2 text-xs font-semibold sm:px-3 sm:text-sm"
+                    className="flex min-w-0 items-center justify-between rounded-md border border-(--color-navy-100) bg-(--color-navy-50) px-2 py-2 text-xs font-semibold sm:px-3 sm:text-sm"
                   >
                     <span className="min-w-0 truncate">
-                      <span className="mr-1.5 text-(--color-text-muted) sm:mr-2">{index + 1}</span>
+                      <span className="mr-1.5 inline-flex h-5 w-5 items-center justify-center rounded-full bg-(--color-ink) text-[10px] text-white sm:mr-2">{index + 1}</span>
                       {playerName(displayNameMap, id)}
                     </span>
-                    <span className="font-display text-lg tracking-wider text-(--color-clay-700)">
+                    <span className="rounded border border-(--color-navy-200) bg-(--color-navy-100) px-1.5 py-0.5 font-display text-base tracking-wider text-(--color-navy-900)">
                       {matchScorecards.get(id) ?? 0}
                     </span>
                   </div>
@@ -124,16 +124,16 @@ export default async function ResultsPage() {
                   {setRows.map((set) => (
                     <div
                       key={set.key}
-                      className="grid grid-cols-[1fr_auto_2.5rem_auto_1fr] items-center gap-2 text-sm"
+                      className="grid grid-cols-[1fr_auto_2.5rem_auto_1fr] items-center gap-2 rounded-md bg-(--color-forest-100) px-2 py-2 text-sm"
                     >
-                      <span className="font-medium">
+                      <span className={`font-medium ${set.team1Games > set.team2Games ? "text-(--color-forest-700) font-semibold" : "text-(--color-clay-600)"}`}>
                         {playerName(displayNameMap, set.team1Player1Id)}
                         {set.team1Player2Id ? ` & ${playerName(displayNameMap, set.team1Player2Id)}` : ""}
                       </span>
-                      <span className="text-right font-bold text-(--color-clay-600)">{set.team1Games}</span>
+                      <span className={`text-right font-semibold ${set.team1Games > set.team2Games ? "text-(--color-forest-700)" : "text-(--color-clay-600)"}`}>{set.team1Games}</span>
                       <span className="text-center text-xs text-(--color-text-muted)">S{set.setNumber}</span>
-                      <span className="font-bold text-(--color-clay-600)">{set.team2Games}</span>
-                      <span className="text-right font-medium">
+                      <span className={`font-semibold ${set.team2Games > set.team1Games ? "text-(--color-forest-700)" : "text-(--color-clay-600)"}`}>{set.team2Games}</span>
+                      <span className={`text-right font-medium ${set.team2Games > set.team1Games ? "text-(--color-forest-700) font-semibold" : "text-(--color-clay-600)"}`}>
                         {playerName(displayNameMap, set.team2Player1Id)}
                         {set.team2Player2Id ? ` & ${playerName(displayNameMap, set.team2Player2Id)}` : ""}
                       </span>

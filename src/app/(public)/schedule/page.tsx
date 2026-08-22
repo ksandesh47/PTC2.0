@@ -296,7 +296,7 @@ export default async function SchedulePage({ searchParams }: Readonly<PageProps>
         </p>
       )}
 
-      <div className="grid gap-4 lg:grid-cols-2 animate-stagger">
+      <div className="grid gap-3 lg:grid-cols-2 animate-stagger">
         {visibleSlots.length === 0 && (
           <p className="text-(--color-text-muted)">
             {personalMode ? "No personal matches this week." : "No slots configured for this week."}
@@ -396,33 +396,30 @@ function ScheduleMatchCard({
   );
 
   return (
-    <div className="rounded-xl border border-(--color-border) bg-(--color-surface) overflow-hidden shadow-sm">
+    <div className="rounded-lg border border-(--color-border) bg-(--color-surface) overflow-hidden shadow-sm transition-shadow hover:shadow-md">
       {/* Colored date strip like V1 */}
-      <div className="bg-(--color-clay-800) px-4 py-3 flex items-start justify-between gap-3">
+      <div className="border-b border-(--color-navy-100) border-t-2 border-t-(--color-navy-400) bg-white px-3 py-2.5 flex items-start justify-between gap-3 sm:px-4">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-wider text-(--color-clay-100)">
+            <p className="text-sm font-semibold uppercase tracking-wider text-(--color-navy-900)">
             {match.slot?.slotDate ? formatDate(match.slot.slotDate) : dayLabel}
           </p>
-          {time && <p className="text-xs text-(--color-clay-300)">{time}</p>}
+          {time && <p className="text-xs text-(--color-navy-600)">{time}</p>}
         </div>
         <StatusBadge match={match} />
       </div>
 
-      <div className="p-4 space-y-4">
+      <div className="p-3 space-y-3 sm:p-4">
 
       {match.pairings.length > 0 ? (
         <div className="grid grid-cols-2 gap-2">
           {lineup.map((id, index) => (
-            <div
-              key={id}
-              className="flex min-w-0 items-center justify-between rounded-lg bg-(--color-clay-50) px-2 py-2 text-xs font-semibold sm:px-3 sm:text-sm"
-            >
+            <div key={id} className="flex min-w-0 items-center justify-between rounded-md border border-(--color-navy-100) bg-(--color-navy-50) px-2 py-1.5 text-xs font-semibold sm:px-3 sm:py-2 sm:text-sm">
               <span className="min-w-0 truncate">
-                <span className="mr-1.5 text-(--color-text-muted) sm:mr-2">{index + 1}</span>
+                <span className="mr-1.5 inline-flex h-5 w-5 items-center justify-center rounded-full bg-(--color-ink) text-[10px] text-white sm:mr-2">{index + 1}</span>
                 {playerName(displayNameMap, id)}
               </span>
               {match.status === "completed" && (
-                <span className="font-display text-lg tracking-wider text-(--color-clay-700)">
+                <span className="rounded border border-(--color-navy-200) bg-(--color-navy-100) px-1.5 py-0.5 font-display text-base tracking-wider text-(--color-navy-900)">
                   {scoreByPlayer.get(id) ?? 0}
                 </span>
               )}
@@ -453,13 +450,13 @@ function ScheduleMatchCard({
           {setRows.map((set) => (
             <div
               key={set.key}
-              className="grid grid-cols-[1fr_auto_2.5rem_auto_1fr] items-center gap-2 text-sm"
+              className="grid grid-cols-[1fr_auto_2.5rem_auto_1fr] items-center gap-2 rounded-md bg-(--color-forest-100) px-2 py-1.5 text-sm sm:py-2"
             >
-              <span className="font-medium">{set.team1Label}</span>
-              <span className="text-right font-bold text-(--color-clay-600)">{set.team1Games}</span>
+              <span className={`font-medium ${set.team1Games > set.team2Games ? "text-(--color-forest-700) font-semibold" : "text-(--color-clay-600)"}`}>{set.team1Label}</span>
+              <span className={`text-right font-semibold ${set.team1Games > set.team2Games ? "text-(--color-forest-700)" : "text-(--color-clay-600)"}`}>{set.team1Games}</span>
               <span className="text-center text-xs text-(--color-text-muted)">S{set.setNumber}</span>
-              <span className="font-bold text-(--color-clay-600)">{set.team2Games}</span>
-              <span className="text-right font-medium">{set.team2Label}</span>
+              <span className={`font-semibold ${set.team2Games > set.team1Games ? "text-(--color-forest-700)" : "text-(--color-clay-600)"}`}>{set.team2Games}</span>
+              <span className={`text-right font-medium ${set.team2Games > set.team1Games ? "text-(--color-forest-700) font-semibold" : "text-(--color-clay-600)"}`}>{set.team2Label}</span>
             </div>
           ))}
         </div>

@@ -31,14 +31,14 @@ export async function SiteHeader() {
   }
 
   return (
-    <header className="bg-(--color-clay-900) shadow-md">
-      <div className="mx-auto flex min-h-14 flex-wrap items-center justify-between gap-x-6 gap-y-2 px-4 py-2 sm:h-14 sm:flex-nowrap sm:py-0 sm:px-6 lg:px-8">
+    <header className="sticky top-0 z-40 border-b border-(--color-navy-800) bg-(--color-ink)/95 shadow-md backdrop-blur">
+      <div className="mx-auto flex min-h-14 w-full max-w-7xl flex-wrap items-center justify-between gap-x-6 gap-y-2 px-4 py-2 sm:h-14 sm:flex-nowrap sm:py-0 sm:px-6 lg:px-8">
         {/* Logo */}
         <Link
           href="/"
-          className="font-display text-2xl tracking-widest text-(--color-clay-200) hover:text-white leading-none transition-colors flex items-center gap-2"
+          className="font-display text-2xl tracking-widest text-(--color-brand) hover:text-white leading-none transition-colors flex items-center gap-2"
         >
-          <span>🎾</span> PTC
+          <span className="text-xl">🎾</span> PTC
         </Link>
 
         {/* Primary nav */}
@@ -47,7 +47,7 @@ export async function SiteHeader() {
             <Link
               key={link.href}
               href={link.href}
-              className="text-sm font-semibold text-(--color-clay-300) hover:text-white transition-colors"
+              className="text-sm font-semibold text-(--color-brand-soft-2) hover:text-white transition-colors"
             >
               {link.label}
             </Link>
@@ -60,7 +60,7 @@ export async function SiteHeader() {
             <>
               <Link
                 href="/player/availability"
-                className="text-sm font-semibold text-(--color-clay-300) hover:text-white transition-colors"
+                className="text-sm font-semibold text-(--color-brand-soft-2) hover:text-white transition-colors"
               >
                 My Availability
               </Link>
@@ -69,7 +69,7 @@ export async function SiteHeader() {
           ) : (
             <Link
               href="/auth/login"
-              className="rounded-md bg-(--color-clay-600) px-3 py-1.5 text-sm font-semibold text-white hover:bg-(--color-clay-500) transition-colors"
+              className="rounded-md bg-(--color-brand) px-3 py-1.5 text-sm font-semibold text-(--color-ink) hover:bg-(--color-brand-active) transition-colors"
             >
               Sign in
             </Link>

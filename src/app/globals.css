@@ -42,6 +42,11 @@
   --color-navy-800: #243b53;
   --color-navy-900: #102a43;
 
+  --color-ink: #1a1a2e;
+  --color-brand: #c9a84c;
+  --color-brand-soft-2: #c8a870;
+  --color-brand-active: #ffd98e;
+
   --color-gold-50: #fff8df;
   --color-gold-400: #d8ad3d;
   --color-gold-500: #c59624;
@@ -53,14 +58,14 @@
   --color-court-white: #f5f8f5;
 
   /* Semantic tokens */
-  --color-background: #faf7f2;
+  --color-background: #f7f3ee;
   --color-surface: #ffffff;
   --color-border: #e4e0d8;
-  --color-text: #1a1a18;
-  --color-text-muted: #5a574f;
-  --color-accent: #c45c1e;
-  --color-accent-hover: #a34818;
-  --color-success: #2d6e2d;
+  --color-text: #1a1a2e;
+  --color-text-muted: #6a7a9b;
+  --color-accent: #c9a84c;
+  --color-accent-hover: #a88732;
+  --color-success: #2e7d32;
 
   --radius-sm: 4px;
   --radius-md: 8px;
@@ -74,10 +79,17 @@
     background-color: var(--color-background);
     color: var(--color-text);
     -webkit-font-smoothing: antialiased;
+    scroll-behavior: smooth;
   }
 
   body {
     font-family: var(--font-body, "Source Sans 3", sans-serif);
+    line-height: 1.5;
+  }
+
+  ::selection {
+    background: var(--color-brand);
+    color: var(--color-ink);
   }
 
   h1, h2, h3 {

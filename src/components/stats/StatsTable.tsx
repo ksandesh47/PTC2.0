@@ -13,19 +13,19 @@ type Props = {
   minMatches: number;
 };
 
-const columns: Array<{ key: SortKey; label: string; align: "left" | "right" }> = [
+const columns: Array<{ key: SortKey; label: string; align: "left" | "center" | "right" }> = [
   { key: "rank", label: "#", align: "right" },
   { key: "player", label: "Player", align: "left" },
-  { key: "averageScore", label: "Avg", align: "right" },
-  { key: "total", label: "Total", align: "right" },
-  { key: "highScore", label: "High", align: "right" },
-  { key: "lowScore", label: "Low", align: "right" },
-  { key: "matchesPlayed", label: "M", align: "right" },
-  { key: "matchesCanceled", label: "CAN", align: "right" },
-  { key: "setsWon", label: "SW", align: "right" },
-  { key: "setsLost", label: "SL", align: "right" },
-  { key: "threeSetsWon", label: "3SW", align: "right" },
-  { key: "threeSetsLost", label: "3SL", align: "right" },
+  { key: "averageScore", label: "Avg", align: "center" },
+  { key: "total", label: "Total", align: "center" },
+  { key: "highScore", label: "High", align: "center" },
+  { key: "lowScore", label: "Low", align: "center" },
+  { key: "matchesPlayed", label: "M", align: "center" },
+  { key: "matchesCanceled", label: "CAN", align: "center" },
+  { key: "setsWon", label: "SW", align: "center" },
+  { key: "setsLost", label: "SL", align: "center" },
+  { key: "threeSetsWon", label: "3SW", align: "center" },
+  { key: "threeSetsLost", label: "3SL", align: "center" },
 ];
 
 export function StatsTable({ rows, displayNames, standingsLabel, minMatches }: Readonly<Props>) {
@@ -68,7 +68,7 @@ export function StatsTable({ rows, displayNames, standingsLabel, minMatches }: R
             {columns.map((column) => (
               <th
                 key={column.key}
-                className={`px-2 py-2.5 whitespace-nowrap ${column.align === "right" ? "text-right" : "text-left"} ${
+                className={`px-2 py-2.5 whitespace-nowrap ${column.align === "right" ? "text-right" : column.align === "center" ? "text-center" : "text-left"} ${
                   column.key === "rank"
                     ? "sticky left-0 z-20 w-9 min-w-9 bg-(--color-clay-50)"
                     : column.key === "player"
@@ -98,16 +98,16 @@ export function StatsTable({ rows, displayNames, standingsLabel, minMatches }: R
                     <span className="text-[0.65em] font-mono font-normal text-(--color-text-muted)">{row.matchesPlayed}</span>
                   </span>
                 </td>
-                <td className="w-14 px-2 py-2.5 text-right font-bold text-(--color-clay-600)">{row.averageScore.toFixed(1)}</td>
-                <td className="w-14 px-2 py-2.5 text-right">{row.total}</td>
-                <td className="w-14 px-2 py-2.5 text-right">{row.highScore}</td>
-                <td className="w-14 px-2 py-2.5 text-right">{row.lowScore}</td>
-                <td className="w-12 px-2 py-2.5 text-right">{row.matchesPlayed}</td>
-                <td className="w-12 px-2 py-2.5 text-right">{row.matchesCanceled}</td>
-                <td className="w-12 px-2 py-2.5 text-right">{row.setsWon}</td>
-                <td className="w-12 px-2 py-2.5 text-right">{row.setsLost}</td>
-                <td className="w-12 px-2 py-2.5 text-right">{row.threeSetsWon}</td>
-                <td className="w-12 px-2 py-2.5 text-right">{row.threeSetsLost}</td>
+                <td className="w-14 px-2 py-2.5 text-center font-bold text-(--color-clay-600)">{row.averageScore.toFixed(1)}</td>
+                <td className="w-14 px-2 py-2.5 text-center">{row.total}</td>
+                <td className="w-14 px-2 py-2.5 text-center">{row.highScore}</td>
+                <td className="w-14 px-2 py-2.5 text-center">{row.lowScore}</td>
+                <td className="w-12 px-2 py-2.5 text-center">{row.matchesPlayed}</td>
+                <td className="w-12 px-2 py-2.5 text-center">{row.matchesCanceled}</td>
+                <td className="w-12 px-2 py-2.5 text-center">{row.setsWon}</td>
+                <td className="w-12 px-2 py-2.5 text-center">{row.setsLost}</td>
+                <td className="w-12 px-2 py-2.5 text-center">{row.threeSetsWon}</td>
+                <td className="w-12 px-2 py-2.5 text-center">{row.threeSetsLost}</td>
               </tr>
             );
           })}
