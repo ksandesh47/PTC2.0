@@ -5,7 +5,7 @@ export default function HomePage() {
     <>
       {/* Hero banner */}
       <section className="bg-(--color-clay-800) py-12 text-center space-y-4 sm:py-16">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto w-full max-w-7xl px-4 md:w-3/5">
           <h1 className="break-words px-4 font-display text-4xl text-(--color-clay-100) tracking-widest sm:text-6xl lg:text-8xl">
             PALOMINO TENNIS CLUB
           </h1>
@@ -15,7 +15,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 space-y-12">
+      <div className="mx-auto w-full max-w-7xl px-4 py-12 space-y-12 md:w-3/5">
         {/* Quick-links grid */}
         <section>
           <h2 className="font-display text-3xl tracking-widest mb-6">QUICK ACCESS</h2>

@@ -67,19 +67,21 @@ export default async function StandingsPage() {
   const top3 = standings.slice(0, 3);
 
   return (
-    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 space-y-8">
+    <div className="mx-auto w-full max-w-7xl px-4 py-12 space-y-8 md:w-3/5">
       <div>
-        <h1 className="font-display text-5xl tracking-widest text-(--color-clay-500)">
-          STANDINGS
-        </h1>
-        <p className="text-sm text-(--color-text-muted) mt-1">
-          {season.name} · {getStandingsLabel()} league model · updated {formatDate(new Date())}
-        </p>
+        <div className="w-full">
+          <h1 className="font-display text-5xl tracking-widest text-(--color-clay-500)">
+            STANDINGS
+          </h1>
+          <p className="text-sm text-(--color-text-muted) mt-1">
+            {season.name} · {getStandingsLabel()} league model · updated {formatDate(new Date())}
+          </p>
+        </div>
       </div>
 
       {/* Podium */}
       {top3.length > 0 && (
-        <div className="grid grid-cols-3 gap-3 sm:gap-5">
+        <div className="grid w-full grid-cols-3 gap-3 sm:gap-5">
           {[top3[1], top3[0], top3[2]].filter(Boolean).map((row) => (
             <PodiumCard
               key={row.playerId}
@@ -94,8 +96,10 @@ export default async function StandingsPage() {
       {/* Top-8 match score breakdown */}
       {standings.some((row) => row.countedScorecards.length > 0) && (
         <section className="space-y-3">
-          <h2 className="font-display text-2xl tracking-wider">🏅 Top {MIN_MATCHES} Match Score Breakdown</h2>
-          <div className="relative rounded-lg border border-(--color-border) after:pointer-events-none after:absolute after:inset-y-0 after:right-0 after:w-8 after:bg-gradient-to-l after:from-(--color-surface) after:to-transparent sm:after:hidden">
+          <div className="w-full">
+            <h2 className="font-display text-2xl tracking-wider">🏅 Top {MIN_MATCHES} Match Score Breakdown</h2>
+          </div>
+          <div className="relative w-full overflow-hidden rounded-lg border border-(--color-border) after:pointer-events-none after:absolute after:inset-y-0 after:right-0 after:w-8 after:bg-gradient-to-l after:from-(--color-surface) after:to-transparent sm:after:hidden">
             <div className="overflow-x-auto">
               <table className="min-w-max w-full table-fixed text-sm" aria-label="Top match breakdown">
               <thead className="bg-(--color-clay-50) text-(--color-text-muted) text-xs uppercase tracking-widest">

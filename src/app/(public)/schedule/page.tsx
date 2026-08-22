@@ -238,7 +238,7 @@ export default async function SchedulePage({ searchParams }: Readonly<PageProps>
   const linkBase = personalMode ? "/schedule?me=1&week=" : "/schedule?week=";
 
   return (
-    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 space-y-8">
+    <div className="mx-auto w-full max-w-7xl px-4 py-12 space-y-8 md:w-3/5">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="font-display text-5xl tracking-widest text-(--color-clay-500)">

@@ -43,7 +43,7 @@ export default async function ResultsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 space-y-8">
+    <div className="mx-auto w-full max-w-7xl px-4 py-12 space-y-8 md:w-3/5">
       <div>
         <h1 className="font-display text-5xl tracking-widest text-(--color-clay-500)">
           RESULTS

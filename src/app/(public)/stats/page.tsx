@@ -54,14 +54,16 @@ export default async function StatsPage() {
   );
 
   return (
-    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 space-y-6">
+    <div className="mx-auto w-full max-w-7xl px-4 py-12 space-y-6 md:w-3/5">
       <div>
-        <h1 className="font-display text-5xl tracking-widest text-(--color-clay-500)">
-          STATS
-        </h1>
-        <p className="mt-1 text-sm text-(--color-text-muted)">
-          {season.name} · sorted by average · league scoring: {getStandingsLabel()} match scores over {palominoLeagueRules.matchFormat.setsPerMatch} rotating sets.
-        </p>
+        <div className="w-full">
+          <h1 className="font-display text-5xl tracking-widest text-(--color-clay-500)">
+            STATS
+          </h1>
+          <p className="mt-1 text-sm text-(--color-text-muted)">
+            {season.name} · sorted by average · league scoring: {getStandingsLabel()} match scores over {palominoLeagueRules.matchFormat.setsPerMatch} rotating sets.
+          </p>
+        </div>
       </div>
 
       <StatsTable
@@ -72,8 +74,10 @@ export default async function StatsPage() {
       />
 
       <section className="-mt-2 space-y-3">
-        <h2 className="font-display text-2xl tracking-wider">⚡ Season Highlights</h2>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="w-full">
+          <h2 className="font-display text-2xl tracking-wider">⚡ Season Highlights</h2>
+        </div>
+        <div className="grid w-full grid-cols-2 gap-3">
           <HighlightCard
             icon="👑"
             title="Current Leader"

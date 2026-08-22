@@ -142,7 +142,7 @@ export default async function AvailabilityPage({ searchParams }: Readonly<PagePr
   const selectedPlayer = roster.find((p) => p.id === selectedPlayerId);
   if (!selectedPlayer) {
     return (
-      <div className="mx-auto max-w-4xl px-4 sm:px-6 py-10 space-y-6">
+      <div className="mx-auto w-full max-w-7xl px-4 py-10 space-y-6 md:w-3/5">
         <div className="flex items-center justify-between text-sm">
           <Link href="/" className="font-semibold text-(--color-clay-600) hover:opacity-90">
             📅 View Schedule & Standings
@@ -240,7 +240,7 @@ export default async function AvailabilityPage({ searchParams }: Readonly<PagePr
   const fullName = displayName(selectedPlayer.firstName, selectedPlayer.lastName);
 
   return (
-    <div className="mx-auto max-w-2xl px-4 sm:px-6 py-10 space-y-6">
+    <div className="mx-auto w-full max-w-7xl px-4 py-10 space-y-6 md:w-3/5">
       <div className="flex items-center justify-between text-sm">
         <Link href="/availability" className="font-semibold text-(--color-clay-600) hover:opacity-90">
           ← Back to players
