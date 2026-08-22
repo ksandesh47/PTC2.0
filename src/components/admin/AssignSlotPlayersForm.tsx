@@ -49,6 +49,16 @@ function availabilityChip(status: AvailabilityStatus): string {
   return 'bg-(--color-navy-100) text-(--color-text-muted)';
 }
 
+function assignmentPlayers(initialAssignment?: Assignment | null): string[] {
+  if (!initialAssignment) return [];
+  return [
+    initialAssignment.team1Player1Id,
+    initialAssignment.team1Player2Id,
+    initialAssignment.team2Player1Id,
+    initialAssignment.team2Player2Id,
+  ];
+}
+
 export function AssignSlotPlayersForm({
   slotId,
   slotHeader,
@@ -61,16 +71,7 @@ export function AssignSlotPlayersForm({
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [selected, setSelected] = useState<string[]>(() =>
-    initialAssignment
-      ? [
-          initialAssignment.team1Player1Id,
-          initialAssignment.team1Player2Id,
-          initialAssignment.team2Player1Id,
-          initialAssignment.team2Player2Id,
-        ].filter(Boolean)
-      : []
-  );
+  const [selected, setSelected] = useState<string[]>(() => assignmentPlayers(initialAssignment));
 
   const sortedPlayers = useMemo(() => {
     return [...players].sort((a, b) => {
@@ -86,18 +87,28 @@ export function AssignSlotPlayersForm({
   useEffect(() => {
     if (!open) return;
     const handler = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setOpen(false);
+      if (event.key === 'Escape') {
+        setSelected(assignmentPlayers(initialAssignment));
+        setError(null);
+        setOpen(false);
+      }
     };
     document.addEventListener('keydown', handler);
     return () => document.removeEventListener('keydown', handler);
-  }, [open]);
+  }, [initialAssignment, open]);
 
   const toggleSelection = (playerId: string) => {
     setSelected((prev) => {
       if (prev.includes(playerId)) return prev.filter((id) => id !== playerId);
-      if (prev.length >= 4) return [...prev.slice(0, 3), playerId];
+      if (prev.length >= 4) return prev;
       return [...prev, playerId];
     });
+  };
+
+  const closeWithoutSaving = () => {
+    setSelected(assignmentPlayers(initialAssignment));
+    setError(null);
+    setOpen(false);
   };
 
   let submitLabel = 'Save Assignment';
@@ -155,7 +166,7 @@ export function AssignSlotPlayersForm({
             type="button"
             aria-label="Close player picker"
             className="fixed inset-0 z-40 bg-black/40"
-            onClick={() => setOpen(false)}
+            onClick={closeWithoutSaving}
           />
           <dialog
             open
@@ -168,7 +179,7 @@ export function AssignSlotPlayersForm({
               </div>
               <button
                 type="button"
-                onClick={() => setOpen(false)}
+                onClick={closeWithoutSaving}
                 className="rounded px-2 py-1 text-sm hover:bg-(--color-navy-50)"
                 aria-label="Close"
               >
@@ -205,7 +216,7 @@ export function AssignSlotPlayersForm({
                   </div>
                   {selected.length === 4 && (
                     <p className="mt-1 text-(--color-text-muted)">
-                      Choose another player to replace player 4, including unavailable players.
+                      Remove a selected player before adding a different player.
                     </p>
                   )}
                 </>

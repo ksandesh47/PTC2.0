@@ -79,8 +79,8 @@ export default async function StandingsPage() {
 
       {/* Podium */}
       {top3.length > 0 && (
-        <div className="grid gap-4 lg:grid-cols-3">
-          {top3.map((row) => (
+        <div className="grid grid-cols-3 gap-3 sm:gap-5">
+          {[top3[1], top3[0], top3[2]].filter(Boolean).map((row) => (
             <PodiumCard
               key={row.playerId}
               entry={row}
@@ -167,37 +167,45 @@ function PodiumCard({
   const tooltip = rosterEntry
     ? needsMoreTooltip({ ...rosterEntry, matchesPlayed: entry.matchesPlayed })
     : undefined;
+  const cardTone = entry.rank === 1
+    ? "border-(--color-gold-400) bg-(--color-gold-50)"
+    : entry.rank === 2
+      ? "border-(--color-slate-300) bg-(--color-slate-50)"
+      : "border-(--color-clay-300) bg-(--color-clay-50)";
+  const topBorder = entry.rank === 1
+    ? "border-t-(--color-gold-500)"
+    : entry.rank === 2
+      ? "border-t-(--color-slate-400)"
+      : "border-t-(--color-clay-500)";
   return (
-    <article className="rounded-xl border border-(--color-border) bg-(--color-surface) overflow-hidden shadow-sm">
-      <div className="bg-(--color-clay-100) px-4 py-3 flex items-center gap-3 lg:px-5 lg:py-4">
-        <span className="text-3xl leading-none">{medalFor(entry.rank)}</span>
-        <h2 className="min-w-0 flex-1 truncate font-display text-2xl tracking-wider text-(--color-text) lg:text-3xl">
+    <article className={`rounded-xl border border-t-4 ${topBorder} ${cardTone} px-3 py-4 shadow-sm sm:px-5 sm:py-5`}>
+      <div className="flex items-start justify-between gap-2">
+        <span className="text-2xl leading-none sm:text-3xl">{medalFor(entry.rank)}</span>
+        <span className="text-xs text-(--color-text)">#{entry.rank}</span>
+      </div>
+      <div className="mt-3">
+        <h2 className="min-w-0 truncate font-display text-xl tracking-wider text-(--color-text) sm:text-2xl">
           <PlayerNameBadge
             name={displayName}
             matchesPlayed={entry.matchesPlayed}
             tooltip={tooltip}
           />
         </h2>
-        <span className="text-xs uppercase tracking-widest text-(--color-clay-600)">
-          Rank {entry.rank}
-        </span>
       </div>
-      <div className="p-2 lg:p-3">
-      <div className="mt-0 flex items-end justify-between">
-        <div>
+      <div className="mt-3 flex items-end justify-between gap-2">
+        <div className="min-w-0">
           <p className="text-xs uppercase tracking-widest text-(--color-text-muted)">
             {getStandingsLabel()}
           </p>
-          <p className="font-display text-3xl tracking-wider text-(--color-clay-600) lg:text-4xl">
+          <p className="font-display text-3xl tracking-wider text-(--color-clay-600) sm:text-4xl">
             {entry.standingsTotal}
           </p>
         </div>
-        <div className="text-right text-sm text-(--color-text-muted)">
-          <p>Total: {entry.total}</p>
-          <p>Avg: {entry.averageScore.toFixed(1)} · {entry.matchesPlayed}M</p>
-          <p>SW-SL: {entry.setsWon}-{entry.setsLost}</p>
-        </div>
       </div>
+      <div className="mt-3 text-xs leading-[1.45] text-(--color-text-muted) sm:text-sm">
+        <p>Total: {entry.total}</p>
+        <p>Avg: {entry.averageScore.toFixed(1)} · {entry.matchesPlayed}M</p>
+        <p>SW-SL: {entry.setsWon}-{entry.setsLost}</p>
       </div>
     </article>
   );
@@ -208,10 +216,16 @@ function PlayerNameBadge({
   matchesPlayed,
   tooltip,
 }: Readonly<{ name: string; matchesPlayed: number; tooltip: string | undefined }>) {
+  const needsMatches = matchesPlayed < MIN_MATCHES;
   return (
-    <span className="inline-flex items-baseline gap-1" title={tooltip}>
-      <span>{name}</span>
-      <span className="text-[0.65em] font-mono font-normal text-(--color-text-muted)">
+    <span
+      className={`inline-flex max-w-full items-baseline gap-1 ${needsMatches
+        ? "rounded-full border border-red-200 bg-red-50 px-2 py-0.5 text-red-600"
+        : ""}`}
+      title={tooltip}
+    >
+      <span className="truncate">{name}</span>
+      <span className={`text-[0.65em] font-mono font-normal ${needsMatches ? "text-red-500" : "text-(--color-text-muted)"}`}>
         {matchesPlayed}
       </span>
     </span>

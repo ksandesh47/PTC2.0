@@ -54,7 +54,7 @@ export default async function StatsPage() {
   );
 
   return (
-    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 space-y-8">
+    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 space-y-6">
       <div>
         <h1 className="font-display text-5xl tracking-widest text-(--color-clay-500)">
           STATS
@@ -71,9 +71,21 @@ export default async function StatsPage() {
         minMatches={MIN_MATCHES}
       />
 
-      <section className="space-y-3">
+      <section className="-mt-2 space-y-3">
         <h2 className="font-display text-2xl tracking-wider">⚡ Season Highlights</h2>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3">
+          <HighlightCard
+            icon="👑"
+            title="Current Leader"
+            value={highlights.leader.name}
+            subtitle={highlights.leader.detail}
+          />
+          <HighlightCard
+            icon="🏅"
+            title="Most Sets Won Overall"
+            value={highlights.mostSetsWon.value}
+            subtitle={highlights.mostSetsWon.name}
+          />
           <HighlightCard
             icon="🔥"
             title="Highest Match Score"
@@ -87,16 +99,28 @@ export default async function StatsPage() {
             subtitle={highlights.lowScore.matches}
           />
           <HighlightCard
-            icon="🏅"
-            title="Most Sets Won"
-            value={highlights.mostSetsWon.value}
-            subtitle={highlights.mostSetsWon.name}
+            icon="📈"
+            title="Most Improved"
+            value={highlights.mostImproved.name}
+            subtitle={highlights.mostImproved.detail}
           />
           <HighlightCard
-            icon="👑"
-            title="Current Leader"
-            value={highlights.leader.name}
-            subtitle={highlights.leader.detail}
+            icon="📉"
+            title="Least Improved"
+            value={highlights.leastImproved.name}
+            subtitle={highlights.leastImproved.detail}
+          />
+          <HighlightCard
+            icon="🎯"
+            title="Most Consistent"
+            value={highlights.mostConsistent.name}
+            subtitle={highlights.mostConsistent.detail}
+          />
+          <HighlightCard
+            icon="📊"
+            title="Least Consistent"
+            value={highlights.leastConsistent.name}
+            subtitle={highlights.leastConsistent.detail}
           />
         </div>
       </section>
@@ -113,9 +137,7 @@ function buildSeasonHighlights(
   type FlatScorecard = PlayerMatchScorecard & { date: string | Date | undefined };
 
   const flat: FlatScorecard[] = [];
-  const matchDateById = new Map<string, string | Date | undefined>();
   for (const match of completedMatches) {
-    matchDateById.set(match.id, match.slot?.slotDate);
     const scs = scorecardsByMatch.get(match.id) ?? [];
     for (const sc of scs) {
       flat.push({ ...sc, date: match.slot?.slotDate });
@@ -125,6 +147,7 @@ function buildSeasonHighlights(
   const emptyHighlight = { value: "–" as string | number, matches: "" };
   if (flat.length === 0) {
     const leader = standings[0];
+    const emptyPlayerHighlight = { name: "–", detail: "" };
     return {
       highScore: emptyHighlight,
       lowScore: emptyHighlight,
@@ -133,6 +156,10 @@ function buildSeasonHighlights(
         name: leader ? (displayNameMap.get(leader.playerId) ?? leader.playerName) : "–",
         detail: leader ? `${leader.standingsTotal} pts · ${leader.setsWon} SW` : "",
       },
+      mostImproved: emptyPlayerHighlight,
+      leastImproved: emptyPlayerHighlight,
+      mostConsistent: emptyPlayerHighlight,
+      leastConsistent: emptyPlayerHighlight,
     };
   }
 
@@ -158,6 +185,65 @@ function buildSeasonHighlights(
   const mostSetsWon = [...standings].sort((a, b) => b.setsWon - a.setsWon)[0];
   const leader = standings[0];
 
+  const scorecardsByPlayer = new Map<string, FlatScorecard[]>();
+  for (const scorecard of flat) {
+    const playerCards = scorecardsByPlayer.get(scorecard.playerId) ?? [];
+    playerCards.push(scorecard);
+    scorecardsByPlayer.set(scorecard.playerId, playerCards);
+  }
+
+  const trends = [...scorecardsByPlayer.entries()]
+    .map(([playerId, cards]) => {
+      const chronological = [...cards].sort((a, b) => {
+        const aDate = a.date ? new Date(a.date).getTime() : 0;
+        const bDate = b.date ? new Date(b.date).getTime() : 0;
+        return aDate - bDate || a.weekNumber - b.weekNumber;
+      });
+      if (chronological.length < 2) return null;
+
+      const splitIndex = Math.floor(chronological.length / 2);
+      const early = chronological.slice(0, splitIndex).map((card) => card.score);
+      const recent = chronological.slice(splitIndex).map((card) => card.score);
+      const earlyAverage = average(early);
+      const recentAverage = average(recent);
+      const mean = average(chronological.map((card) => card.score));
+      const variance = chronological.reduce(
+        (sum, card) => sum + (card.score - mean) ** 2,
+        0
+      ) / (chronological.length - 1);
+
+      return {
+        playerId,
+        name: displayNameMap.get(playerId) ?? playerId,
+        improvement: recentAverage - earlyAverage,
+        earlyAverage,
+        recentAverage,
+        averageScore: mean,
+        standardDeviation: Math.sqrt(variance),
+        matches: chronological.length,
+      };
+    })
+    .filter((trend): trend is NonNullable<typeof trend> => trend !== null);
+
+  const mostImproved = [...trends].sort((a, b) => b.improvement - a.improvement)[0];
+  const leastImproved = [...trends].sort((a, b) => a.improvement - b.improvement)[0];
+  const mostConsistent = [...trends].sort((a, b) => a.standardDeviation - b.standardDeviation)[0];
+  const leastConsistent = [...trends].sort((a, b) => b.standardDeviation - a.standardDeviation)[0];
+
+  function trendHighlight(trend: (typeof trends)[number] | undefined, includeDirection = false) {
+    if (!trend) return { name: "–", detail: "" };
+    if (!includeDirection) {
+      return {
+        name: trend.name,
+        detail: `${trend.standardDeviation.toFixed(2)} std dev · ${trend.averageScore.toFixed(1)} avg over ${trend.matches} matches`,
+      };
+    }
+    return {
+      name: trend.name,
+      detail: `${trend.improvement >= 0 ? "+" : ""}${trend.improvement.toFixed(1)} avg pts · ${trend.earlyAverage.toFixed(1)} early → ${trend.recentAverage.toFixed(1)} recent`,
+    };
+  }
+
   return {
     highScore: {
       value: maxScore as string | number,
@@ -175,7 +261,15 @@ function buildSeasonHighlights(
       name: leader ? (displayNameMap.get(leader.playerId) ?? leader.playerName) : "–",
       detail: leader ? `${leader.standingsTotal} Top-${MIN_MATCHES} pts · ${leader.setsWon} SW` : "",
     },
+    mostImproved: trendHighlight(mostImproved, true),
+    leastImproved: trendHighlight(leastImproved, true),
+    mostConsistent: trendHighlight(mostConsistent),
+    leastConsistent: trendHighlight(leastConsistent),
   };
+}
+
+function average(values: number[]) {
+  return values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : 0;
 }
 
 function HighlightCard({

@@ -62,8 +62,11 @@ export type LeagueStandingsEntry = {
   highScore: number;
   lowScore: number;
   matchesPlayed: number;
+  matchesCanceled: number;
   setsWon: number;
   setsLost: number;
+  threeSetsWon: number;
+  threeSetsLost: number;
   gamesWon: number;
   gamesLost: number;
   scorecards: PlayerMatchScorecard[];
@@ -168,6 +171,7 @@ export function buildMatchScorecards(match: LeagueMatch) {
 export function buildLeagueStandings(input: {
   players: PlayerIdentity[];
   matches: LeagueMatch[];
+  canceledMatches?: LeagueMatch[];
 }) {
   const scorecardsByPlayer = new Map<string, PlayerMatchScorecard[]>();
 
@@ -192,9 +196,21 @@ export function buildLeagueStandings(input: {
       0
     );
     const matchesPlayed = scorecards.length;
+    const matchesCanceled = (input.canceledMatches ?? []).filter((match) =>
+      match.pairings.some((pairing) =>
+        [
+          pairing.team1Player1Id,
+          pairing.team1Player2Id,
+          pairing.team2Player1Id,
+          pairing.team2Player2Id,
+        ].includes(player.id)
+      )
+    ).length;
     const total = scorecards.reduce((sum, scorecard) => sum + scorecard.score, 0);
     const setsWon = scorecards.reduce((sum, scorecard) => sum + scorecard.setsWon, 0);
     const setsLost = scorecards.reduce((sum, scorecard) => sum + scorecard.setsLost, 0);
+    const threeSetsWon = scorecards.filter((scorecard) => scorecard.setsWon === 3).length;
+    const threeSetsLost = scorecards.filter((scorecard) => scorecard.setsLost === 3).length;
     const gamesWon = scorecards.reduce((sum, scorecard) => sum + scorecard.gamesWon, 0);
     const gamesLost = scorecards.reduce((sum, scorecard) => sum + scorecard.gamesLost, 0);
     const highScore = scorecards[0]?.score ?? 0;
@@ -213,8 +229,11 @@ export function buildLeagueStandings(input: {
       highScore,
       lowScore,
       matchesPlayed,
+      matchesCanceled,
       setsWon,
       setsLost,
+      threeSetsWon,
+      threeSetsLost,
       gamesWon,
       gamesLost,
       scorecards,

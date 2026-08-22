@@ -4,9 +4,12 @@ import { availabilitySlots, matches, playerAvailability, players, seasonPlayers,
 import { and, eq, inArray } from "drizzle-orm";
 import { formatDate } from "@/lib/utils";
 import { buildMatchSetRows } from "@/lib/league/display";
+import { buildMatchScorecards } from "@/lib/league/scorecards";
+import type { LeagueMatch } from "@/lib/league/scorecards";
 import { SlotMatchActions } from "@/components/admin/SlotMatchActions";
 import { AssignSlotPlayersForm } from "@/components/admin/AssignSlotPlayersForm";
 import { AutoAssignButton } from "@/components/admin/AutoAssignButton";
+import { AutoAssignWeekButton } from "@/components/admin/AutoAssignWeekButton";
 
 type PageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
@@ -662,13 +665,18 @@ export default async function AdminScoresPage({ searchParams }: Readonly<PagePro
       )}
 
       <section className="space-y-3">
-        <h2 className="font-display text-2xl tracking-wider">THIS WEEK'S SLOTS</h2>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="font-display text-2xl tracking-wider">THIS WEEK'S SLOTS</h2>
+          <AutoAssignWeekButton weekNumber={selectedWeek} />
+        </div>
         <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
           {slotLayout.slots.map((slot) => {
             const match = slot.match;
             const slotLabel = `${slot.dayLabel} SLOT ${slot.slotNumber}`;
             const scoredSetCount = match ? (setCountByMatch.get(match.id) ?? 0) : 0;
-            const scoredSets = match && scoredSetCount > 0 ? buildSetCards(match) : [];
+            const individualScores = match && scoredSetCount > 0
+              ? buildMatchScorecards(match as LeagueMatch)
+              : [];
             const availableCount = slot.slotId ? (availableCountBySlot.get(slot.slotId) ?? 0) : 0;
             let scoringSummary = "No players assigned";
             if (scoredSetCount > 0) {
@@ -722,28 +730,37 @@ export default async function AdminScoresPage({ searchParams }: Readonly<PagePro
                   <>
                     <p className="text-xs text-(--color-text-muted)">{match.slot?.label ?? match.court ?? "Court TBD"}</p>
                     <p className="text-xs">{scoringSummary}</p>
-                    {scoredSets.length > 0 && (
+                    {individualScores.length > 0 && (
                       <div className="space-y-1 pt-1">
                         <p className="text-xs font-semibold uppercase tracking-wider text-(--color-text-muted)">
-                          {isScored ? "Match Results" : "Assigned Players"}
+                          Individual Scores
                         </p>
-                        {scoredSets.map((set) => (
-                          <div key={set.setNumber} className="rounded border border-(--color-border) px-2 py-1 text-xs">
-                            <p className="font-semibold uppercase tracking-wider text-(--color-text-muted)">Set {set.setNumber}</p>
-                            <div className={`grid items-center gap-1 ${isScored ? "grid-cols-[1fr_auto_auto_1fr]" : "grid-cols-[1fr_auto_1fr]"}`}>
-                              <span className="font-semibold truncate">{set.team1Label}</span>
-                              {isScored ? (
-                                <>
-                                  <span className="font-semibold text-(--color-navy-600)">{set.team1Games}</span>
-                                  <span className="font-semibold text-(--color-navy-600)">{set.team2Games}</span>
-                                </>
-                              ) : (
-                                <span className="text-center text-(--color-text-muted)">vs</span>
-                              )}
-                              <span className="font-semibold truncate text-right">{set.team2Label}</span>
-                            </div>
-                          </div>
-                        ))}
+                        <div className="grid grid-cols-2 gap-1">
+                          {individualScores.map((scorecard) => {
+                            const player = match.pairings
+                              .flatMap((pairing) => [
+                                pairing.team1Player1,
+                                pairing.team1Player2,
+                                pairing.team2Player1,
+                                pairing.team2Player2,
+                              ])
+                              .find((candidate) => candidate?.id === scorecard.playerId);
+                            return (
+                              <div key={scorecard.playerId} className="flex items-center justify-between rounded border border-(--color-border) px-2 py-1 text-xs">
+                                <span className="truncate font-semibold">{player ? `${player.firstName} ${player.lastName}` : "Unknown player"}</span>
+                                <span className="ml-2 font-display text-lg text-(--color-navy-600)">{scorecard.score}</span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                        <p className="text-[10px] text-(--color-text-muted)">
+                          Individual league points for this match
+                        </p>
+                      </div>
+                    )}
+                    {isScored && individualScores.length === 0 && (
+                      <div className="rounded border border-(--color-border) px-2 py-1 text-xs">
+                        <p className="text-(--color-text-muted)">No individual scores recorded yet.</p>
                       </div>
                     )}
                     {(match.status === "cancelled" || match.status === "abandoned") && (

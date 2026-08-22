@@ -67,6 +67,36 @@ describe("buildLeagueStandings", () => {
     expect(standings[0]?.playerId).toBe("a");
   });
 
+  it("tracks canceled matches and three-set results separately", () => {
+    const completed = match("1", "player", 6);
+    completed.pairings[0].sets = [
+      { version: 1, setNumber: 1, team1Games: 6, team2Games: 0 },
+      { version: 1, setNumber: 2, team1Games: 6, team2Games: 1 },
+      { version: 1, setNumber: 3, team1Games: 6, team2Games: 2 },
+    ];
+    const canceled = {
+      ...completed,
+      id: "2",
+      matchNumber: 2,
+      status: "cancelled",
+    };
+
+    const standings = buildLeagueStandings({
+      players: [
+        { id: "player", firstName: "Test", lastName: "Player" },
+        { id: "player-opponent", firstName: "Other", lastName: "Player" },
+      ],
+      matches: [completed],
+      canceledMatches: [canceled],
+    });
+
+    const player = standings.find((entry) => entry.playerId === "player");
+    expect(player?.matchesPlayed).toBe(1);
+    expect(player?.matchesCanceled).toBe(1);
+    expect(player?.threeSetsWon).toBe(1);
+    expect(player?.threeSetsLost).toBe(0);
+  });
+
   it("honors an explicit pairing override when displaying a set", () => {
     const rows = buildMatchSetRows([
       {

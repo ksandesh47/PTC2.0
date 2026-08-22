@@ -67,6 +67,9 @@ export async function getActiveSeasonProjection() {
   const standings = buildLeagueStandings({
     players: enrolledPlayers,
     matches: completedMatches,
+    canceledMatches: allMatches.filter(
+      (match) => match.status === "cancelled" || match.status === "abandoned"
+    ),
   });
 
   const displayNameMap = buildDisplayNameMap(enrolledPlayers);

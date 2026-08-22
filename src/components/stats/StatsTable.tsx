@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import type { LeagueStandingsEntry } from "@/lib/league/scorecards";
 
-type SortKey = "rank" | "player" | "averageScore" | "total" | "standingsTotal" | "highScore" | "lowScore" | "matchesPlayed" | "setsWon" | "setsLost";
+type SortKey = "rank" | "player" | "averageScore" | "total" | "standingsTotal" | "highScore" | "lowScore" | "matchesPlayed" | "matchesCanceled" | "setsWon" | "setsLost" | "threeSetsWon" | "threeSetsLost";
 type SortDirection = "asc" | "desc";
 
 type Props = {
@@ -18,12 +18,14 @@ const columns: Array<{ key: SortKey; label: string; align: "left" | "right" }> =
   { key: "player", label: "Player", align: "left" },
   { key: "averageScore", label: "Avg", align: "right" },
   { key: "total", label: "Total", align: "right" },
-  { key: "standingsTotal", label: "Best 8", align: "right" },
   { key: "highScore", label: "High", align: "right" },
   { key: "lowScore", label: "Low", align: "right" },
   { key: "matchesPlayed", label: "M", align: "right" },
+  { key: "matchesCanceled", label: "CAN", align: "right" },
   { key: "setsWon", label: "SW", align: "right" },
   { key: "setsLost", label: "SL", align: "right" },
+  { key: "threeSetsWon", label: "3SW", align: "right" },
+  { key: "threeSetsLost", label: "3SL", align: "right" },
 ];
 
 export function StatsTable({ rows, displayNames, standingsLabel, minMatches }: Readonly<Props>) {
@@ -75,7 +77,7 @@ export function StatsTable({ rows, displayNames, standingsLabel, minMatches }: R
                 }`}
               >
                 <button type="button" onClick={() => changeSort(column.key)} className="inline-flex items-center gap-1 font-semibold hover:text-(--color-clay-600)">
-                  {column.key === "standingsTotal" ? standingsLabel : column.label}
+                  {column.label}
                   <span aria-hidden="true" className={column.key === sortKey ? "text-(--color-clay-600)" : "opacity-40"}>{indicator(column.key)}</span>
                 </button>
               </th>
@@ -98,17 +100,23 @@ export function StatsTable({ rows, displayNames, standingsLabel, minMatches }: R
                 </td>
                 <td className="px-3 py-3 text-right font-bold text-(--color-clay-600)">{row.averageScore.toFixed(1)}</td>
                 <td className="px-3 py-3 text-right">{row.total}</td>
-                <td className="px-3 py-3 text-right">{row.standingsTotal}</td>
                 <td className="px-3 py-3 text-right">{row.highScore}</td>
                 <td className="px-3 py-3 text-right">{row.lowScore}</td>
                 <td className="px-3 py-3 text-right">{row.matchesPlayed}</td>
+                <td className="px-3 py-3 text-right">{row.matchesCanceled}</td>
                 <td className="px-3 py-3 text-right">{row.setsWon}</td>
                 <td className="px-3 py-3 text-right">{row.setsLost}</td>
+                <td className="px-3 py-3 text-right">{row.threeSetsWon}</td>
+                <td className="px-3 py-3 text-right">{row.threeSetsLost}</td>
               </tr>
             );
           })}
         </tbody>
         </table>
+      </div>
+      <div className="border-t border-(--color-border) px-3 py-3 text-xs text-(--color-text-muted)">
+        <p className="font-semibold uppercase tracking-wider">Legend</p>
+        <p className="mt-1">Avg = average score · Total = all match points · High/Low = highest/lowest match score · M = matches played · CAN = canceled matches · SW/SL = sets won/lost · 3SW/3SL = matches won/lost in all three sets.</p>
       </div>
     </div>
   );
