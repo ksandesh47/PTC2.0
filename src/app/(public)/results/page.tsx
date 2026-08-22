@@ -83,12 +83,12 @@ export default async function ResultsPage() {
               key={match.id}
               className="rounded-xl border border-(--color-border) bg-(--color-surface) overflow-hidden shadow-sm"
             >
-              <div className="border-b border-(--color-navy-100) border-t-2 border-t-(--color-navy-400) bg-white px-4 py-3 flex items-start justify-between gap-3">
+              <div className="bg-(--color-clay-800) px-4 py-3 flex items-start justify-between gap-3">
                 <div>
-                  <p className="text-sm font-semibold uppercase tracking-wider text-(--color-navy-900)">
+                  <p className="text-sm font-semibold uppercase tracking-wider text-(--color-clay-100)">
                     {match.slot?.slotDate ? formatDate(match.slot.slotDate) : `Week ${match.weekNumber}`}
                   </p>
-                  <p className="text-xs text-(--color-navy-600)">
+                  <p className="text-xs text-(--color-clay-300)">
                     {match.slot?.label ?? match.court ?? "Court TBD"}
                   </p>
                 </div>

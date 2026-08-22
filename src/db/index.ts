@@ -13,7 +13,13 @@ if (!rawConnectionString) {
 // Vercel env values can accidentally include surrounding quotes if copied from .env files.
 const connectionString = rawConnectionString.replace(/^['\"]|['\"]$/g, "");
 
-// Disable prefetch for serverless environments (Vercel Edge / Supabase Pooler).
-const client = postgres(connectionString, { prepare: false });
+// Keep one connection per serverless process so parallel Vercel workers do not
+// exhaust the Supabase connection limit.
+const client = postgres(connectionString, {
+	prepare: false,
+	max: 3,
+	idle_timeout: 20,
+	connect_timeout: 10,
+});
 
 export const db = drizzle(client, { schema });
