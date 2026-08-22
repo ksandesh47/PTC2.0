@@ -62,17 +62,17 @@ export function StatsTable({ rows, displayNames, standingsLabel, minMatches }: R
   return (
     <div className="relative rounded-lg border border-(--color-border) bg-(--color-surface) after:pointer-events-none after:absolute after:inset-y-0 after:right-0 after:w-8 after:bg-gradient-to-l after:from-(--color-surface) after:to-transparent sm:after:hidden">
       <div className="overflow-x-auto">
-        <table className="min-w-max w-full text-sm" aria-label="League stats table">
+        <table className="w-auto min-w-[760px] table-fixed text-sm" aria-label="League stats table">
         <thead className="bg-(--color-clay-50) text-xs uppercase tracking-widest text-(--color-text-muted)">
           <tr>
             {columns.map((column) => (
               <th
                 key={column.key}
-                className={`px-3 py-3 ${column.align === "right" ? "text-right" : "text-left"} ${
+                className={`px-2 py-2.5 whitespace-nowrap ${column.align === "right" ? "text-right" : "text-left"} ${
                   column.key === "rank"
-                    ? "sticky left-0 z-20 w-10 min-w-10 bg-(--color-clay-50)"
+                    ? "sticky left-0 z-20 w-9 min-w-9 bg-(--color-clay-50)"
                     : column.key === "player"
-                      ? "sticky left-10 z-20 w-40 min-w-40 max-w-40 bg-(--color-clay-50)"
+                      ? "sticky left-9 z-20 w-36 min-w-36 max-w-36 bg-(--color-clay-50)"
                       : ""
                 }`}
               >
@@ -91,23 +91,23 @@ export function StatsTable({ rows, displayNames, standingsLabel, minMatches }: R
             const tooltip = remaining > 0 ? `${name} needs ${remaining} more match${remaining === 1 ? "" : "es"}` : undefined;
             return (
               <tr key={row.playerId} className="hover:bg-(--color-clay-50) transition-colors">
-                <td className="sticky left-0 z-10 w-10 min-w-10 bg-(--color-surface) px-3 py-3 text-right text-(--color-text-muted) font-mono">{index < 3 ? ["🥇", "🥈", "🥉"][index] : index + 1}</td>
-                <td className="sticky left-10 z-10 w-40 min-w-40 max-w-40 bg-(--color-surface) px-3 py-3 font-semibold" title={tooltip}>
+                <td className="sticky left-0 z-10 w-9 min-w-9 bg-(--color-surface) px-2 py-2.5 text-right text-(--color-text-muted) font-mono">{index < 3 ? ["🥇", "🥈", "🥉"][index] : index + 1}</td>
+                <td className="sticky left-9 z-10 w-36 min-w-36 max-w-36 bg-(--color-surface) px-2 py-2.5 font-semibold" title={tooltip}>
                   <span className="inline-flex max-w-full items-baseline gap-1 truncate">
                     <span>{name}</span>
                     <span className="text-[0.65em] font-mono font-normal text-(--color-text-muted)">{row.matchesPlayed}</span>
                   </span>
                 </td>
-                <td className="px-3 py-3 text-right font-bold text-(--color-clay-600)">{row.averageScore.toFixed(1)}</td>
-                <td className="px-3 py-3 text-right">{row.total}</td>
-                <td className="px-3 py-3 text-right">{row.highScore}</td>
-                <td className="px-3 py-3 text-right">{row.lowScore}</td>
-                <td className="px-3 py-3 text-right">{row.matchesPlayed}</td>
-                <td className="px-3 py-3 text-right">{row.matchesCanceled}</td>
-                <td className="px-3 py-3 text-right">{row.setsWon}</td>
-                <td className="px-3 py-3 text-right">{row.setsLost}</td>
-                <td className="px-3 py-3 text-right">{row.threeSetsWon}</td>
-                <td className="px-3 py-3 text-right">{row.threeSetsLost}</td>
+                <td className="w-14 px-2 py-2.5 text-right font-bold text-(--color-clay-600)">{row.averageScore.toFixed(1)}</td>
+                <td className="w-14 px-2 py-2.5 text-right">{row.total}</td>
+                <td className="w-14 px-2 py-2.5 text-right">{row.highScore}</td>
+                <td className="w-14 px-2 py-2.5 text-right">{row.lowScore}</td>
+                <td className="w-12 px-2 py-2.5 text-right">{row.matchesPlayed}</td>
+                <td className="w-12 px-2 py-2.5 text-right">{row.matchesCanceled}</td>
+                <td className="w-12 px-2 py-2.5 text-right">{row.setsWon}</td>
+                <td className="w-12 px-2 py-2.5 text-right">{row.setsLost}</td>
+                <td className="w-12 px-2 py-2.5 text-right">{row.threeSetsWon}</td>
+                <td className="w-12 px-2 py-2.5 text-right">{row.threeSetsLost}</td>
               </tr>
             );
           })}

@@ -127,13 +127,16 @@ export default async function AdminAvailabilityPage({ searchParams }: Readonly<P
             id="availability-month"
             name="month"
             defaultValue={selectedMonth}
-            onChange={(event) => {
-              event.currentTarget.form?.submit();
-            }}
             className="rounded-lg border border-(--color-border) bg-(--color-surface) px-3 py-2 text-sm"
           >
             {months.map((month) => <option key={month} value={month}>{monthLabel(month)}</option>)}
           </select>
+          <button
+            type="submit"
+            className="ml-2 rounded-lg border border-(--color-border) bg-(--color-surface) px-3 py-2 text-sm font-semibold hover:bg-(--color-navy-50)"
+          >
+            View
+          </button>
         </form>
         <span className="text-sm text-(--color-text-muted)">{submittedMonths.size} month{submittedMonths.size === 1 ? "" : "s"} have submissions</span>
       </div>
